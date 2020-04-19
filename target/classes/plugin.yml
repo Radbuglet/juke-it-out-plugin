@@ -1,0 +1,11 @@
+name: JukeItOut
+description: ""
+author: radbuglet
+
+main: net.coopfury.JukeItOut.Game
+version: "1.0.0"
+
+commands:
+  fspeed:
+    description: "Sets fly speed of player"
+    permission: "juke_it_out.privilege.map_maker"

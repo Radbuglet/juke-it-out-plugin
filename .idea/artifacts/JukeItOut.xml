@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="JukeItOut">
+    <output-path>$PROJECT_DIR$/../server/plugins</output-path>
+    <root id="archive" name="JukeItOut.jar">
+      <element id="module-output" name="JukeItOut" />
+    </root>
+  </artifact>
+</component>
