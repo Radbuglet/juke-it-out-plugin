@@ -6,9 +6,11 @@ import net.coopfury.JukeItOut.helpers.java.Box;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.serialization.SerializableAs;
 
 import java.util.Map;
 
+@SerializableAs("location")
 public class ConfigSchemaLocation extends ConfigSchema {
     public Location deserializedLocation;
     protected ConfigSchemaLocation(Map<String, Object> data) {
@@ -68,5 +70,9 @@ public class ConfigSchemaLocation extends ConfigSchema {
 
         deserializedLocation = pipeline.isSuccessful() ?
                 new Location(worldBox.value, xBox.value, yBox.value, zBox.value, pitchBox.value, yawBox.value) : null;
+    }
+
+    public boolean hasValidLocation() {
+        return deserializedLocation != null;
     }
 }

@@ -9,12 +9,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Optional;
 
 public class GameManagerModule extends GameModule {
     // Play mode controller
-    private Object playMode = new PlayModeGame();
+    private Object playMode;
 
     Optional<PlayModeWaiting> getModeWaiting() {
         if (playMode instanceof PlayModeWaiting) {
@@ -33,6 +34,22 @@ public class GameManagerModule extends GameModule {
     }
 
     // Event handling
+    @Override
+    protected void onEnable(Game pluginInstance) {
+        {
+            PlayModeGame initialPlayMode = new PlayModeGame();
+            initialPlayMode.startRound();
+            playMode = initialPlayMode;
+        }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                getModeGame().ifPresent(PlayModeGame::tick);
+            }
+        }.runTaskTimer(pluginInstance, 0, 0);
+    }
+
     @EventHandler
     private void handleDamage(EntityDamageEvent event) {
         CastUtils.tryCast(Player.class, event.getEntity(), player -> {
