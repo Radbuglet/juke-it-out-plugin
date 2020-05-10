@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayModeGame {
+public class PlayModeGame implements PlayModeCommon {
     List<PlayTeam> teams = new ArrayList<>();
     int round;
     long roundEndsAt;

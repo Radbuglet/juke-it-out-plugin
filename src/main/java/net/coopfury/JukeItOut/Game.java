@@ -5,6 +5,8 @@ import net.coopfury.JukeItOut.modules.SmallFixesModule;
 import net.coopfury.JukeItOut.modules.adminCommands.AdminCommandModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.gameManager.GameManagerModule;
+import org.bukkit.Server;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -45,12 +47,20 @@ public class Game extends JavaPlugin {
         getLogger().info("JukeItOut disabled!");
     }
 
+    public void bindListener(Listener listener, PluginManager pluginManager) {
+        pluginManager.registerEvents(listener, this);
+    }
+
+    public void bindListener(Listener listener) {
+        bindListener(listener, getServer().getPluginManager());
+    }
+
     // Module tracking
     public void registerModule(GameModule instance, PluginManager pluginManager) {
         assert !registeredModules.containsKey(instance.getClass());
         registeredModules.put(instance.getClass(), instance);
         instance.onEnable(this);
-        pluginManager.registerEvents(instance, this);
+        bindListener(instance, pluginManager);
     }
 
     public<T extends GameModule> T _getModule(Class<T> type) {  // Named this way as to avoid naming conflicts with the static relays.

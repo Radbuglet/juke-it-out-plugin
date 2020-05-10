@@ -2,17 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f50e0de3-436a-48fe-a65f-6f8647938793" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/helpers/java/TimeUnits.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/helpers/java/TimestampUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/ConfiguredTeam.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/helpers/java/Union.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/state/PlayModeCommon.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/ConfigLoadingModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/ConfigLoadingModule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/schema/ConfigSchemaLocation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/schema/ConfigSchemaLocation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/schema/ConfigSchemaTeam.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/configLoading/schema/ConfigSchemaTeam.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/GameManagerModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/GameManagerModule.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/state/PlayModeGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/state/PlayModeGame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/state/PlayModeWaiting.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/net/coopfury/JukeItOut/modules/gameManager/state/PlayModeWaiting.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,9 +19,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Enum" />
         <option value="Interface" />
         <option value="Class" />
-        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -53,7 +50,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../server/plugins" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15136719" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -100,6 +97,9 @@
       <workItem from="1587433562232" duration="130000" />
       <workItem from="1587825019830" duration="2137000" />
       <workItem from="1588112642151" duration="1000" />
+      <workItem from="1588374135209" duration="1000" />
+      <workItem from="1588689015673" duration="12000" />
+      <workItem from="1589146753203" duration="1958000" />
     </task>
     <servers />
   </component>
@@ -112,10 +112,10 @@
     </state>
     <state x="872" y="359" key="#Project_Structure/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1584807458257" />
     <state x="3432" y="359" key="#Project_Structure/0.0.2560.1400/2560.0.2560.1400@2560.0.2560.1400" timestamp="1584805281622" />
-    <state x="1085" y="410" key="#com.intellij.ide.util.MemberChooser" timestamp="1587310198822">
+    <state x="1085" y="410" key="#com.intellij.ide.util.MemberChooser" timestamp="1589148595428">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1085" y="410" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1587310198822" />
+    <state x="1085" y="410" key="#com.intellij.ide.util.MemberChooser/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1589148595428" />
     <state x="3470" y="390" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1584805045217">
       <screen x="2560" y="0" width="2560" height="1400" />
     </state>
@@ -149,18 +149,18 @@
     </state>
     <state x="976" y="525" key="com.intellij.ide.util.TipDialog/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1585329587040" />
     <state x="3536" y="525" key="com.intellij.ide.util.TipDialog/0.0.2560.1400/2560.0.2560.1400@2560.0.2560.1400" timestamp="1584898136178" />
-    <state x="976" y="432" width="607" height="536" key="find.popup" timestamp="1585497721069">
+    <state x="976" y="432" width="607" height="536" key="find.popup" timestamp="1589148064469">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="976" y="432" width="607" height="536" key="find.popup/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1585497721069" />
+    <state x="976" y="432" width="607" height="536" key="find.popup/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1589148064469" />
     <state x="662" y="321" key="new project wizard" timestamp="1587433691208">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="662" y="321" key="new project wizard/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1587433691208" />
-    <state x="936" y="330" width="672" height="677" key="run.anything.popup" timestamp="1587826519705">
+    <state x="936" y="330" width="672" height="677" key="run.anything.popup" timestamp="1589147838717">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="936" y="330" width="672" height="677" key="run.anything.popup/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1587826519705" />
+    <state x="936" y="330" width="672" height="677" key="run.anything.popup/0.0.2560.1400/2560.0.2560.1400@0.0.2560.1400" timestamp="1589147838717" />
     <state x="943" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1587309802924">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
