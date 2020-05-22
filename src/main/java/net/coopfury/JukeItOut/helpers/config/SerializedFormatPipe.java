@@ -1,6 +1,5 @@
 package net.coopfury.JukeItOut.helpers.config;
 
-import net.coopfury.JukeItOut.helpers.java.Box;
 import net.coopfury.JukeItOut.helpers.java.CastUtils;
 
 import java.util.Map;
@@ -18,26 +17,6 @@ public class SerializedFormatPipe {
     public interface DelegateAdvancedHandler<TDeserialized> {
         Object serialize();
         void deserializeAndSet(TDeserialized unprocessed) throws DeserializationException;
-    }
-
-    public static class SetGetFieldHandler<T> implements DelegateAdvancedHandler<T> {
-        private final Consumer<T> setter;
-        private final Supplier<Object> getter;
-
-        public SetGetFieldHandler(Consumer<T> setter, Supplier<Object> getter) {
-            this.setter = setter;
-            this.getter = getter;
-        }
-
-        @Override
-        public Object serialize() {
-            return getter.get();
-        }
-
-        @Override
-        public void deserializeAndSet(T unprocessed) {
-            setter.accept(unprocessed);
-        }
     }
 
     public enum Mode {
@@ -70,31 +49,31 @@ public class SerializedFormatPipe {
         }
     }
 
-    public<TDeserialized> void field(String key, Class<TDeserialized> type, Box<TDeserialized> targetBox) throws DeserializationException {
+    public<TDeserialized> void field(String key, Class<TDeserialized> type, Consumer<TDeserialized> setter, Supplier<Object> getter) throws DeserializationException {
         field(key, type, new DelegateAdvancedHandler<TDeserialized>() {
             @Override
             public Object serialize() {
-                return targetBox.value;
+                return getter.get();
             }
 
             @Override
-            public void deserializeAndSet(TDeserialized unprocessed) throws DeserializationException {
-                targetBox.value = unprocessed;
+            public void deserializeAndSet(TDeserialized unprocessed) {
+                setter.accept(unprocessed);
             }
         });
     }
 
-    public<TDeserialized> void field(String key, Class<TDeserialized> type, Box<TDeserialized> targetBox, DelegateValidator<TDeserialized> validator) throws DeserializationException {
+    public<TDeserialized> void field(String key, Class<TDeserialized> type, Consumer<TDeserialized> setter, Supplier<Object> getter, DelegateValidator<TDeserialized> validator) throws DeserializationException {
         field(key, type, new DelegateAdvancedHandler<TDeserialized>() {
             @Override
             public Object serialize() {
-                return targetBox.value;
+                return getter.get();
             }
 
             @Override
             public void deserializeAndSet(TDeserialized unprocessed) throws DeserializationException {
                 validator.validate(unprocessed);
-                targetBox.value = unprocessed;
+                setter.accept(unprocessed);
             }
         });
     }

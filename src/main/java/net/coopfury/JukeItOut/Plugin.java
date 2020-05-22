@@ -3,7 +3,7 @@ package net.coopfury.JukeItOut;
 import net.coopfury.JukeItOut.helpers.java.CastUtils;
 import net.coopfury.JukeItOut.modules.SmallFixesModule;
 import net.coopfury.JukeItOut.modules.adminCommands.AdminCommandModule;
-import net.coopfury.JukeItOut.modules.gameManager.GameManagerModule;
+import net.coopfury.JukeItOut.modules.gameModule.GameModule;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,7 +21,7 @@ public class Plugin extends JavaPlugin {
     private void getModules(Consumer<PluginModule> moduleConsumer) {
         moduleConsumer.accept(new SmallFixesModule());
         moduleConsumer.accept(new AdminCommandModule());
-        moduleConsumer.accept(new GameManagerModule());
+        moduleConsumer.accept(new GameModule());
     }
 
     @Override

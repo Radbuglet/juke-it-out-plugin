@@ -32,10 +32,10 @@ public class SchemaLocation extends ConfigSchema {
             }
         });
 
-        format.field("x", Double.class, new SerializedFormatPipe.SetGetFieldHandler<>(location::setX, location::getX));
-        format.field("y", Double.class, new SerializedFormatPipe.SetGetFieldHandler<>(location::setY, location::getY));
-        format.field("z", Double.class, new SerializedFormatPipe.SetGetFieldHandler<>(location::setZ, location::getZ));
-        format.field("h", Float.class, new SerializedFormatPipe.SetGetFieldHandler<>(location::setPitch, location::getPitch));
-        format.field("v", Float.class, new SerializedFormatPipe.SetGetFieldHandler<>(location::setYaw, location::getYaw));
+        format.field("x", Double.class, location::setX, location::getX);
+        format.field("y", Double.class, location::setY, location::getY);
+        format.field("z", Double.class, location::setZ, location::getZ);
+        format.field("h", Float.class, location::setPitch, location::getPitch);
+        format.field("v", Float.class, location::setYaw, location::getYaw);
     }
 }
