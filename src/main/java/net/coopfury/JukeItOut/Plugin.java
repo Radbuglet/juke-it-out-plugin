@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class Game extends JavaPlugin {
+public class Plugin extends JavaPlugin {
     // Properties
-    private static Game instance;
+    private static Plugin instance;
     private final Map<Class<?>, Object> registeredModules = new HashMap<>();
 
     // Module loading
-    private void getModules(Consumer<GameModule> moduleConsumer) {
+    private void getModules(Consumer<PluginModule> moduleConsumer) {
         moduleConsumer.accept(new SmallFixesModule());
         moduleConsumer.accept(new AdminCommandModule());
         moduleConsumer.accept(new GameManagerModule());
@@ -53,23 +53,23 @@ public class Game extends JavaPlugin {
     }
 
     // Module tracking
-    public void registerModule(GameModule instance, PluginManager pluginManager) {
+    public void registerModule(PluginModule instance, PluginManager pluginManager) {
         assert !registeredModules.containsKey(instance.getClass());
         registeredModules.put(instance.getClass(), instance);
         instance.onEnable(this);
         bindListener(instance, pluginManager);
     }
 
-    public<T extends GameModule> T _getModule(Class<T> type) {  // Named this way as to avoid naming conflicts with the static relays.
+    public<T extends PluginModule> T _getModule(Class<T> type) {  // Named this way as to avoid naming conflicts with the static relays.
         return CastUtils.dynamicCast(type, registeredModules.get(type)).orElseThrow(IllegalAccessError::new);
     }
 
     // Static relays
-    public static<T extends GameModule> T getModule(Class<T> type) {
+    public static<T extends PluginModule> T getModule(Class<T> type) {
         return instance._getModule(type);
     }
 
-    public static Game getGame() {
+    public static Plugin getGame() {
         return instance;
     }
 }

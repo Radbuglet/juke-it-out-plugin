@@ -5,6 +5,8 @@ import net.coopfury.JukeItOut.helpers.java.CastUtils;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 // Welcome to the sad world of EE Java coding
 // TODO: Better error messages...
@@ -16,6 +18,26 @@ public class SerializedFormatPipe {
     public interface DelegateAdvancedHandler<TDeserialized> {
         Object serialize();
         void deserializeAndSet(TDeserialized unprocessed) throws DeserializationException;
+    }
+
+    public static class SetGetFieldHandler<T> implements DelegateAdvancedHandler<T> {
+        private final Consumer<T> setter;
+        private final Supplier<Object> getter;
+
+        public SetGetFieldHandler(Consumer<T> setter, Supplier<Object> getter) {
+            this.setter = setter;
+            this.getter = getter;
+        }
+
+        @Override
+        public Object serialize() {
+            return getter.get();
+        }
+
+        @Override
+        public void deserializeAndSet(T unprocessed) {
+            setter.accept(unprocessed);
+        }
     }
 
     public enum Mode {
@@ -31,7 +53,7 @@ public class SerializedFormatPipe {
         this.targetSection = targetSection;
     }
 
-    public<TDeserialized> void Field(String key, Class<TDeserialized> type, DelegateAdvancedHandler<TDeserialized> handler) throws DeserializationException {
+    public<TDeserialized> void field(String key, Class<TDeserialized> type, DelegateAdvancedHandler<TDeserialized> handler) throws DeserializationException {
         if (mode == Mode.SERIALIZE) {
             targetSection.put(key, handler.serialize());
         } else {
@@ -48,8 +70,8 @@ public class SerializedFormatPipe {
         }
     }
 
-    public<TDeserialized> void Field(String key, Class<TDeserialized> type, Box<TDeserialized> targetBox) throws DeserializationException {
-        Field(key, type, new DelegateAdvancedHandler<TDeserialized>() {
+    public<TDeserialized> void field(String key, Class<TDeserialized> type, Box<TDeserialized> targetBox) throws DeserializationException {
+        field(key, type, new DelegateAdvancedHandler<TDeserialized>() {
             @Override
             public Object serialize() {
                 return targetBox.value;
@@ -62,8 +84,8 @@ public class SerializedFormatPipe {
         });
     }
 
-    public<TDeserialized> void Field(String key, Class<TDeserialized> type, Box<TDeserialized> targetBox, DelegateValidator<TDeserialized> validator) throws DeserializationException {
-        Field(key, type, new DelegateAdvancedHandler<TDeserialized>() {
+    public<TDeserialized> void field(String key, Class<TDeserialized> type, Box<TDeserialized> targetBox, DelegateValidator<TDeserialized> validator) throws DeserializationException {
+        field(key, type, new DelegateAdvancedHandler<TDeserialized>() {
             @Override
             public Object serialize() {
                 return targetBox.value;

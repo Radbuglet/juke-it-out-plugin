@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut.modules;
 
-import net.coopfury.JukeItOut.GameModule;
+import net.coopfury.JukeItOut.PluginModule;
 import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.helpers.spigot.ItemStackUtils;
 import org.bukkit.GameMode;
@@ -12,7 +12,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.InventoryHolder;
 
-public class SmallFixesModule extends GameModule {
+public class SmallFixesModule extends PluginModule {
     private static boolean shouldDenyMapMakePrivilege(Player player) {
         return player.getGameMode() != GameMode.CREATIVE || !player.hasPermission(Constants.permission_map_making);
     }
