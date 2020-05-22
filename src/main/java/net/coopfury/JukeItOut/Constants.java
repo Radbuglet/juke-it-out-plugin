@@ -14,10 +14,4 @@ public final class Constants {
     public static final String message_fly_speed_help = ChatColor.RED + "Usage: /fspeed <speed: [0-1]|" + fly_speed_reset_sub + ">";
     public static final String message_fly_speed_success = ChatColor.GREEN + "Successfully set your fly speed.";
     public static final float default_fly_speed = 0.1f;
-
-    // Config
-    public static final String locations_root = "locations";
-
-    // Game messages
-    public static final String message_game_round_title = ChatColor.RED + "Round %s";
 }
