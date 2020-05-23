@@ -32,20 +32,24 @@ public class SerializedFormatPipe {
         this.targetSection = targetSection;
     }
 
+    public static<K, V, T extends V> T readFromMap(Map<K, V> map, K key, Class<T> type) throws DeserializationException {
+        Object raw = map.getOrDefault(key, null);
+        if (raw == null) {
+            throw new DeserializationException("Failed to find config value in config section!");
+        }
+        Optional<T> serializedOptional = CastUtils.dynamicCast(type, raw);
+        if (serializedOptional.isPresent()) {
+            return serializedOptional.get();
+        } else {
+            throw new DeserializationException("Value in config section is of an invalid primitive type!");
+        }
+    }
+
     public<TDeserialized> void field(String key, Class<TDeserialized> type, DelegateAdvancedHandler<TDeserialized> handler) throws DeserializationException {
         if (mode == Mode.SERIALIZE) {
             targetSection.put(key, handler.serialize());
         } else {
-            Object raw = targetSection.getOrDefault(key, null);
-            if (raw == null) {
-                throw new DeserializationException("Failed to find config value in config section!");
-            }
-            Optional<TDeserialized> serializedOptional = CastUtils.dynamicCast(type, raw);
-            if (serializedOptional.isPresent()) {
-                handler.deserializeAndSet(serializedOptional.get());
-            } else {
-                throw new DeserializationException("Value in config section is of an invalid primitive type!");
-            }
+            handler.deserializeAndSet(readFromMap(targetSection, key, type));
         }
     }
 

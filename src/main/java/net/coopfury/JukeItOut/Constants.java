@@ -1,6 +1,8 @@
 package net.coopfury.JukeItOut;
 
+import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 
 public final class Constants {
     // Unsorted
@@ -14,4 +16,9 @@ public final class Constants {
     public static final String message_fly_speed_help = ChatColor.RED + "Usage: /fspeed <speed: [0-1]|" + fly_speed_reset_sub + ">";
     public static final String message_fly_speed_success = ChatColor.GREEN + "Successfully set your fly speed.";
     public static final float default_fly_speed = 0.1f;
+
+    // Game
+    public static final String message_game_new_round = ChatColor.RED + "Round %s";
+    public static final Sound sound_new_round = Sound.ENDERDRAGON_HIT;
+    public static final UiUtils.TitleTimings title_timings_important = new UiUtils.TitleTimings(5, 20, 5);
 }

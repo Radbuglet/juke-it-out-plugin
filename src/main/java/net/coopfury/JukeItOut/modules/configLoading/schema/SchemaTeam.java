@@ -21,6 +21,7 @@ public class SchemaTeam extends ConfigSchema {
     protected void handleFormat(SerializedFormatPipe format) throws DeserializationException {
         format.field("name", String.class, v -> name = v, () -> name);
         format.field("color", Integer.class, v -> colorDamageId = v, () -> colorDamageId);
-        format.field("spawn", SchemaLocation.class, v -> spawnLocation = v, () -> spawnLocation);
+        format.field("spawn", SchemaLocation.class, v -> spawnLocation = v, () -> spawnLocation, loc ->
+                DeserializationException.asserted(loc.isValid, "Invalid spawn location!"));
     }
 }
