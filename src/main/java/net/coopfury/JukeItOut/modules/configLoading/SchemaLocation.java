@@ -1,4 +1,4 @@
-package net.coopfury.JukeItOut.modules.configLoading.schema;
+package net.coopfury.JukeItOut.modules.configLoading;
 
 import net.coopfury.JukeItOut.helpers.config.ConfigSchema;
 import net.coopfury.JukeItOut.helpers.config.DeserializationException;
@@ -14,7 +14,12 @@ public class SchemaLocation extends ConfigSchema {
     public Location location = new Location(null, 0d, 0d, 0d);
 
     public SchemaLocation(Map<String, Object> configSection) throws DeserializationException {
-        super(configSection);
+        loadFromConfig(configSection);
+    }
+
+    public SchemaLocation(Location location) {
+        this.location = location;
+        isValid = true;
     }
 
     @Override

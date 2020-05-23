@@ -2,10 +2,13 @@ name: JukeItOut
 description: ""
 author: radbuglet
 
-main: net.coopfury.JukeItOut.Game
+main: net.coopfury.JukeItOut.Plugin
 version: "1.0.0"
 
 commands:
   fspeed:
     description: "Sets fly speed of player"
+    permission: "juke_it_out.privilege.map_maker"
+  gc-new-team:
+    description: "Adds a new team"
     permission: "juke_it_out.privilege.map_maker"

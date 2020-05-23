@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class ConfigSchema implements ConfigurationSerializable {
-    public final boolean isValid;
+    public boolean isValid;
 
     protected abstract void handleFormat(SerializedFormatPipe format) throws DeserializationException;
 
-    public ConfigSchema(Map<String, Object> configSection) {
+    protected void loadFromConfig(Map<String, Object> configSection) {
         boolean success;
         try {
             handleFormat(new SerializedFormatPipe(SerializedFormatPipe.Mode.DESERIALIZE, configSection));

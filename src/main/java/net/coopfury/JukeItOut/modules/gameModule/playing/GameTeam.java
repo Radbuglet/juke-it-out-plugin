@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing;
 
-import net.coopfury.JukeItOut.modules.configLoading.schema.SchemaTeam;
+import net.coopfury.JukeItOut.modules.configLoading.SchemaTeam;
 
 import java.util.ArrayList;
 import java.util.List;

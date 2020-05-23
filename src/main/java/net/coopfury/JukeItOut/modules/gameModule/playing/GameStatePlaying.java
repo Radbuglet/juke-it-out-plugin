@@ -2,7 +2,7 @@ package net.coopfury.JukeItOut.modules.gameModule.playing;
 
 import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
-import net.coopfury.JukeItOut.modules.configLoading.schema.SchemaTeam;
+import net.coopfury.JukeItOut.modules.configLoading.SchemaTeam;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
 import org.bukkit.entity.Player;
 

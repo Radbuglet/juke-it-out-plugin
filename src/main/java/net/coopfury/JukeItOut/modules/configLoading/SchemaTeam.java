@@ -1,8 +1,9 @@
-package net.coopfury.JukeItOut.modules.configLoading.schema;
+package net.coopfury.JukeItOut.modules.configLoading;
 
 import net.coopfury.JukeItOut.helpers.config.ConfigSchema;
 import net.coopfury.JukeItOut.helpers.config.DeserializationException;
 import net.coopfury.JukeItOut.helpers.config.SerializedFormatPipe;
+import org.bukkit.Location;
 import org.bukkit.configuration.serialization.SerializableAs;
 
 import java.util.Map;
@@ -14,7 +15,14 @@ public class SchemaTeam extends ConfigSchema {
     public SchemaLocation spawnLocation;
 
     public SchemaTeam(Map<String, Object> configSection) throws DeserializationException {
-        super(configSection);
+        loadFromConfig(configSection);
+    }
+
+    public SchemaTeam(String name, int colorDamageId, Location spawnLocation) {
+        this.name = name;
+        this.colorDamageId = colorDamageId;
+        this.spawnLocation = new SchemaLocation(spawnLocation);
+        isValid = true;
     }
 
     @Override

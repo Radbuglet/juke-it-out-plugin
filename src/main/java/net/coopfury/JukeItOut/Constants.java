@@ -17,6 +17,11 @@ public final class Constants {
     public static final String message_fly_speed_success = ChatColor.GREEN + "Successfully set your fly speed.";
     public static final float default_fly_speed = 0.1f;
 
+    // Config
+    public static final String config_root_teams = "teams";
+    public static final String command_add_team = "gc-new-team";
+    public static final String message_add_team_success = ChatColor.GREEN + "Successfully added a new team!";
+
     // Game
     public static final String message_game_new_round = ChatColor.RED + "Round %s";
     public static final Sound sound_new_round = Sound.ENDERDRAGON_HIT;
