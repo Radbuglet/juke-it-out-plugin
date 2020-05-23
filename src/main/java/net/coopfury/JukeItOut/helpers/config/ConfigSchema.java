@@ -17,6 +17,8 @@ public abstract class ConfigSchema implements ConfigurationSerializable {
             handleFormat(new SerializedFormatPipe(SerializedFormatPipe.Mode.DESERIALIZE, configSection));
             success = true;
         } catch (DeserializationException e) {
+            System.out.println(String.format("Failed to deserialize schema of type %s:", getClass().getName()));
+            e.printStackTrace();
             success = false;
         }
         isValid = success;

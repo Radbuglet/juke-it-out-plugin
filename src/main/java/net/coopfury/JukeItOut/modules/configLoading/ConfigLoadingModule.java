@@ -49,6 +49,7 @@ public class ConfigLoadingModule extends PluginModule {
         conf.set(Constants.config_root_teams, teams);
         logger.info(String.format("Saved %s team%s.", teams.size(), teams.size() == 1 ? "" : "s"));
 
+        Plugin.getGame().saveConfig();
         logger.info("Saved config.");
     }
 

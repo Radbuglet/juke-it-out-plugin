@@ -40,7 +40,7 @@ public class SchemaLocation extends ConfigSchema {
         format.field("x", Double.class, location::setX, location::getX);
         format.field("y", Double.class, location::setY, location::getY);
         format.field("z", Double.class, location::setZ, location::getZ);
-        format.field("h", Float.class, location::setPitch, location::getPitch);
-        format.field("v", Float.class, location::setYaw, location::getYaw);
+        format.field("h", Double.class, val -> location.setPitch((float) (double) val), location::getPitch);
+        format.field("v", Double.class, val -> location.setYaw((float) (double) val), location::getYaw);
     }
 }

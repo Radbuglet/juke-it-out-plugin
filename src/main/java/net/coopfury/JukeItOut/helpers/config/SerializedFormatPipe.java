@@ -43,7 +43,8 @@ public class SerializedFormatPipe {
         }
         Optional<T> serializedOptional = CastUtils.dynamicCast(type, raw);
         if (!serializedOptional.isPresent()) {
-            throw new DeserializationException("Value in config section is of an invalid primitive type!");
+            throw new DeserializationException(String.format(
+                    "Value in config section is of an invalid primitive type. Expected %s, got %s!", type.getName(), raw.getClass().getName()));
         }
         if (serializedOptional.get() instanceof ConfigSchema && !((ConfigSchema) serializedOptional.get()).isValid) {
             throw new DeserializationException("Value in config section is an invalid schema instance.");

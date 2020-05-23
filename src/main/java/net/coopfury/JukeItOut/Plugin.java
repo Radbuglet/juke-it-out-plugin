@@ -9,14 +9,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class Plugin extends JavaPlugin {
     // Properties
     private static Plugin instance;
-    private final Map<Class<?>, Object> registeredModules = new HashMap<>();
+    private final List<PluginModule> registeredModulesList = new ArrayList<>();
+    private final Map<Class<?>, PluginModule> registeredModulesMap = new HashMap<>();
 
     // Module loading
     private void getModules(Consumer<PluginModule> moduleConsumer) {
@@ -41,8 +44,9 @@ public class Plugin extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("JukeItOut disabling...");
-        getModules(module -> module.onDisable(this));
-
+        for (PluginModule module: registeredModulesList) {
+            module.onDisable(this);
+        }
         getLogger().info("JukeItOut disabled!");
     }
 
@@ -56,14 +60,15 @@ public class Plugin extends JavaPlugin {
 
     // Module tracking
     public void registerModule(PluginModule instance, PluginManager pluginManager) {
-        assert !registeredModules.containsKey(instance.getClass());
-        registeredModules.put(instance.getClass(), instance);
+        assert !registeredModulesMap.containsKey(instance.getClass());
+        registeredModulesMap.put(instance.getClass(), instance);
         instance.onEnable(this);
         bindListener(instance, pluginManager);
+        registeredModulesList.add(instance);
     }
 
     public<T extends PluginModule> T _getModule(Class<T> type) {  // Named this way as to avoid naming conflicts with the static relays.
-        return CastUtils.dynamicCast(type, registeredModules.get(type)).orElseThrow(IllegalAccessError::new);
+        return CastUtils.dynamicCast(type, registeredModulesMap.get(type)).orElseThrow(IllegalAccessError::new);
     }
 
     // Static relays
