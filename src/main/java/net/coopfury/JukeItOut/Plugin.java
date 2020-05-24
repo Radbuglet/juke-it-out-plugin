@@ -1,7 +1,7 @@
 package net.coopfury.JukeItOut;
 
 import net.coopfury.JukeItOut.helpers.java.CastUtils;
-import net.coopfury.JukeItOut.modules.SmallFixesModule;
+import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.adminCommands.AdminCommandModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.gameModule.GameModule;
@@ -23,7 +23,7 @@ public class Plugin extends JavaPlugin {
 
     // Module loading
     private void getModules(Consumer<PluginModule> moduleConsumer) {
-        moduleConsumer.accept(new SmallFixesModule());
+        moduleConsumer.accept(new GlobalFixesModule());
         moduleConsumer.accept(new AdminCommandModule());
         moduleConsumer.accept(new ConfigLoadingModule());
         moduleConsumer.accept(new GameModule());

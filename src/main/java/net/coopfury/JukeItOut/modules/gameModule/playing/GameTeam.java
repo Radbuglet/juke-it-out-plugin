@@ -4,6 +4,7 @@ import net.coopfury.JukeItOut.modules.configLoading.SchemaTeam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GameTeam {
     public final SchemaTeam configTeam;
@@ -13,8 +14,14 @@ public class GameTeam {
         this.configTeam = configTeam;
     }
 
-    public void addMember(GameStatePlaying playingState, GameTeamMember member) {
+    public GameTeamMember addMember(GameStatePlaying playingState, UUID playerUuid) {
+        GameTeamMember member = new GameTeamMember(this, playerUuid);
         playingState.registerMember(member);
         members.add(member);
+        return member;
+    }
+
+    void unregisterMember(GameTeamMember member) {
+        members.remove(member);
     }
 }
