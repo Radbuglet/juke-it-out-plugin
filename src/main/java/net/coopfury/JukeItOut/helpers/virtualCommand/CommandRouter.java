@@ -16,6 +16,10 @@ public class CommandRouter<TSender extends CommandSender> implements VirtualComm
 
     public CommandRouter() {
         this.defaultHandler = (router, sender, args) -> {
+            if (args.getCount() > 0)
+                sender.sendMessage(Constants.message_usage_unknown + args.getPart(0));
+            else
+                sender.sendMessage(Constants.message_usage_missing);
             sender.sendMessage(Constants.message_usage_top_start + args.getLeftStr(true) + Constants.message_usage_top_end);
             for (String sub : router.getSubs()) {
                 sender.sendMessage(Constants.message_usage_sub + sub);

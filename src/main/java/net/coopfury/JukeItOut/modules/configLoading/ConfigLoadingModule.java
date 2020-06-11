@@ -40,6 +40,11 @@ public class ConfigLoadingModule extends PluginModule {
         logger.info("Loaded config.");
     }
 
+    public void reloadConfig() {
+        Plugin.getGame().reloadConfig();
+        loadConfig();
+    }
+
     public void saveConfig() {
         FileConfiguration conf = getConfig();
         Logger logger = getLogger();
