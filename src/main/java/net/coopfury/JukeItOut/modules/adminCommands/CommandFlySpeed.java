@@ -1,11 +1,11 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
 import net.coopfury.JukeItOut.Constants;
-import net.coopfury.JukeItOut.helpers.spigot.command.AbstractPlayerCommand;
+import net.coopfury.JukeItOut.helpers.spigot.AbstractPlayerCommand;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-public class CommandFlySpeed extends AbstractPlayerCommand {
+class CommandFlySpeed extends AbstractPlayerCommand {
     @Override
     protected boolean onCommandPlayer(Player player, Command command, String s, String[] args) {
         if (args.length != 1) {

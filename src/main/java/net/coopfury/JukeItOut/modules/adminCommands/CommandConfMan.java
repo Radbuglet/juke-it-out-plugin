@@ -1,20 +1,26 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
-import net.coopfury.JukeItOut.helpers.spigot.command.AbstractPlayerCommand;
-import net.coopfury.JukeItOut.helpers.spigot.command.ArgumentList;
-import net.coopfury.JukeItOut.helpers.spigot.command.CommandRouter;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
+import net.coopfury.JukeItOut.Constants;
+import net.coopfury.JukeItOut.helpers.virtualCommand.CommandRouter;
+import net.coopfury.JukeItOut.helpers.virtualCommand.PlayerCommandVirtualForward;
+import net.coopfury.JukeItOut.helpers.virtualCommand.VirtualCommandHandler;
 import org.bukkit.entity.Player;
 
-public class CommandConfMan extends AbstractPlayerCommand {
-    private final CommandRouter<Player> router = new CommandRouter<>((router, sender, args) -> {
-        sender.sendMessage(ChatColor.RED + "Bad sub!");  // TODO
-        return false;
-    });
+class CommandConfMan extends PlayerCommandVirtualForward {
+    private static final CommandRouter<Player> router = new CommandRouter<Player>()
+            .registerSub("teams", new CommandRouter<Player>()
+                .registerSub("add", (router, sender, args) -> {
+                    sender.sendMessage(Constants.message_add_team_success);
+                    return true;
+                })
+                .registerSub("list", (router, sender, args) -> {
+                    sender.sendMessage("Not implemented");
+                    return true;
+                })
+            );
 
     @Override
-    protected boolean onCommandPlayer(Player commandSender, Command command, String s, String[] args) {
-        return router.onCommand(null, commandSender, new ArgumentList(args));
+    protected VirtualCommandHandler<?, Player> getHandler() {
+        return router;
     }
 }

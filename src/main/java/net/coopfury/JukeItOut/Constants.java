@@ -7,6 +7,9 @@ import org.bukkit.Sound;
 public final class Constants {
     // Unsorted
     public static final String message_non_player_command = ChatColor.RED + "This command only operates on a player.";
+    public static final String message_usage_top_start = ChatColor.RED + "Usage: " + ChatColor.WHITE;
+    public static final String message_usage_top_end = ChatColor.GOLD + " <?>";
+    public static final String message_usage_sub = ChatColor.GOLD + "- ";
     public static final String message_crafting_disabled_item = ChatColor.RED + "Crafting disabled";
     public static final String permission_map_making = "juke_it_out.privilege.map_maker";
 

@@ -9,6 +9,6 @@ commands:
   fspeed:
     description: "Sets fly speed of player"
     permission: "juke_it_out.privilege.map_maker"
-  gc-new-team:
-    description: "Adds a new team"
+  confman:
+    description: "Manages the game configuration in game"
     permission: "juke_it_out.privilege.map_maker"
