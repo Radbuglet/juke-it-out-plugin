@@ -1,7 +1,6 @@
 package net.coopfury.JukeItOut.helpers.config;
 
 import net.coopfury.JukeItOut.helpers.java.CastUtils;
-import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 // Welcome to the sad world of EE Java coding
 // TODO: Better error messages...

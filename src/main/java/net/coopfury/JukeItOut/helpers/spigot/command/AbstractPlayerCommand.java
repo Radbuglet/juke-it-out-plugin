@@ -1,4 +1,4 @@
-package net.coopfury.JukeItOut.helpers.spigot;
+package net.coopfury.JukeItOut.helpers.spigot.command;
 
 import net.coopfury.JukeItOut.Constants;
 import org.bukkit.command.Command;

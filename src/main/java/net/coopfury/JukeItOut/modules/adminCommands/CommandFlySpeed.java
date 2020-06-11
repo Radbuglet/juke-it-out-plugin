@@ -1,7 +1,7 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
 import net.coopfury.JukeItOut.Constants;
-import net.coopfury.JukeItOut.helpers.spigot.AbstractPlayerCommand;
+import net.coopfury.JukeItOut.helpers.spigot.command.AbstractPlayerCommand;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 

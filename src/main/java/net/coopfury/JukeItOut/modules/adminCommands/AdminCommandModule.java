@@ -11,7 +11,7 @@ public class AdminCommandModule extends PluginModule {
     protected void onEnable(Plugin pluginInstance) {
         super.onEnable(pluginInstance);
         registerCommand(pluginInstance, Constants.command_fly_speed, new CommandFlySpeed());
-        registerCommand(pluginInstance, Constants.command_add_team, new CommandAddTeam());
+        registerCommand(pluginInstance, Constants.command_conf_man, new CommandConfMan());
     }
 
     private void registerCommand(Plugin pluginInstance, String commandName, CommandExecutor executor) {

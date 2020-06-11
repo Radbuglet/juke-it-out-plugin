@@ -19,7 +19,7 @@ public final class Constants {
 
     // Config
     public static final String config_root_teams = "teams";
-    public static final String command_add_team = "gc-new-team";
+    public static final String command_conf_man = "confman";
     public static final String message_add_team_success = ChatColor.GREEN + "Successfully added a new team!";
 
     // Game

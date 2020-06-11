@@ -1,13 +1,19 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing;
 
 import net.coopfury.JukeItOut.Constants;
+import net.coopfury.JukeItOut.helpers.java.TimeUnits;
+import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
+import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
+import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.SchemaTeam;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
-import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
@@ -15,17 +21,21 @@ public class GameStatePlaying implements GameState {
     private final List<GameTeam> teams = new ArrayList<>();
     private final Map<UUID, GameTeamMember> memberMap = new HashMap<>();
     private int roundId;
-    private int roundTicksLeft;
+    private long roundEndTime;
 
     public void startRound() {
         roundId++;
-        roundTicksLeft = 20 * 10;
+        roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 20);
         for (GameTeam team: teams) {
             for (GameTeamMember member: team.members) {
                 Player player = member.getPlayer();
+                PlayerUtils.resetPlayer(player);
+
+                Inventory inventory = player.getInventory();
+                inventory.addItem(new ItemStack(Material.IRON_SWORD));
+                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY).toItemStack());
+
                 player.teleport(team.configTeam.spawnLocation.location);
-                player.setHealth(player.getMaxHealth());
-                player.setGameMode(GameMode.SURVIVAL);
                 UiUtils.playTitle(player, String.format(Constants.message_game_new_round, roundId), Constants.title_timings_important);
                 UiUtils.playSound(player, Constants.sound_new_round);
             }
@@ -34,15 +44,15 @@ public class GameStatePlaying implements GameState {
 
     @Override
     public void tick() {
-        roundTicksLeft--;
-        if (roundTicksLeft < 0) {
+        long timeUntilRoundEnd = TimestampUtils.getTimeUntil(roundEndTime, TimeUnits.Ms);
+        if (timeUntilRoundEnd < 0) {
             startRound();
             return;
         }
         for (GameTeamMember member: memberMap.values()) {
-            Player player = member.getPlayer();
-            player.setExp((float) (roundTicksLeft % 20) / 20);
-            player.setLevel(roundTicksLeft / 20);
+            Player player = member.getPlayer();  // Runnables are executed before any player disconnection handling occurs
+            player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);
+            player.setLevel((int) (timeUntilRoundEnd / 1000));
         }
     }
 
