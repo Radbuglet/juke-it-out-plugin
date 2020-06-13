@@ -58,6 +58,14 @@ public class ConfigLoadingModule extends PluginModule {
         logger.info("Saved config.");
     }
 
+    public int getTeamIndexByName(String name) {
+        for (int index = 0; index < teams.size(); index++) {
+            if (teams.get(index).name.equals(name))
+                return index;
+        }
+        return -1;
+    }
+
     @Override
     protected void onEnable(Plugin pluginInstance) {
         loadConfig();

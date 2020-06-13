@@ -32,5 +32,7 @@ public final class PlayerUtils {
             player.removePotionEffect(effect.getType());
         }
         player.getInventory().clear();
+        player.setItemOnCursor(null);
+        player.closeInventory();
     }
 }
