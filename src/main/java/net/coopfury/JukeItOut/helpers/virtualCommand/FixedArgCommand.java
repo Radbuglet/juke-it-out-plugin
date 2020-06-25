@@ -5,17 +5,21 @@ import org.bukkit.command.CommandSender;
 
 public class FixedArgCommand<TParent, TSender extends CommandSender> implements VirtualCommandHandler<TParent, TSender> {
     private final VirtualCommandHandler<TParent, TSender> handler;
-    private final String usageText;
-    public final int argCount;
+    private String usageText = ChatColor.GOLD.toString();
+    public int argCount;
 
     public FixedArgCommand(String[] usage, VirtualCommandHandler<TParent, TSender> handler) {
         this.handler = handler;
-        argCount = usage.length;
-        StringBuilder usageText = new StringBuilder(ChatColor.GOLD.toString());
+        addArgs(usage);
+    }
+
+    public void addArgs(String[] usage) {
+        StringBuilder usageText = new StringBuilder();
         for (String usagePart : usage) {
             usageText.append(" <").append(usagePart).append(">");
         }
-        this.usageText = usageText.toString();
+        this.usageText += usageText.toString();
+        argCount += usage.length;
     }
 
     @Override

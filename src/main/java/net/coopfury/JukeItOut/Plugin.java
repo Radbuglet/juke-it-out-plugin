@@ -24,8 +24,8 @@ public class Plugin extends JavaPlugin {
     // Module loading
     private void getModules(Consumer<PluginModule> moduleConsumer) {
         moduleConsumer.accept(new GlobalFixesModule());
-        moduleConsumer.accept(new AdminCommandModule());
         moduleConsumer.accept(new ConfigLoadingModule());
+        moduleConsumer.accept(new AdminCommandModule());
         moduleConsumer.accept(new GameModule());
     }
 

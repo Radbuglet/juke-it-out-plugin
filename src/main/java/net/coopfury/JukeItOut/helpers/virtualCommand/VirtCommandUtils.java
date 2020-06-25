@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public final class VirtCommandUtils {
     // Map editing
@@ -30,7 +31,7 @@ public final class VirtCommandUtils {
                 (parent, sender, args) -> transferMapEntryShared(map, sender, args, true)));
 
         router.registerSub("clone", new FixedArgCommand<>(new String[]{ "original_name", "clone_name" },
-                (parent, sender, args) -> transferMapEntryShared(map, sender, args, true)));
+                (parent, sender, args) -> transferMapEntryShared(map, sender, args, false)));
 
         router.registerSub("remove", new FixedArgCommand<>(new String[]{ "name" }, (parent, sender, args) -> {
             if (!map.contains(args.getPart(0))) {
@@ -41,8 +42,6 @@ public final class VirtCommandUtils {
             sender.sendMessage(ChatColor.GREEN + "Removed entry!");
             return true;
         }));
-
-        // TODO: Addition
     }
 
     private static boolean transferMapEntryShared(ConfigDictionary<?> map, CommandSender sender, ArgumentList args, boolean isRename) {
@@ -62,6 +61,35 @@ public final class VirtCommandUtils {
                 ChatColor.GREEN + "Entry renamed successfully!" :
                 ChatColor.GREEN + "Entry cloned successfully!");
         return true;
+    }
+
+    public interface MapAdditionHandler<TSender extends CommandSender> {
+        Object createNew(TSender sender, String name, ArgumentList args);
+    }
+
+    public static<TSender extends CommandSender> void registerMapAdder(
+            CommandRouter<TSender> router, ConfigDictionary<?> map,
+            String[] constructorArgs, MapAdditionHandler<TSender> innerHandler) {
+
+        FixedArgCommand<Object, TSender> handler = new FixedArgCommand<>(new String[]{"name"}, (parent, sender, args) -> {
+            String desiredName = args.getPart(0);
+            if (map.contains(desiredName)) {
+                sender.sendMessage(message_duplicate_entry_name);
+                return false;
+            }
+            args.rootOffset++;
+            Object newValue = innerHandler.createNew(sender, desiredName, args);
+            args.rootOffset--;
+            if (newValue != null) {
+                map.replace(desiredName, newValue);  // FIXME: For some reason, the team isn't actually added.
+                sender.sendMessage(ChatColor.GREEN + "Entry created successfully!");
+                return true;
+            } else {
+                return false;  // Error is sent by handler.
+            }
+        });
+        handler.addArgs(constructorArgs);
+        router.registerSub("new", handler);
     }
 
     // Misc

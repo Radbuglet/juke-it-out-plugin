@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ConfigTeam {
-    private final Map<String, Object> map;
+    public final Map<String, Object> map;
 
     public ConfigTeam() {
         this.map = new HashMap<>();
