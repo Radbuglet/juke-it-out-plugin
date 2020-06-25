@@ -2,16 +2,12 @@ package net.coopfury.JukeItOut.modules.configLoading;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.PluginModule;
-import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
-import net.coopfury.JukeItOut.helpers.config.ConfigWrapperUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.logging.Logger;
 
 public class ConfigLoadingModule extends PluginModule {
-    public final ConfigDictionary<ConfigTeam> teams = new ConfigDictionary<>(
-            ConfigWrapperUtils.createStructWrapper(ConfigTeam::new)
-    );
+    public ConfigRoot root;
 
     private Logger getLogger() {
         return Plugin.getGame().getLogger();
@@ -24,6 +20,7 @@ public class ConfigLoadingModule extends PluginModule {
     public void reloadConfig() {
         getLogger().info("Reloaded config!");
         Plugin.getGame().reloadConfig();
+        root = new ConfigRoot(getConfig().getValues(false));
     }
 
     public void saveConfig() {

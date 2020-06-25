@@ -34,7 +34,7 @@ public class GameModule extends PluginModule {
         }.runTaskTimer(pluginInstance, 0, 0);
 
         GameStatePlaying state = new GameStatePlaying();
-        for (Optional<ConfigTeam> teamConfig : configLoadingModule.teams.values()) {
+        for (Optional<ConfigTeam> teamConfig : configLoadingModule.root.getTeams().values()) {
             if (!teamConfig.isPresent()) continue;
             if (!teamConfig.get().isValid()) {
                 pluginInstance.getLogger().warning("Team is invalid!");

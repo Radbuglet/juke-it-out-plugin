@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class ConfigPrimitives {
-    public static Optional<Map<String, Object>> unpackConfigSection(Object mapRaw) {
+    public static Optional<Map<String, Object>> unpackMap(Object mapRaw) {
         if (!(mapRaw instanceof Map)) return Optional.empty();
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) mapRaw;
@@ -30,7 +30,7 @@ public final class ConfigPrimitives {
 
     public static Optional<Location> unpackLocation(Object mapRaw) {
         // Cast map
-        Optional<Map<String, Object>> map = unpackConfigSection(mapRaw);
+        Optional<Map<String, Object>> map = unpackMap(mapRaw);
         if (!map.isPresent()) return Optional.empty();
 
         // Get world

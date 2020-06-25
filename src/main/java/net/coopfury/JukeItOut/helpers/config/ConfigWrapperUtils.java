@@ -7,7 +7,7 @@ import java.util.function.Function;
 public final class ConfigWrapperUtils {
     public static<T> Function<Object, Optional<T>> createStructWrapper(Function<Map<String, Object>, T> wrapper) {
         return raw -> {
-            Optional<Map<String, Object>> map = ConfigPrimitives.unpackConfigSection(raw);
+            Optional<Map<String, Object>> map = ConfigPrimitives.unpackMap(raw);
             return map.map(wrapper);  // Shorthand for `map.isPresent() ? Optional.of(wrapper.apply(map.get())) : Optional.empty()`?!
         };
     }
