@@ -1,16 +1,16 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing;
 
-import net.coopfury.JukeItOut.modules.configLoading.SchemaTeam;
+import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class GameTeam {
-    public final SchemaTeam configTeam;
+    public final ConfigTeam configTeam;
     public final List<GameTeamMember> members = new ArrayList<>();
 
-    public GameTeam(SchemaTeam configTeam) {
+    public GameTeam(ConfigTeam configTeam) {
         this.configTeam = configTeam;
     }
 

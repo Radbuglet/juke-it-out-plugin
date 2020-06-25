@@ -3,10 +3,13 @@ package net.coopfury.JukeItOut.modules.gameModule;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.PluginModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
+import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameTeam;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Optional;
 
 public class GameModule extends PluginModule {
     public GameState currentState;
@@ -22,10 +25,6 @@ public class GameModule extends PluginModule {
     @Override
     protected void onEnable(Plugin pluginInstance) {
         ConfigLoadingModule configLoadingModule = Plugin.getModule(ConfigLoadingModule.class);
-        if (configLoadingModule.teams.size() == 0) {
-            Plugin.getGame().getLogger().warning("No teams available for debug thingy!");
-            return;
-        }
 
         new BukkitRunnable() {
             @Override
@@ -35,8 +34,15 @@ public class GameModule extends PluginModule {
         }.runTaskTimer(pluginInstance, 0, 0);
 
         GameStatePlaying state = new GameStatePlaying();
-        GameTeam team = state.makeTeam(configLoadingModule.teams.get(0));
-        team.addMember(state, pluginInstance.getServer().getOnlinePlayers().iterator().next().getUniqueId());
+        for (Optional<ConfigTeam> teamConfig : configLoadingModule.teams.values()) {
+            if (!teamConfig.isPresent()) continue;
+            if (!teamConfig.get().isValid()) {
+                pluginInstance.getLogger().warning("Team is invalid!");
+                continue;
+            }
+            GameTeam team = state.makeTeam(teamConfig.get());
+            team.addMember(state, pluginInstance.getServer().getOnlinePlayers().iterator().next().getUniqueId());  // TODO: Temp
+        }
         setGameState(state);
         state.startRound();
     }

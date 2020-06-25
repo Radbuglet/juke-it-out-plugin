@@ -6,7 +6,7 @@ import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
-import net.coopfury.JukeItOut.modules.configLoading.SchemaTeam;
+import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -35,7 +35,7 @@ public class GameStatePlaying implements GameState {
                 inventory.addItem(new ItemStack(Material.IRON_SWORD));
                 inventory.addItem(new ItemBuilder(Material.STAINED_CLAY).toItemStack());
 
-                player.teleport(team.configTeam.spawnLocation.location);
+                player.teleport(team.configTeam.getSpawnLocation().orElse(null));
                 UiUtils.playTitle(player, String.format(Constants.message_game_new_round, roundId), Constants.title_timings_important);
                 UiUtils.playSound(player, Constants.sound_new_round);
             }
@@ -56,7 +56,7 @@ public class GameStatePlaying implements GameState {
         }
     }
 
-    public GameTeam makeTeam(SchemaTeam teamConfig) {
+    public GameTeam makeTeam(ConfigTeam teamConfig) {
         GameTeam team = new GameTeam(teamConfig);
         teams.add(team);
         return team;
