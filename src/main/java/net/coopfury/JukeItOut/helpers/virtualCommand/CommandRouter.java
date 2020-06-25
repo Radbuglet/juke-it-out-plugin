@@ -1,10 +1,12 @@
 package net.coopfury.JukeItOut.helpers.virtualCommand;
 
 import net.coopfury.JukeItOut.Constants;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class CommandRouter<TSender extends CommandSender> implements VirtualCommandHandler<Object, TSender> {
     private final VirtualCommandHandler<? super CommandRouter<?>, ? super TSender> defaultHandler;
@@ -17,13 +19,13 @@ public class CommandRouter<TSender extends CommandSender> implements VirtualComm
     public CommandRouter() {
         this.defaultHandler = (router, sender, args) -> {
             if (args.getCount() > 0) {
-                sender.sendMessage(Constants.message_usage_unknown + args.getPart(0));
+                sender.sendMessage(ChatColor.RED + "Unknown sub command: " + ChatColor.GOLD + args.getPart(0));
             } else {
-                sender.sendMessage(Constants.message_usage_missing);
+                sender.sendMessage(ChatColor.RED + "Command is not complete.");
             }
-            sender.sendMessage(VirtCommandUtils.formatUsageStart(args) + Constants.message_usage_top_end);
+            sender.sendMessage(VirtCommandUtils.formatUsageStart(args) + ChatColor.GOLD + " <...>");
             for (String sub : router.getSubs()) {
-                sender.sendMessage(Constants.message_usage_sub + sub);
+                sender.sendMessage(ChatColor.GOLD + "- " + sub);
             }
             return false;
         };
@@ -35,6 +37,11 @@ public class CommandRouter<TSender extends CommandSender> implements VirtualComm
 
     public CommandRouter<TSender> registerSub(String name, VirtualCommandHandler<? super CommandRouter<?>, ? super TSender> handler) {
         handlers.put(name, handler);
+        return this;
+    }
+
+    public CommandRouter<TSender> registerMultiple(Consumer<CommandRouter<TSender>> registrar) {
+        registrar.accept(this);
         return this;
     }
 

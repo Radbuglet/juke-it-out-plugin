@@ -8,7 +8,9 @@ import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -36,8 +38,8 @@ public class GameStatePlaying implements GameState {
                 inventory.addItem(new ItemBuilder(Material.STAINED_CLAY).toItemStack());
 
                 player.teleport(team.configTeam.getSpawnLocation().orElse(null));
-                UiUtils.playTitle(player, String.format(Constants.message_game_new_round, roundId), Constants.title_timings_important);
-                UiUtils.playSound(player, Constants.sound_new_round);
+                UiUtils.playTitle(player, String.format(ChatColor.RED + "Round %s", roundId), Constants.title_timings_important);
+                UiUtils.playSound(player, Sound.ENDERDRAGON_HIT);
             }
         }
     }

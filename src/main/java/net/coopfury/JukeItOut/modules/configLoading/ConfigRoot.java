@@ -1,6 +1,5 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
-import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
 import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
 import net.coopfury.JukeItOut.helpers.config.ConfigWrapperUtils;
@@ -17,7 +16,7 @@ public class ConfigRoot {
     }
 
     public ConfigDictionary<ConfigTeam> getTeams() {
-        Optional<Map<String, Object>> rawTeamMap = ConfigPrimitives.unpackMap(map.get(Constants.config_root_teams));
+        Optional<Map<String, Object>> rawTeamMap = ConfigPrimitives.unpackMap(map.get("teams"));
         if (!rawTeamMap.isPresent()) {
             rawTeamMap = Optional.of(new HashMap<>());
         }

@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut.helpers.spigot;
 
-import net.coopfury.JukeItOut.Constants;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,7 +14,7 @@ public abstract class AbstractPlayerCommand implements CommandExecutor {
         if (commandSender instanceof Player) {
             return onCommandPlayer((Player) commandSender, command, s, args);
         } else {
-            commandSender.sendMessage(Constants.message_non_player_command);
+            commandSender.sendMessage(ChatColor.RED + "This command only operates on a player.");
             return false;
         }
     }

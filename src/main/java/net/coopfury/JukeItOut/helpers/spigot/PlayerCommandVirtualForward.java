@@ -1,6 +1,7 @@
-package net.coopfury.JukeItOut.helpers.virtualCommand;
+package net.coopfury.JukeItOut.helpers.spigot;
 
-import net.coopfury.JukeItOut.helpers.spigot.AbstractPlayerCommand;
+import net.coopfury.JukeItOut.helpers.virtualCommand.ArgumentList;
+import net.coopfury.JukeItOut.helpers.virtualCommand.VirtualCommandHandler;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 

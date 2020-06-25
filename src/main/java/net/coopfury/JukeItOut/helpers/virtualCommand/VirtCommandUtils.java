@@ -1,9 +1,16 @@
 package net.coopfury.JukeItOut.helpers.virtualCommand;
 
-import net.coopfury.JukeItOut.Constants;
+import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public final class VirtCommandUtils {
     public static String formatUsageStart(ArgumentList list) {
-        return Constants.message_usage_top_start + list.getLeftStr(true);
+        return ChatColor.RED + "Usage: " + ChatColor.WHITE + list.getLeftStr(true);
+    }
+
+    public static<TSender extends CommandSender> void registerMapEditingSubs(CommandRouter<TSender> router, ConfigDictionary<?> map) {
+        throw new NotImplementedException();
     }
 }
