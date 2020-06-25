@@ -25,7 +25,7 @@ public class CommandRouter<TSender extends CommandSender> implements VirtualComm
             }
             sender.sendMessage(VirtCommandUtils.formatUsageStart(args) + ChatColor.GOLD + " <...>");
             for (String sub : router.getSubs()) {
-                sender.sendMessage(ChatColor.GOLD + "- " + sub);
+                sender.sendMessage(Constants.message_list_prefix + sub);
             }
             return false;
         };

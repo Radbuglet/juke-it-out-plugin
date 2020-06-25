@@ -31,9 +31,17 @@ public class ConfigDictionary<T> {
         map.clear();
     }
 
+    public Object getRaw(String key) {
+        return map.getOrDefault(key, null);
+    }
+
     public Optional<T> get(String key) {
         Object valueRaw = map.getOrDefault(key, null);
         return valueRaw == null ? Optional.empty() : wrapper.apply(valueRaw);
+    }
+
+    public boolean contains(String key) {
+        return map.containsKey(key);
     }
 
     public Set<String> keySet() {
