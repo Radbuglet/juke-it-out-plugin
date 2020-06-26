@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.Set;
-import java.util.function.BiFunction;
 
 public final class VirtCommandUtils {
     // Map editing
@@ -56,7 +55,7 @@ public final class VirtCommandUtils {
 
         Object rawValue = map.getRaw(args.getPart(0));
         if (isRename) map.remove(args.getPart(0));
-        map.replace(args.getPart(1), rawValue);
+        map.put(args.getPart(1), rawValue);
         sender.sendMessage(isRename ?
                 ChatColor.GREEN + "Entry renamed successfully!" :
                 ChatColor.GREEN + "Entry cloned successfully!");
@@ -81,7 +80,7 @@ public final class VirtCommandUtils {
             Object newValue = innerHandler.createNew(sender, desiredName, args);
             args.rootOffset--;
             if (newValue != null) {
-                map.replace(desiredName, newValue);  // FIXME: For some reason, the team isn't actually added.
+                map.put(desiredName, newValue);
                 sender.sendMessage(ChatColor.GREEN + "Entry created successfully!");
                 return true;
             } else {
@@ -89,7 +88,7 @@ public final class VirtCommandUtils {
             }
         });
         handler.addArgs(constructorArgs);
-        router.registerSub("new", handler);
+        router.registerSub("add", handler);
     }
 
     // Misc

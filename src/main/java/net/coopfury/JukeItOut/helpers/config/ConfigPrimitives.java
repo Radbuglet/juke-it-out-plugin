@@ -19,7 +19,7 @@ public final class ConfigPrimitives {
 
     public static Map<String, Object> packLocation(Location location) {
         Map<String, Object> map = new HashMap<>();
-        map.put("world", location.getWorld());
+        map.put("world", location.getWorld().getName());
         map.put("x", location.getX());
         map.put("y", location.getY());
         map.put("z", location.getY());

@@ -14,13 +14,8 @@ public class ConfigDictionary<T> {
         this.wrapper = wrapper;
     }
 
-    public ConfigDictionary(Function<Object, Optional<T>> wrapper) {
-        this.map = new HashMap<>();
-        this.wrapper = wrapper;
-    }
-
-    public void replace(String key, Object underlyingData) {
-        map.replace(key, underlyingData);
+    public void put(String key, Object underlyingData) {
+        map.put(key, underlyingData);
     }
 
     public void remove(String key) {

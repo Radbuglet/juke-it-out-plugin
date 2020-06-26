@@ -25,7 +25,7 @@ public class ConfigTeam {
     }
 
     public void setName(String newName) {
-        map.replace("name", newName);
+        map.put("name", newName);
     }
 
 
@@ -34,7 +34,7 @@ public class ConfigTeam {
     }
 
     public void setWoolColor(int data) {
-        map.replace("color", data);
+        map.put("color", data);
     }
 
 
@@ -43,7 +43,7 @@ public class ConfigTeam {
     }
 
     public void setSpawnLocation(Location location) {
-        map.replace("spawn", ConfigPrimitives.packLocation(location));
+        map.put("spawn", ConfigPrimitives.packLocation(location));
     }
 
 

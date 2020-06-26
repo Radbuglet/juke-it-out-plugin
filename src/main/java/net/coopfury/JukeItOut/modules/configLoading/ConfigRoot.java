@@ -19,6 +19,7 @@ public class ConfigRoot {
         Optional<Map<String, Object>> rawTeamMap = ConfigPrimitives.unpackMap(map.get("teams"));
         if (!rawTeamMap.isPresent()) {
             rawTeamMap = Optional.of(new HashMap<>());
+            map.put("teams", rawTeamMap.get());
         }
         return new ConfigDictionary<>(rawTeamMap.get(), ConfigWrapperUtils.createStructWrapper(ConfigTeam::new));
     }
