@@ -38,16 +38,18 @@ public class ConfigDictionary<T> {
         return subSection != null ? Optional.of(wrapper.apply(subSection)) : Optional.empty();
     }
 
-    public Iterable<T> values() {
-        return () -> new Iterator<T>() {  // TODO: Implement
+    public Iterable<Optional<T>> values() {
+        return () -> new Iterator<Optional<T>>() {
+            private final Iterator<String> keys = keys().iterator();
+
             @Override
             public boolean hasNext() {
-                return false;
+                return keys.hasNext();
             }
 
             @Override
-            public T next() {
-                return null;
+            public Optional<T> next() {
+                return get(keys.next());
             }
         };
     }

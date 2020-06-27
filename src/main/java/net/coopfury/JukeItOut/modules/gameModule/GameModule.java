@@ -9,6 +9,8 @@ import net.coopfury.JukeItOut.modules.gameModule.playing.GameTeam;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Optional;
+
 public class GameModule extends PluginModule {
     public GameState currentState;
 
@@ -32,12 +34,12 @@ public class GameModule extends PluginModule {
         }.runTaskTimer(pluginInstance, 0, 0);
 
         GameStatePlaying state = new GameStatePlaying();
-        for (ConfigTeam teamConfig : configLoadingModule.root.getTeams().values()) {
-            if (!teamConfig.isValid()) {
+        for (Optional<ConfigTeam> teamConfig : configLoadingModule.root.getTeams().values()) {
+            if (!teamConfig.isPresent() || !teamConfig.get().isValid()) {
                 pluginInstance.getLogger().warning("Team is invalid!");
                 continue;
             }
-            GameTeam team = state.makeTeam(teamConfig);
+            GameTeam team = state.makeTeam(teamConfig.get());
             team.addMember(state, pluginInstance.getServer().getOnlinePlayers().iterator().next().getUniqueId());  // TODO: Temp
         }
         setGameState(state);

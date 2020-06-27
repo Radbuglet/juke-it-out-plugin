@@ -12,7 +12,7 @@ public final class ConfigPrimitives {
         section.set("world", location.getWorld().getName());
         section.set("x", location.getX());
         section.set("y", location.getY());
-        section.set("z", location.getY());
+        section.set("z", location.getZ());
         section.set("pitch", location.getPitch());
         section.set("yaw", location.getYaw());
     }
@@ -30,6 +30,6 @@ public final class ConfigPrimitives {
 
         // Construct location
         return Optional.of(new Location(world, section.getDouble("x"), section.getDouble("y"), section.getDouble("z"),
-                (float) section.getDouble("pitch"), (float) section.getDouble("yaw")));
+                (float) section.getDouble("yaw"), (float) section.getDouble("pitch")));
     }
 }
