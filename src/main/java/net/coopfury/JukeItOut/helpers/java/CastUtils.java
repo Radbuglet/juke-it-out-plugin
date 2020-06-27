@@ -1,6 +1,5 @@
 package net.coopfury.JukeItOut.helpers.java;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -25,9 +24,5 @@ public final class CastUtils {
 
     public static<T, D> void tryCast(Class<T> type, D unCasted, Consumer<T> ifSuccess) {
         tryCast(type, unCasted, ifSuccess, e -> {});
-    }
-
-    public static<K, V> Optional<V> getMap(Map<K, ?> map, Class<V> type, K key) {
-        return dynamicCast(type, map.getOrDefault(key, null));
     }
 }

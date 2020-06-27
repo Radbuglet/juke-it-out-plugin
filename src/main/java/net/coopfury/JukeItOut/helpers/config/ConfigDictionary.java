@@ -1,60 +1,62 @@
 package net.coopfury.JukeItOut.helpers.config;
 
-import net.coopfury.JukeItOut.helpers.java.EnumerableUtils;
+import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.Function;
 
+// TODO: Ensure that no primitives other than sections make it into the map
 public class ConfigDictionary<T> {
-    private final Map<String, Object> map;
-    private final Function<Object, Optional<T>> wrapper;
+    public final ConfigurationSection rootSection;
+    private final Function<ConfigurationSection, T> wrapper;
 
-    public ConfigDictionary(Map<String, Object> map, Function<Object, Optional<T>> wrapper) {
-        this.map = map;
+    public ConfigDictionary(ConfigurationSection rootSection, Function<ConfigurationSection, T> wrapper) {
+        this.rootSection = rootSection;
         this.wrapper = wrapper;
     }
 
-    public void put(String key, Object underlyingData) {
-        map.put(key, underlyingData);
+    public T create(String key) {
+        return wrapper.apply(rootSection.createSection(key));
     }
 
     public void remove(String key) {
-        map.remove(key);
+        rootSection.set(key, null);
     }
 
-    public void clear() {
-        map.clear();
+    public boolean has(String key) {
+        return rootSection.isConfigurationSection(key);
     }
 
-    public Object getRaw(String key) {
-        return map.getOrDefault(key, null);
+    public Collection<String> keys() {
+        return rootSection.getKeys(false);
     }
 
     public Optional<T> get(String key) {
-        Object valueRaw = map.getOrDefault(key, null);
-        return valueRaw == null ? Optional.empty() : wrapper.apply(valueRaw);
+        ConfigurationSection subSection = rootSection.getConfigurationSection(key);
+        return subSection != null ? Optional.of(wrapper.apply(subSection)) : Optional.empty();
     }
 
-    public boolean contains(String key) {
-        return map.containsKey(key);
-    }
-
-    public Set<String> keySet() {
-        return map.keySet();
-    }
-
-    public Collection<Optional<T>> values() {
-        Collection<Object> rawValueCollection = map.values();
-        return new AbstractCollection<Optional<T>>() {
+    public Iterable<T> values() {
+        return () -> new Iterator<T>() {  // TODO: Implement
             @Override
-            public Iterator<Optional<T>> iterator() {
-                return EnumerableUtils.map(rawValueCollection.iterator(), wrapper);
+            public boolean hasNext() {
+                return false;
             }
 
             @Override
-            public int size() {
-                return rawValueCollection.size();
+            public T next() {
+                return null;
             }
         };
+    }
+
+    public Object getRaw(String key) {
+        return rootSection.get(key);
+    }
+
+    public void setRaw(String key, Object value) {
+        rootSection.set(key, value);
     }
 }

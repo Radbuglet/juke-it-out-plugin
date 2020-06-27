@@ -1,49 +1,44 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
+import net.coopfury.JukeItOut.helpers.config.ConfigOptionalUtils;
 import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
-import net.coopfury.JukeItOut.helpers.java.CastUtils;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class ConfigTeam {
-    public final Map<String, Object> map;
+    public final ConfigurationSection section;
 
-    public ConfigTeam() {
-        this.map = new HashMap<>();
-    }
-
-    public ConfigTeam(Map<String, Object> map) {
-        this.map = map;
+    public ConfigTeam(ConfigurationSection section) {
+        this.section = section;
     }
 
 
     public Optional<String> getName() {
-        return CastUtils.getMap(map, String.class, "name");
+        return ConfigOptionalUtils.readString(section, "name");
     }
 
     public void setName(String newName) {
-        map.put("name", newName);
+        section.set("name", newName);
     }
 
 
     public Optional<Integer> getWoolColor() {
-        return CastUtils.getMap(map, Integer.class, "color");
+        return ConfigOptionalUtils.readInteger(section, "color");
     }
 
     public void setWoolColor(int data) {
-        map.put("color", data);
+        section.set("color", data);
     }
 
 
     public Optional<Location> getSpawnLocation() {
-        return ConfigPrimitives.unpackLocation(map.getOrDefault("spawn", null));
+        return ConfigPrimitives.getLocation(section.getConfigurationSection("spawn"));  // getLocation accepts null sections
     }
 
     public void setSpawnLocation(Location location) {
-        map.put("spawn", ConfigPrimitives.packLocation(location));
+        ConfigPrimitives.setLocation(ConfigOptionalUtils.readOrMakeSection(section, "spawn"), location);
     }
 
 

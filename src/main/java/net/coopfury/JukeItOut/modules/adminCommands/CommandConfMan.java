@@ -20,14 +20,13 @@ class CommandConfMan extends PlayerCommandVirtualForward {
     private static final CommandRouter<Player> router = new CommandRouter<Player>()
             .registerSub("teams", new CommandRouter<Player>()
                     .registerMultiple(router -> {
-                        ConfigDictionary<?> map = getConfig().root.getTeams();
+                        ConfigDictionary<ConfigTeam> map = getConfig().root.getTeams();
                         VirtCommandUtils.registerMapEditingSubs(router, map);
-                        VirtCommandUtils.registerMapAdder(router, map, new String[]{ "color" }, (sender, name, args) -> {
-                            ConfigTeam team = new ConfigTeam();
-                            team.setName(name);
-                            team.setSpawnLocation(sender.getLocation());
-                            team.setWoolColor(0);  // TODO: Use arg
-                            return team.map;
+                        VirtCommandUtils.registerMapAdder(router, map, new String[]{ "color" }, (sender, name, args, instance) -> {
+                            instance.setName(name);
+                            instance.setWoolColor(1);  // TODO: load from args
+                            instance.setSpawnLocation(sender.getLocation());
+                            return true;
                         });
                     }))
             .registerSub("save", new FixedArgCommand<>(new String[]{}, (parent, sender, args) -> {

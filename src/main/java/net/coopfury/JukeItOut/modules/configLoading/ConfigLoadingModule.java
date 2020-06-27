@@ -20,7 +20,7 @@ public class ConfigLoadingModule extends PluginModule {
     public void reloadConfig() {
         getLogger().info("Reloaded config!");
         Plugin.getGame().reloadConfig();
-        root = new ConfigRoot(getConfig().getValues(false));
+        root = new ConfigRoot(getConfig());
     }
 
     public void saveConfig() {

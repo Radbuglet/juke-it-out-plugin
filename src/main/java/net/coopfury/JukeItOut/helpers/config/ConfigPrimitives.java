@@ -1,63 +1,35 @@
 package net.coopfury.JukeItOut.helpers.config;
 
-import net.coopfury.JukeItOut.helpers.java.CastUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public final class ConfigPrimitives {
-    public static Optional<Map<String, Object>> unpackMap(Object mapRaw) {
-        if (!(mapRaw instanceof Map)) return Optional.empty();
-        @SuppressWarnings("unchecked")
-        Map<String, Object> map = (Map<String, Object>) mapRaw;
-        return Optional.of(map);
+    public static void setLocation(ConfigurationSection section, Location location) {
+        section.set("world", location.getWorld().getName());
+        section.set("x", location.getX());
+        section.set("y", location.getY());
+        section.set("z", location.getY());
+        section.set("pitch", location.getPitch());
+        section.set("yaw", location.getYaw());
     }
 
-    public static Map<String, Object> packLocation(Location location) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("world", location.getWorld().getName());
-        map.put("x", location.getX());
-        map.put("y", location.getY());
-        map.put("z", location.getY());
-        map.put("pitch", location.getPitch());
-        map.put("yaw", location.getYaw());
-        return map;
-    }
-
-    public static Optional<Location> unpackLocation(Object mapRaw) {
-        // Cast map
-        Optional<Map<String, Object>> map = unpackMap(mapRaw);
-        if (!map.isPresent()) return Optional.empty();
-
+    public static Optional<Location> getLocation(ConfigurationSection section) {
         // Get world
-        Optional<String> worldName = CastUtils.getMap(map.get(), String.class, "world");
-        if (!worldName.isPresent()) return Optional.empty();
-        World world = Bukkit.getWorld(worldName.get());
+        String worldName = section.getString("world");
+        if (worldName == null) return Optional.empty();
+        World world = Bukkit.getWorld(worldName);
         if (world == null) return Optional.empty();
 
-        // Get numeric values
-        Optional<Double> x = CastUtils.getMap(map.get(), Double.class, "x");
-        if (!x.isPresent()) return Optional.empty();
-
-        Optional<Double> y = CastUtils.getMap(map.get(), Double.class, "y");
-        if (!y.isPresent()) return Optional.empty();
-
-        Optional<Double> z = CastUtils.getMap(map.get(), Double.class, "z");
-        if (!z.isPresent()) return Optional.empty();
-
-        Optional<Double> pitch = CastUtils.getMap(map.get(), Double.class, "pitch");
-        if (!pitch.isPresent()) return Optional.empty();
-
-        Optional<Double> yaw = CastUtils.getMap(map.get(), Double.class, "yaw");
-        //noinspection OptionalIsPresent
-        if (!yaw.isPresent()) return Optional.empty();
+        // Ensure that all numeric fields are present
+        if (!(section.isDouble("x") && section.isDouble("y") && section.isDouble("z") &&
+                section.isDouble("pitch") && section.isDouble("yaw"))) return Optional.empty();
 
         // Construct location
-        return Optional.of(new Location(world, x.get(), y.get(), z.get(),
-                (float) (double) (pitch.get()), (float) (double) (yaw.get())));
+        return Optional.of(new Location(world, section.getDouble("x"), section.getDouble("y"), section.getDouble("z"),
+                (float) section.getDouble("pitch"), (float) section.getDouble("yaw")));
     }
 }
