@@ -9,6 +9,7 @@ import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -35,7 +36,7 @@ public class GameStatePlaying implements GameState {
 
                 Inventory inventory = player.getInventory();
                 inventory.addItem(new ItemStack(Material.IRON_SWORD));
-                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY).toItemStack());
+                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY, 64).setDyeColor(DyeColor.GREEN).toItemStack());
 
                 player.teleport(team.configTeam.getSpawnLocation().orElse(null));
                 UiUtils.playTitle(player, String.format(ChatColor.RED + "Round %s", roundId), Constants.title_timings_important);

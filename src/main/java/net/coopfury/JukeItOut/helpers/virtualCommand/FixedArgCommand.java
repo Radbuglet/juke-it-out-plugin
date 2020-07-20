@@ -3,12 +3,12 @@ package net.coopfury.JukeItOut.helpers.virtualCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-public class FixedArgCommand<TParent, TSender extends CommandSender> implements VirtualCommandHandler<TParent, TSender> {
-    private final VirtualCommandHandler<TParent, TSender> handler;
+public class FixedArgCommand<TSender extends CommandSender> implements VirtualCommandHandler<TSender> {
+    private final VirtualCommandHandler<TSender> handler;
     private String usageText = ChatColor.GOLD.toString();
     public int argCount;
 
-    public FixedArgCommand(String[] usage, VirtualCommandHandler<TParent, TSender> handler) {
+    public FixedArgCommand(String[] usage, VirtualCommandHandler<TSender> handler) {
         this.handler = handler;
         addArgs(usage);
     }
@@ -23,11 +23,11 @@ public class FixedArgCommand<TParent, TSender extends CommandSender> implements 
     }
 
     @Override
-    public boolean handleCommand(TParent parent, TSender sender, ArgumentList args) {
+    public boolean handleCommand(TSender sender, ArgumentList args) {
         if (args.getCount() != argCount) {
             sender.sendMessage(VirtCommandUtils.formatUsageStart(args) + usageText);
             return false;
         }
-        return handler.handleCommand(parent, sender, args);
+        return handler.handleCommand(sender, args);
     }
 }

@@ -13,7 +13,7 @@ public final class VirtCommandUtils {
     private static final String message_unknown_entry_name = ChatColor.RED + "Unknown entry name!";
 
     public static void registerMapEditingSubs(CommandRouter<? extends CommandSender> router, ConfigDictionary<?> map) {
-        router.registerSub("list", new FixedArgCommand<>(new String[]{}, (parent, sender, args) -> {
+        router.registerSub("list", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
             Collection<String> keys = map.keys();
             if (keys.size() == 0) {
                 sender.sendMessage(ChatColor.RED + "No entries have been created!");
@@ -27,12 +27,12 @@ public final class VirtCommandUtils {
         }));
 
         router.registerSub("rename", new FixedArgCommand<>(new String[]{ "old_name", "new_name" },
-                (parent, sender, args) -> transferMapEntryShared(map, sender, args, true)));
+                (sender, args) -> transferMapEntryShared(map, sender, args, true)));
 
         router.registerSub("clone", new FixedArgCommand<>(new String[]{ "original_name", "clone_name" },
-                (parent, sender, args) -> transferMapEntryShared(map, sender, args, false)));
+                (sender, args) -> transferMapEntryShared(map, sender, args, false)));
 
-        router.registerSub("remove", new FixedArgCommand<>(new String[]{ "name" }, (parent, sender, args) -> {
+        router.registerSub("remove", new FixedArgCommand<>(new String[]{ "name" }, (sender, args) -> {
             if (!map.has(args.getPart(0))) {
                 sender.sendMessage(message_unknown_entry_name);
                 return false;
@@ -70,7 +70,7 @@ public final class VirtCommandUtils {
             CommandRouter<TSender> router, ConfigDictionary<TVal> map,
             String[] constructorArgs, MapAdditionHandler<TSender, TVal> innerHandler) {
 
-        FixedArgCommand<Object, TSender> handler = new FixedArgCommand<>(new String[]{"name"}, (parent, sender, args) -> {
+        FixedArgCommand<TSender> handler = new FixedArgCommand<>(new String[]{"name"}, (sender, args) -> {
             String desiredName = args.getPart(0);
             if (map.has(desiredName)) {
                 sender.sendMessage(message_duplicate_entry_name);

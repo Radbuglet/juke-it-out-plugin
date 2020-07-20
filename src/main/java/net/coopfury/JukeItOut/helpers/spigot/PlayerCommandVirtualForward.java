@@ -6,10 +6,10 @@ import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
 public abstract class PlayerCommandVirtualForward extends AbstractPlayerCommand {
-    protected abstract VirtualCommandHandler<?, Player> getHandler();
+    protected abstract VirtualCommandHandler<Player> getHandler();
 
     @Override
     protected boolean onCommandPlayer(Player commandSender, Command command, String commandName, String[] args) {
-        return getHandler().handleCommand(null, commandSender, new ArgumentList(commandName, args));
+        return getHandler().handleCommand(commandSender, new ArgumentList(commandName, args));
     }
 }

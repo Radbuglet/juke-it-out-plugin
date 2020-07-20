@@ -29,19 +29,19 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             return true;
                         });
                     }))
-            .registerSub("save", new FixedArgCommand<>(new String[]{}, (parent, sender, args) -> {
+            .registerSub("save", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
                 getConfig().saveConfig();
                 sender.sendMessage(ChatColor.GREEN + "Saved config!");
                 return true;
             }))
-            .registerSub("reload", new FixedArgCommand<>(new String[]{}, (parent, sender, args) -> {
+            .registerSub("reload", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
                 getConfig().reloadConfig();
                 sender.sendMessage(ChatColor.GREEN + "Reloaded config!");
                 return true;
             }));
 
     @Override
-    protected VirtualCommandHandler<?, Player> getHandler() {
+    protected VirtualCommandHandler<Player> getHandler() {
         return router;
     }
 }
