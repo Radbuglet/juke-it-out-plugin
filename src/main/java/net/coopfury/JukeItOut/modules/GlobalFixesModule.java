@@ -2,7 +2,7 @@ package net.coopfury.JukeItOut.modules;
 
 import net.coopfury.JukeItOut.PluginModule;
 import net.coopfury.JukeItOut.Constants;
-import net.coopfury.JukeItOut.helpers.spigot.ItemStackUtils;
+import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -22,7 +22,9 @@ public class GlobalFixesModule extends PluginModule {
     private void onCraftPreview(PrepareItemCraftEvent event) {
         InventoryHolder inventoryHolder = event.getInventory().getHolder();
         if (!(inventoryHolder instanceof Player) || shouldDenyMapMakePrivilege((Player) inventoryHolder)) {
-            event.getInventory().setResult(ItemStackUtils.makeButtonItem(Material.BARRIER, ChatColor.RED + "Crafting disabled"));
+            event.getInventory().setResult(new ItemBuilder(Material.BARRIER)
+                .setName(ChatColor.RED + "Crafting disabled")
+                .toItemStack());
         }
     }
 

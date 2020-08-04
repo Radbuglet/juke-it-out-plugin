@@ -1,7 +1,9 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
-import net.coopfury.JukeItOut.helpers.config.ConfigUtils;
 import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
+import net.coopfury.JukeItOut.helpers.config.ConfigUtils;
+import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -14,7 +16,6 @@ public class ConfigTeam {
         this.section = section;
     }
 
-
     public Optional<String> getName() {
         return ConfigUtils.readString(section, "name");
     }
@@ -23,15 +24,13 @@ public class ConfigTeam {
         section.set("name", newName);
     }
 
-
-    public Optional<Integer> getWoolColor() {
-        return ConfigUtils.readInteger(section, "color");
+    public Optional<DyeColor> getWoolColor() {
+        return ConfigUtils.readString(section, "color").flatMap(SpigotEnumConverters.DYE_COLOR::parse);
     }
 
-    public void setWoolColor(int data) {
-        section.set("color", data);
+    public void setWoolColor(String id) {
+        section.set("color", id);
     }
-
 
     public Optional<Location> getSpawnLocation() {
         return ConfigPrimitives.getLocation(section.getConfigurationSection("spawn"));  // getLocation accepts null sections
@@ -40,7 +39,6 @@ public class ConfigTeam {
     public void setSpawnLocation(Location location) {
         ConfigPrimitives.setLocation(ConfigUtils.readOrMakeSection(section, "spawn"), location);
     }
-
 
     public boolean isValid() {
         return getName().isPresent() && getSpawnLocation().isPresent();

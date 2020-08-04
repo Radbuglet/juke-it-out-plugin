@@ -7,20 +7,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 public final class PlayerUtils {
-    public static class LoadOutStack {
-        public ItemStack stack;
-        int amountNeeded;
-
-        public LoadOutStack(ItemStack stack) {
-            this.stack = stack;
-            reset();
-        }
-
-        void reset() {
-            amountNeeded = stack.getAmount();
-        }
-    }
-
     public static void resetPlayer(Player player) {
         player.setTotalExperience(0);
         player.setHealth(player.getMaxHealth());

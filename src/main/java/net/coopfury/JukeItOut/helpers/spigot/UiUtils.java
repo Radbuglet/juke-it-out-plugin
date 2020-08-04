@@ -25,7 +25,7 @@ public final class UiUtils {
     }
 
     public static IChatBaseComponent toNewChatFormat(String oldFormat) {
-        // FIXME: Someone could exploit this by adding `"`s and escape sequences!!!
+        // FIXME: Someone could break this by adding `"`s and escape sequences!!!
         return IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + oldFormat + "\"}");
     }
 

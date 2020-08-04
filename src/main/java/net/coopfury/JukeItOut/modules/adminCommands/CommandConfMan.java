@@ -3,6 +3,7 @@ package net.coopfury.JukeItOut.modules.adminCommands;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
 import net.coopfury.JukeItOut.helpers.spigot.PlayerCommandVirtualForward;
+import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.helpers.virtualCommand.CommandRouter;
 import net.coopfury.JukeItOut.helpers.virtualCommand.FixedArgCommand;
 import net.coopfury.JukeItOut.helpers.virtualCommand.VirtCommandUtils;
@@ -23,8 +24,13 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                         ConfigDictionary<ConfigTeam> map = getConfig().root.getTeams();
                         VirtCommandUtils.registerMapEditingSubs(router, map);
                         VirtCommandUtils.registerMapAdder(router, map, new String[]{ "color" }, (sender, name, args, instance) -> {
+                            if (!SpigotEnumConverters.DYE_COLOR.isValid(args.getPart(0))) {
+                                sender.sendMessage(ChatColor.RED + "Invalid color. Color must be a valid DyeColor.");
+                                return false;
+                            }
+
                             instance.setName(name);
-                            instance.setWoolColor(1);  // TODO: load from args
+                            instance.setWoolColor(args.getPart(0));
                             instance.setSpawnLocation(sender.getLocation());
                             return true;
                         });
