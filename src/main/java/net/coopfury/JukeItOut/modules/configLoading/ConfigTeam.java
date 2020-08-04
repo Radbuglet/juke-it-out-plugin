@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
-import net.coopfury.JukeItOut.helpers.config.ConfigOptionalUtils;
+import net.coopfury.JukeItOut.helpers.config.ConfigUtils;
 import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,7 +16,7 @@ public class ConfigTeam {
 
 
     public Optional<String> getName() {
-        return ConfigOptionalUtils.readString(section, "name");
+        return ConfigUtils.readString(section, "name");
     }
 
     public void setName(String newName) {
@@ -25,7 +25,7 @@ public class ConfigTeam {
 
 
     public Optional<Integer> getWoolColor() {
-        return ConfigOptionalUtils.readInteger(section, "color");
+        return ConfigUtils.readInteger(section, "color");
     }
 
     public void setWoolColor(int data) {
@@ -38,7 +38,7 @@ public class ConfigTeam {
     }
 
     public void setSpawnLocation(Location location) {
-        ConfigPrimitives.setLocation(ConfigOptionalUtils.readOrMakeSection(section, "spawn"), location);
+        ConfigPrimitives.setLocation(ConfigUtils.readOrMakeSection(section, "spawn"), location);
     }
 
 

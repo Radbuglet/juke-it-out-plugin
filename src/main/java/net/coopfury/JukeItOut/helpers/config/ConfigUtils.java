@@ -5,7 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class ConfigOptionalUtils {
+public final class ConfigUtils {
     public static<T> Optional<T> readGeneric(String key, Function<String, T> getter, Function<String, Boolean> validator) {
         return validator.apply(key) ? Optional.of(getter.apply(key)) : Optional.empty();
     }
@@ -18,14 +18,14 @@ public final class ConfigOptionalUtils {
         return readGeneric(key, section::getInt, section::isInt);
     }
 
-    public static Optional<Double> readDouble(ConfigurationSection section, String key) {
-        return readGeneric(key, section::getDouble, section::isDouble);
-    }
-
     public static ConfigurationSection readOrMakeSection(ConfigurationSection section, String key) {
         if (!section.isConfigurationSection(key)) {
             section.createSection(key);
         }
         return section.getConfigurationSection(key);
+    }
+
+    public static boolean isNumeric(ConfigurationSection section, String key) {
+        return section.isDouble(key) || section.isInt(key);
     }
 }

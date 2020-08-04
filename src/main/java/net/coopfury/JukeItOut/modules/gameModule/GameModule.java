@@ -6,6 +6,8 @@ import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameTeam;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -29,7 +31,7 @@ public class GameModule extends PluginModule {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (currentState != null) currentState.tick();
+                if (currentState != null) currentState.onTick();
             }
         }.runTaskTimer(pluginInstance, 0, 0);
 
@@ -40,9 +42,17 @@ public class GameModule extends PluginModule {
                 continue;
             }
             GameTeam team = state.makeTeam(teamConfig.get());
-            team.addMember(state, pluginInstance.getServer().getOnlinePlayers().iterator().next().getUniqueId());  // TODO: Temp
+            for (Player player: Bukkit.getOnlinePlayers()) {  // TODO: Temp
+                team.addMember(state, player.getUniqueId());
+            }
         }
         setGameState(state);
         state.startRound();
+    }
+
+    @Override
+    protected void onDisable(Plugin pluginInstance) {
+        if (currentState != null)
+            currentState.onPluginDisable();
     }
 }

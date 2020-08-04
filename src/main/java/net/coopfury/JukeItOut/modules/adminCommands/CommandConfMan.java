@@ -29,6 +29,11 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             return true;
                         });
                     }))
+            .registerSub("set-diamond-spawn", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
+                getConfig().root.setDiamondSpawn(sender.getLocation());
+                sender.sendMessage(ChatColor.GREEN + "Set diamond spawn location!");
+                return true;
+            }))
             .registerSub("save", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
                 getConfig().saveConfig();
                 sender.sendMessage(ChatColor.GREEN + "Saved config!");

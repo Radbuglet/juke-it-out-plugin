@@ -25,8 +25,9 @@ public final class ConfigPrimitives {
         if (world == null) return Optional.empty();
 
         // Ensure that all numeric fields are present
-        if (!(section.isDouble("x") && section.isDouble("y") && section.isDouble("z") &&
-                section.isDouble("pitch") && section.isDouble("yaw"))) return Optional.empty();
+        if (!(ConfigUtils.isNumeric(section, "x") && ConfigUtils.isNumeric(section, "y") && ConfigUtils.isNumeric(section, "z") &&
+                ConfigUtils.isNumeric(section, "pitch") && ConfigUtils.isNumeric(section, "yaw")))
+            return Optional.empty();
 
         // Construct location
         return Optional.of(new Location(world, section.getDouble("x"), section.getDouble("y"), section.getDouble("z"),
