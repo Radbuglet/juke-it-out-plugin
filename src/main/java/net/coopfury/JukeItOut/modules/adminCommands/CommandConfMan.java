@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 class CommandConfMan extends PlayerCommandVirtualForward {
+    private static final String message_invalid_team_color = ChatColor.RED + "Invalid color. Color must be a valid DyeColor.";
     private static ConfigLoadingModule getConfig() {
         return Plugin.getModule(ConfigLoadingModule.class);
     }
@@ -23,9 +24,9 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                     .registerMultiple(router -> {
                         ConfigDictionary<ConfigTeam> map = getConfig().root.getTeams();
                         VirtCommandUtils.registerMapEditingSubs(router, map);
-                        VirtCommandUtils.registerMapAdder(router, map, new String[]{ "color" }, (sender, name, args, instance) -> {
+                        VirtCommandUtils.registerMapAdder(router, map, new String[]{"color"}, (sender, name, args, instance) -> {
                             if (!SpigotEnumConverters.DYE_COLOR.isValid(args.getPart(0))) {
-                                sender.sendMessage(ChatColor.RED + "Invalid color. Color must be a valid DyeColor.");
+                                sender.sendMessage(message_invalid_team_color);
                                 return false;
                             }
 
@@ -34,6 +35,17 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             instance.setSpawnLocation(sender.getLocation());
                             return true;
                         });
+
+                        router.registerSub("recolor", VirtCommandUtils.makeMapEditingHandler(map, new String[]{"color"}, (sender, args, entry) -> {
+                            String newColor = args.getPart(0);
+                            if (!SpigotEnumConverters.DYE_COLOR.isValid(newColor)) {
+                                sender.sendMessage(message_invalid_team_color);
+                                return false;
+                            }
+                            entry.setWoolColor(newColor);
+                            sender.sendMessage(ChatColor.GREEN + "Successfully recolored team!");
+                            return true;
+                        }));
                     }))
             .registerSub("set-diamond-spawn", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
                 getConfig().root.setDiamondSpawn(sender.getLocation());

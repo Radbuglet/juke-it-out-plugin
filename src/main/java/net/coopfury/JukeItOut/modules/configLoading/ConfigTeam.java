@@ -41,6 +41,6 @@ public class ConfigTeam {
     }
 
     public boolean isValid() {
-        return getName().isPresent() && getSpawnLocation().isPresent();
+        return getName().isPresent() && getSpawnLocation().isPresent() && getWoolColor().isPresent();
     }
 }

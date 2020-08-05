@@ -30,6 +30,7 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
+// TODO: Should assume that, by contract, the config is valid.
 public class GameStatePlaying implements GameState {
     private static final FireworkEffect diamondSpawnFwEffect = FireworkEffect.builder()
             .trail(false).flicker(false)
@@ -53,6 +54,8 @@ public class GameStatePlaying implements GameState {
 
         // Reset characters
         for (GameTeam team: teams) {
+            DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);  // TODO
+
             for (GameTeamMember member: team.members) {
                 // Reset game state
                 member.isAlive = true;
@@ -64,13 +67,15 @@ public class GameStatePlaying implements GameState {
                 PlayerInventory inventory = player.getInventory();
                 inventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));
                 inventory.setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
-                inventory.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-                inventory.setHelmet(new ItemStack(Material.LEATHER_HELMET));
+                inventory.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                    .setLeatherArmorColor(color.getColor()).toItemStack());
+                inventory.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
+                        .setLeatherArmorColor(color.getColor()).toItemStack());
 
-                inventory.addItem(new ItemStack(Material.IRON_SWORD));
+                inventory.addItem(new ItemStack(Material.STONE_SWORD));
                 inventory.addItem(new ItemStack(Material.IRON_PICKAXE));
                 inventory.addItem(new ItemStack(Material.GOLDEN_APPLE, 4));
-                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY, 64).setDyeColor(DyeColor.GREEN).toItemStack());
+                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY, 64).setDyeColor(color).toItemStack());
 
                 player.teleport(team.configTeam.getSpawnLocation().orElse(null));
                 UiUtils.playTitle(player, String.format(ChatColor.RED + "Round %s", roundId), Constants.title_timings_important);
@@ -85,7 +90,7 @@ public class GameStatePlaying implements GameState {
     private void resetWorld(boolean resetBlocks) {
         Optional<World> world = Plugin.getModule(ConfigLoadingModule.class).root.getGameWorld();
         if (!world.isPresent()) {
-            Plugin.getGame().getLogger().warning("Failed to reset world: no world (set by diamond spawn location) set.");
+            Plugin.instance.getLogger().warning("Failed to reset world: no world (set by diamond spawn location) set.");
             return;
         }
 
@@ -140,12 +145,12 @@ public class GameStatePlaying implements GameState {
                     public void run() {
                         firework.detonate();
                     }
-                }.runTaskLater(Plugin.getGame(), 1);
+                }.runTaskLater(Plugin.instance, 1);
 
                 Item spawnedDiamond = world.dropItem(diamondSpawn.get(), new ItemStack(Material.DIAMOND));
                 spawnedDiamond.setVelocity(new Vector(0, .5, 0));
             } else {
-                Plugin.getGame().getLogger().warning("Failed to spawn diamond: no spawn location set.");
+                Plugin.instance.getLogger().warning("Failed to spawn diamond: no spawn location set.");
             }
 
             // Announce spawn

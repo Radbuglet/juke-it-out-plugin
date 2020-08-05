@@ -6,11 +6,64 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public final class VirtCommandUtils {
     // Map editing
     private static final String message_duplicate_entry_name = ChatColor.RED + "Duplicate entry name!";
     private static final String message_unknown_entry_name = ChatColor.RED + "Unknown entry name!";
+
+    public interface MapAdditionHandler<TSender extends CommandSender, TVal> {
+        boolean createNew(TSender sender, String name, ArgumentList args, TVal value);
+    }
+
+    public interface MapEntryEditingHandler<TSender extends CommandSender, TEntry> {
+        boolean performEdits(TSender sender, ArgumentList args, TEntry entry);
+    }
+
+    public static<TSender extends CommandSender, TEntry> VirtualCommandHandler<TSender> makeMapEditingHandler(
+            ConfigDictionary<TEntry> map, String[] innerArgs, MapEntryEditingHandler<TSender, TEntry> innerHandler) {
+        FixedArgCommand<TSender> command = new FixedArgCommand<TSender>(new String[]{"name"}, (sender, args) -> {
+            Optional<TEntry> entry = map.get(args.getPart(0));
+            if (!entry.isPresent()) {
+                sender.sendMessage(message_unknown_entry_name);
+                return false;
+            }
+
+            args.rootOffset++;
+            boolean success = innerHandler.performEdits(sender, args, entry.get());
+            args.rootOffset--;
+            return success;
+        });
+        command.addArgs(innerArgs);
+        return command;
+    }
+
+    public static<TSender extends CommandSender, TVal> void registerMapAdder(
+            CommandRouter<TSender> router, ConfigDictionary<TVal> map,
+            String[] constructorArgs, MapAdditionHandler<TSender, TVal> innerHandler) {
+
+        FixedArgCommand<TSender> handler = new FixedArgCommand<>(new String[]{"name"}, (sender, args) -> {
+            String desiredName = args.getPart(0);
+            if (map.has(desiredName)) {
+                sender.sendMessage(message_duplicate_entry_name);
+                return false;
+            }
+            args.rootOffset++;
+            TVal value = map.create(desiredName);
+            boolean success = innerHandler.createNew(sender, desiredName, args, value);
+            args.rootOffset--;
+            if (success) {
+                sender.sendMessage(ChatColor.GREEN + "Entry created successfully!");
+                return true;
+            } else {
+                map.remove(desiredName);
+                return false;  // Error message is sent by handler.
+            }
+        });
+        handler.addArgs(constructorArgs);
+        router.registerSub("add", handler);
+    }
 
     public static void registerMapEditingSubs(CommandRouter<? extends CommandSender> router, ConfigDictionary<?> map) {
         router.registerSub("list", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
@@ -60,36 +113,6 @@ public final class VirtCommandUtils {
                 ChatColor.GREEN + "Entry renamed successfully!" :
                 ChatColor.GREEN + "Entry cloned successfully!");
         return true;
-    }
-
-    public interface MapAdditionHandler<TSender extends CommandSender, TVal> {
-        boolean createNew(TSender sender, String name, ArgumentList args, TVal value);
-    }
-
-    public static<TSender extends CommandSender, TVal> void registerMapAdder(
-            CommandRouter<TSender> router, ConfigDictionary<TVal> map,
-            String[] constructorArgs, MapAdditionHandler<TSender, TVal> innerHandler) {
-
-        FixedArgCommand<TSender> handler = new FixedArgCommand<>(new String[]{"name"}, (sender, args) -> {
-            String desiredName = args.getPart(0);
-            if (map.has(desiredName)) {
-                sender.sendMessage(message_duplicate_entry_name);
-                return false;
-            }
-            args.rootOffset++;
-            TVal value = map.create(desiredName);
-            boolean success = innerHandler.createNew(sender, desiredName, args, value);
-            args.rootOffset--;
-            if (success) {
-                sender.sendMessage(ChatColor.GREEN + "Entry created successfully!");
-                return true;
-            } else {
-                map.remove(desiredName);
-                return false;  // Error message is sent by handler.
-            }
-        });
-        handler.addArgs(constructorArgs);
-        router.registerSub("add", handler);
     }
 
     // Misc

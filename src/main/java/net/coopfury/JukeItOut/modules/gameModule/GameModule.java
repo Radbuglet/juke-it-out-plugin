@@ -21,7 +21,7 @@ public class GameModule extends PluginModule {
             HandlerList.unregisterAll(currentState);
         }
         currentState = newState;
-        Plugin.getGame().bindListener(newState);
+        Plugin.instance.bindListener(newState);
     }
 
     @Override

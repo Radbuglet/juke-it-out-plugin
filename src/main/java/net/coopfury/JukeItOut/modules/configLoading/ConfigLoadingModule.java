@@ -10,22 +10,22 @@ public class ConfigLoadingModule extends PluginModule {
     public ConfigRoot root;
 
     private Logger getLogger() {
-        return Plugin.getGame().getLogger();
+        return Plugin.instance.getLogger();
     }
 
     private FileConfiguration getConfig() {
-        return Plugin.getGame().getConfig();
+        return Plugin.instance.getConfig();
     }
 
     public void reloadConfig() {
         getLogger().info("Reloaded config!");
-        Plugin.getGame().reloadConfig();
+        Plugin.instance.reloadConfig();
         root = new ConfigRoot(getConfig());
     }
 
     public void saveConfig() {
         getLogger().info("Saved config!");
-        Plugin.getGame().saveConfig();
+        Plugin.instance.saveConfig();
     }
 
     @Override

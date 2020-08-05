@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 public class Plugin extends JavaPlugin {
     // Properties
-    private static Plugin instance;
+    public static Plugin instance;
     private final List<PluginModule> registeredModulesList = new ArrayList<>();
     private final Map<Class<?>, PluginModule> registeredModulesMap = new HashMap<>();
 
@@ -74,9 +74,5 @@ public class Plugin extends JavaPlugin {
     // Static relays
     public static<T extends PluginModule> T getModule(Class<T> type) {
         return instance._getModule(type);
-    }
-
-    public static Plugin getGame() {
-        return instance;
     }
 }

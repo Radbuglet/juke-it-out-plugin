@@ -18,7 +18,7 @@ public class EnumStringParser<T> {
     }
 
     public boolean isValid(String id) {
-        return mapping.containsKey(id);
+        return mapping.containsKey(id.toLowerCase());
     }
 
     public Set<String> getValidValues() {
