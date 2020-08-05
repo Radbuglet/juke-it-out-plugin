@@ -18,8 +18,4 @@ public class GameTeamMember {
     public Player getPlayer() {
         return Bukkit.getPlayer(playerUuid);
     }
-
-    public String getDisplayName() {
-        return "TODO";  // TODO
-    }
 }

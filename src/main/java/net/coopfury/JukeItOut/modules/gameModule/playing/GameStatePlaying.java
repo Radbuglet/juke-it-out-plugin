@@ -54,7 +54,7 @@ public class GameStatePlaying implements GameState {
 
         // Reset characters
         for (GameTeam team: teams) {
-            DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);  // TODO
+            DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);
 
             for (GameTeamMember member: team.members) {
                 // Reset game state
@@ -215,7 +215,7 @@ public class GameStatePlaying implements GameState {
     }
 
     @EventHandler
-    private void onDamage(EntityDamageEvent event) {
+    private void onDamage(EntityDamageEvent event) {  // TODO: Check friendly fire
         // Check that the damage was done to a playing player.
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();

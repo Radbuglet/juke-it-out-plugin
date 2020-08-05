@@ -2,7 +2,7 @@ package net.coopfury.JukeItOut.modules.adminCommands;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
-import net.coopfury.JukeItOut.helpers.spigot.PlayerCommandVirtualForward;
+import net.coopfury.JukeItOut.helpers.virtualCommand.PlayerCommandVirtualForward;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.helpers.virtualCommand.CommandRouter;
 import net.coopfury.JukeItOut.helpers.virtualCommand.FixedArgCommand;
@@ -23,6 +23,8 @@ class CommandConfMan extends PlayerCommandVirtualForward {
             .registerSub("teams", new CommandRouter<Player>()
                     .registerMultiple(router -> {
                         ConfigDictionary<ConfigTeam> map = getConfig().root.getTeams();
+
+                        // Generic editing subs
                         VirtCommandUtils.registerMapEditingSubs(router, map);
                         VirtCommandUtils.registerMapAdder(router, map, new String[]{"color"}, (sender, name, args, instance) -> {
                             if (!SpigotEnumConverters.DYE_COLOR.isValid(args.getPart(0))) {
@@ -35,6 +37,17 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             instance.setSpawnLocation(sender.getLocation());
                             return true;
                         });
+
+                        /*{
+                            CommandRouter<Player> editingRouter = new CommandRouter<>();
+
+                            router.registerSub("edit", (sender, args) -> {
+                                if (args.getCount() < 1) {
+
+                                    return false;
+                                }
+                            });
+                        }*/
 
                         router.registerSub("recolor", VirtCommandUtils.makeMapEditingHandler(map, new String[]{"color"}, (sender, args, entry) -> {
                             String newColor = args.getPart(0);
