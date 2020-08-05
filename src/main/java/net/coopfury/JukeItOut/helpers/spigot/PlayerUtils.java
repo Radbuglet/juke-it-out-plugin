@@ -4,6 +4,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public final class PlayerUtils {
@@ -20,5 +21,11 @@ public final class PlayerUtils {
         player.getInventory().clear();
         player.setItemOnCursor(null);
         player.closeInventory();
+    }
+
+    public static void setEffectLevel(Player player, PotionEffectType type, int level) {
+        player.removePotionEffect(type);
+        if (level >= 0)
+            player.addPotionEffect(new PotionEffect(type, 1000000, level));
     }
 }

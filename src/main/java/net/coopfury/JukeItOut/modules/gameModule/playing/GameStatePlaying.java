@@ -5,8 +5,6 @@ import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.spigot.BlockPointer;
-import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
-import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
@@ -23,7 +21,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -45,6 +42,7 @@ public class GameStatePlaying implements GameState {
     private boolean chaseStarted;
     private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
 
+    // Round management
     public void startRound() {
         // Reset game state
         roundId++;
@@ -55,31 +53,8 @@ public class GameStatePlaying implements GameState {
         // Reset characters
         for (GameTeam team: teams) {
             DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);
-
             for (GameTeamMember member: team.members) {
-                // Reset game state
-                member.isAlive = true;
-
-                // Reset character
-                Player player = member.getPlayer();
-                PlayerUtils.resetPlayer(player);
-
-                PlayerInventory inventory = player.getInventory();
-                inventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));
-                inventory.setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
-                inventory.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
-                    .setLeatherArmorColor(color.getColor()).toItemStack());
-                inventory.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
-                        .setLeatherArmorColor(color.getColor()).toItemStack());
-
-                inventory.addItem(new ItemStack(Material.STONE_SWORD));
-                inventory.addItem(new ItemStack(Material.IRON_PICKAXE));
-                inventory.addItem(new ItemStack(Material.GOLDEN_APPLE, 4));
-                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY, 64).setDyeColor(color).toItemStack());
-
-                player.teleport(team.configTeam.getSpawnLocation().orElse(null));
-                UiUtils.playTitle(player, String.format(ChatColor.RED + "Round %s", roundId), Constants.title_timings_important);
-                UiUtils.playSound(player, Sound.ENDERDRAGON_HIT);
+                member.resetCharacter(roundId, color);
             }
         }
 
@@ -106,12 +81,7 @@ public class GameStatePlaying implements GameState {
         }
     }
 
-    public GameTeam makeTeam(ConfigTeam teamConfig) {
-        GameTeam team = new GameTeam(teamConfig);
-        teams.add(team);
-        return team;
-    }
-
+    // Team management
     void registerMember(GameTeamMember member) {
         memberMap.put(member.playerUuid, member);
     }
@@ -119,6 +89,12 @@ public class GameStatePlaying implements GameState {
     private void removeMember(GameTeamMember member) {
         memberMap.remove(member.playerUuid);
         member.team.unregisterMember(member);
+    }
+
+    public GameTeam makeTeam(ConfigTeam teamConfig) {
+        GameTeam team = new GameTeam(teamConfig);
+        teams.add(team);
+        return team;
     }
 
     @Override
@@ -172,6 +148,7 @@ public class GameStatePlaying implements GameState {
         }
     }
 
+    // Block handling
     @EventHandler
     private void onPlaceBlock(BlockPlaceEvent event) {
         if (!GlobalFixesModule.shouldDenyMapMakePrivilege(event.getPlayer())) {
@@ -214,6 +191,19 @@ public class GameStatePlaying implements GameState {
         dirtyBlocks.remove(blockPointer);
     }
 
+    // Other fun events that make me cry
+    private void handleDeathCommon(GameTeamMember member, Player player) {
+        World world = player.getWorld();
+        player.setGameMode(GameMode.SPECTATOR);
+        world.playEffect(player.getLocation(), Effect.VILLAGER_THUNDERCLOUD, 0);
+        for (ItemStack stack: player.getInventory()) {
+            if (stack != null && stack.getType() == Material.DIAMOND)
+                world.dropItem(player.getLocation(), stack.clone());
+        }
+        player.getInventory().clear();
+        member.isAlive = false;
+    }
+
     @EventHandler
     private void onDamage(EntityDamageEvent event) {  // TODO: Check friendly fire
         // Check that the damage was done to a playing player.
@@ -226,8 +216,7 @@ public class GameStatePlaying implements GameState {
         if (player.getHealth() - event.getFinalDamage() > 0) return;
 
         // Set the player's state
-        player.setGameMode(GameMode.SPECTATOR);
-        member.isAlive = false;
+        handleDeathCommon(member, player);
 
         // Announce the sad news
         // TODO
@@ -257,6 +246,9 @@ public class GameStatePlaying implements GameState {
         Player player = event.getPlayer();
         GameTeamMember member = memberMap.getOrDefault(player.getUniqueId(), null);
         if (member != null) {
+            if (member.isAlive) {
+                handleDeathCommon(member, player);
+            }
             removeMember(member);
         }
 
