@@ -102,14 +102,20 @@ public class GameStatePlaying implements GameState {
 
     public void formatAppendTeamName(StringBuilder builder, Player player) {
         Optional<GameTeamMember> member = getMember(player);
-        if (member.isPresent()) {
-            builder.append(member.get().team.getTextColor().orElse(ChatColor.WHITE))
-                    .append("[")
-                    .append(member.get().team.configTeam.getName().orElse("UNNAMED").toUpperCase())
-                    .append("] ");
-        } else {
+        if (!member.isPresent() || !member.get().isAlive) {
             builder.append(ChatColor.GRAY).append("[SPECTATOR] ");
         }
+        member.ifPresent(gameTeamMember -> builder.append(gameTeamMember.team.getTextColor().orElse(ChatColor.WHITE))
+                .append("[")
+                .append(gameTeamMember.team.configTeam.getName().orElse("UNNAMED").toUpperCase())
+                .append("] "));
+    }
+
+    public String formatPlayerName(Player player) {
+        StringBuilder builder = new StringBuilder();
+        formatAppendTeamName(builder, player);
+        builder.append(UiUtils.formatVaultName(player));
+        return builder.toString();
     }
 
     @Override
@@ -230,27 +236,37 @@ public class GameStatePlaying implements GameState {
         // Check that the player died.
         if (player.getHealth() - event.getFinalDamage() > 0) return;
 
+        // Announce the sad news (happens here so the spectator flag doesn't get added to the message)
+        for (GameTeamMember otherMember: memberMap.values()) {
+            Player otherPlayer = otherMember.getPlayer();
+            otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.GRAY + " died.");
+            UiUtils.playSound(otherPlayer, Sound.BLAZE_DEATH);
+        }
+
         // Set the player's state
         handleDeathCommon(member.get(), player);
 
-        // Announce the sad news
-        // TODO
 
         event.setDamage(0);
     }
 
     @EventHandler
-    private void onPickup(PlayerPickupItemEvent event) {
+    private void onPickup(PlayerPickupItemEvent event) {  // FIXME: This detects the pickup of all diamonds (use entity metadata)!
         Optional<GameTeamMember> member = getMember(event.getPlayer());
         if (!member.isPresent() || event.getItem().getItemStack().getType() != Material.DIAMOND) return;
 
         // Update player with halo
-        // TODO
+        Player player = member.get().getPlayer();
 
         // Update everyone else
-        for (GameTeamMember otherMember: memberMap.values()) {  // TODO: Announce
-            if (otherMember == member.get()) continue;
-            if (!chaseStarted)
+        for (GameTeamMember otherMember: memberMap.values()) {
+            // Send message
+            Player otherPlayer = otherMember.getPlayer();
+            UiUtils.playSound(otherPlayer, Sound.GHAST_SCREAM2);
+            otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.AQUA + " picked up the diamond!");
+
+            // Give items
+            if (otherMember != member.get() && !chaseStarted)
                 otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
         }
         chaseStarted = true;
