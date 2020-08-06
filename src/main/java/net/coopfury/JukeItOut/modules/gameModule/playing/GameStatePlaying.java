@@ -96,8 +96,20 @@ public class GameStatePlaying implements GameState {
         return team;
     }
 
-    public Optional<GameTeamMember> getMember(Player player) {
+    private Optional<GameTeamMember> getMember(Player player) {
         return Optional.ofNullable(memberMap.get(player.getUniqueId()));
+    }
+
+    public void formatAppendTeamName(StringBuilder builder, Player player) {
+        Optional<GameTeamMember> member = getMember(player);
+        if (member.isPresent()) {
+            builder.append(member.get().team.getTextColor().orElse(ChatColor.WHITE))
+                    .append("[")
+                    .append(member.get().team.configTeam.getName().orElse("UNNAMED").toUpperCase())
+                    .append("] ");
+        } else {
+            builder.append(ChatColor.GRAY).append("[SPECTATOR] ");
+        }
     }
 
     @Override

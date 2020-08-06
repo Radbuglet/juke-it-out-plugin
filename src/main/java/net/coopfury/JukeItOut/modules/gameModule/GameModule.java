@@ -68,12 +68,7 @@ public class GameModule extends PluginModule {
         Player player = event.getPlayer();
         StringBuilder formatBuilder = new StringBuilder();
         if (currentState instanceof GameStatePlaying) {
-            Optional<GameTeamMember> member = ((GameStatePlaying) currentState).getMember(event.getPlayer());
-            if (member.isPresent()) {
-                formatBuilder.append("[Playing] ");  // TODO
-            } else {
-                formatBuilder.append(ChatColor.GRAY).append("[SPECTATOR] ");
-            }
+            ((GameStatePlaying) currentState).formatAppendTeamName(formatBuilder, player);
         }
 
         formatBuilder.append(UiUtils.formatVaultName(player, "%s")).append(": ")  // Name

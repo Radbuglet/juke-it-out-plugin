@@ -1,12 +1,16 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing;
 
+import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
+import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class GameTeam {
@@ -66,5 +70,9 @@ public class GameTeam {
 
     void unregisterMember(GameTeamMember member) {
         members.remove(member);
+    }
+
+    public Optional<ChatColor> getTextColor() {
+        return configTeam.getWoolColor().flatMap(SpigotEnumConverters.DYE_TO_CHAT::parse);
     }
 }
