@@ -23,5 +23,6 @@
 hs_err_pid*
 
 # IDEs
-.idea
+.idea/
+*.iml
 target/

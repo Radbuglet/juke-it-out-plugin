@@ -5,19 +5,19 @@ import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.adminCommands.AdminCommandModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.gameModule.GameModule;
+import net.milkbowl.vault.chat.Chat;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Plugin extends JavaPlugin {
     // Properties
     public static Plugin instance;
+    public static Chat vaultChat;
     private final List<PluginModule> registeredModulesList = new ArrayList<>();
     private final Map<Class<?>, PluginModule> registeredModulesMap = new HashMap<>();
 
@@ -34,6 +34,8 @@ public class Plugin extends JavaPlugin {
         // Setup core
         getLogger().info("JukeItOut enabling...");
         instance = this;
+        vaultChat = Optional.ofNullable(getServer().getServicesManager().getRegistration(Chat.class))
+            .map(RegisteredServiceProvider::getProvider).orElseThrow(() -> new IllegalStateException("Failed to get Vault chat service!"));
 
         // Register and initialize modules
         PluginManager pluginManager = getServer().getPluginManager();

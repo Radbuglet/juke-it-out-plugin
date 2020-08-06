@@ -27,7 +27,6 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-// TODO: Should assume that, by contract, the config is valid.
 public class GameStatePlaying implements GameState {
     private static final FireworkEffect diamondSpawnFwEffect = FireworkEffect.builder()
             .trail(false).flicker(false)
@@ -97,6 +96,10 @@ public class GameStatePlaying implements GameState {
         return team;
     }
 
+    public Optional<GameTeamMember> getMember(Player player) {
+        return Optional.ofNullable(memberMap.get(player.getUniqueId()));
+    }
+
     @Override
     public void onTick() {
         long timeUntilRoundEnd = TimestampUtils.getTimeUntil(roundEndTime, TimeUnits.Ms);
@@ -155,7 +158,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (!memberMap.containsKey(event.getPlayer().getUniqueId())) {
+        if (!getMember(event.getPlayer()).isPresent()) {
             event.setCancelled(true);
             return;
         }
@@ -177,7 +180,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (!memberMap.containsKey(event.getPlayer().getUniqueId())) {
+        if (!getMember(event.getPlayer()).isPresent()) {
             event.setCancelled(true);
             return;
         }
@@ -209,14 +212,14 @@ public class GameStatePlaying implements GameState {
         // Check that the damage was done to a playing player.
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        GameTeamMember member = memberMap.get(player.getUniqueId());
-        if (member == null) return;
+        Optional<GameTeamMember> member = getMember(player);
+        if (!member.isPresent()) return;
 
         // Check that the player died.
         if (player.getHealth() - event.getFinalDamage() > 0) return;
 
         // Set the player's state
-        handleDeathCommon(member, player);
+        handleDeathCommon(member.get(), player);
 
         // Announce the sad news
         // TODO
@@ -226,15 +229,15 @@ public class GameStatePlaying implements GameState {
 
     @EventHandler
     private void onPickup(PlayerPickupItemEvent event) {
-        GameTeamMember member = memberMap.get(event.getPlayer().getUniqueId());
-        if (member == null || event.getItem().getItemStack().getType() != Material.DIAMOND) return;
+        Optional<GameTeamMember> member = getMember(event.getPlayer());
+        if (!member.isPresent() || event.getItem().getItemStack().getType() != Material.DIAMOND) return;
 
         // Update player with halo
         // TODO
 
         // Update everyone else
         for (GameTeamMember otherMember: memberMap.values()) {  // TODO: Announce
-            if (otherMember == member) continue;
+            if (otherMember == member.get()) continue;
             if (!chaseStarted)
                 otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
         }
@@ -244,13 +247,13 @@ public class GameStatePlaying implements GameState {
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        GameTeamMember member = memberMap.getOrDefault(player.getUniqueId(), null);
-        if (member != null) {
-            if (member.isAlive) {
-                handleDeathCommon(member, player);
-            }
-            removeMember(member);
+        Optional<GameTeamMember> member = getMember(player);
+        if (!member.isPresent()) return;
+
+        if (member.get().isAlive) {
+            handleDeathCommon(member.get(), player);
         }
+        removeMember(member.get());
 
         // Check that players are still in the game
         // TODO

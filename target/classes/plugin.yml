@@ -5,6 +5,9 @@ author: radbuglet
 main: net.coopfury.JukeItOut.Plugin
 version: "1.0.0"
 
+depend:
+  - Vault
+
 commands:
   fspeed:
     description: "Sets fly speed of player"

@@ -2,13 +2,18 @@ package net.coopfury.JukeItOut.modules.gameModule;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.PluginModule;
+import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameTeam;
+import net.coopfury.JukeItOut.modules.gameModule.playing.GameTeamMember;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Optional;
@@ -24,6 +29,7 @@ public class GameModule extends PluginModule {
         Plugin.instance.bindListener(newState);
     }
 
+    // Run loop handlers
     @Override
     protected void onEnable(Plugin pluginInstance) {
         ConfigLoadingModule configLoadingModule = Plugin.getModule(ConfigLoadingModule.class);
@@ -54,5 +60,26 @@ public class GameModule extends PluginModule {
     protected void onDisable(Plugin pluginInstance) {
         if (currentState != null)
             currentState.onPluginDisable();
+    }
+
+    // Global game event handlers (mostly delegates to current state after some mandatory preliminary handling)
+    @EventHandler
+    private void onChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        StringBuilder formatBuilder = new StringBuilder();
+        if (currentState instanceof GameStatePlaying) {
+            Optional<GameTeamMember> member = ((GameStatePlaying) currentState).getMember(event.getPlayer());
+            if (member.isPresent()) {
+                formatBuilder.append("[Playing] ");  // TODO
+            } else {
+                formatBuilder.append(ChatColor.GRAY).append("[SPECTATOR] ");
+            }
+        }
+
+        formatBuilder.append(UiUtils.formatVaultName(player, "%s")).append(": ")  // Name
+            .append(UiUtils.translateConfigText(Plugin.vaultChat.getPlayerSuffix(player)))  // Chat color
+                .append("%s");  // Message
+
+        event.setFormat(formatBuilder.toString());
     }
 }
