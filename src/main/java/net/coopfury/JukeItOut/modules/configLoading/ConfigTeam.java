@@ -1,6 +1,5 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
-import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
 import net.coopfury.JukeItOut.helpers.config.ConfigUtils;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import org.bukkit.DyeColor;
@@ -33,11 +32,11 @@ public class ConfigTeam {
     }
 
     public Optional<Location> getSpawnLocation() {
-        return ConfigPrimitives.getLocation(section.getConfigurationSection("spawn"));  // getLocation accepts null sections
+        return ConfigUtils.getLocation(section.getConfigurationSection("spawn"));  // getLocation accepts null sections
     }
 
     public void setSpawnLocation(Location location) {
-        ConfigPrimitives.setLocation(ConfigUtils.readOrMakeSection(section, "spawn"), location);
+        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "spawn"), location);
     }
 
     public boolean isValid() {

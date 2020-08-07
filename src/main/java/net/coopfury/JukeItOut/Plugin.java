@@ -12,7 +12,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class Plugin extends JavaPlugin {
     // Properties
@@ -22,13 +21,6 @@ public class Plugin extends JavaPlugin {
     private final Map<Class<?>, PluginModule> registeredModulesMap = new HashMap<>();
 
     // Module loading
-    private void getModules(Consumer<PluginModule> moduleConsumer) {
-        moduleConsumer.accept(new GlobalFixesModule());
-        moduleConsumer.accept(new ConfigLoadingModule());
-        moduleConsumer.accept(new AdminCommandModule());
-        moduleConsumer.accept(new GameModule());
-    }
-
     @Override
     public void onEnable() {
         // Setup core
@@ -39,7 +31,11 @@ public class Plugin extends JavaPlugin {
 
         // Register and initialize modules
         PluginManager pluginManager = getServer().getPluginManager();
-        getModules(module -> registerModule(module, pluginManager));
+        registerModule(new GlobalFixesModule(), pluginManager);
+        registerModule(new ConfigLoadingModule(), pluginManager);
+        registerModule(new AdminCommandModule(), pluginManager);
+        registerModule(new GameModule(), pluginManager);
+
         getLogger().info("JukeItOut enabled!");
     }
 

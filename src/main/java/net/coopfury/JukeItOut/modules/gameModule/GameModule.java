@@ -20,9 +20,8 @@ public class GameModule extends PluginModule {
     public GameState currentState;
 
     public void setGameState(GameState newState) {
-        if (currentState != null) {
+        if (currentState != null)
             HandlerList.unregisterAll(currentState);
-        }
         currentState = newState;
         Plugin.instance.bindListener(newState);
     }
@@ -30,15 +29,17 @@ public class GameModule extends PluginModule {
     // Run loop handlers
     @Override
     protected void onEnable(Plugin pluginInstance) {
-        ConfigLoadingModule configLoadingModule = Plugin.getModule(ConfigLoadingModule.class);
-
+        // Bind run loop
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (currentState != null) currentState.onTick();
+                if (currentState != null)
+                    currentState.onTick();
             }
         }.runTaskTimer(pluginInstance, 0, 0);
 
+        // Setup initial game state  TODO: Temp
+        ConfigLoadingModule configLoadingModule = Plugin.getModule(ConfigLoadingModule.class);
         GameStatePlaying state = new GameStatePlaying();
         for (Optional<ConfigTeam> teamConfig : configLoadingModule.root.getTeams().values()) {
             if (!teamConfig.isPresent() || !teamConfig.get().isValid()) {
@@ -46,7 +47,7 @@ public class GameModule extends PluginModule {
                 continue;
             }
             GameTeam team = state.makeTeam(teamConfig.get());
-            for (Player player: Bukkit.getOnlinePlayers()) {  // TODO: Temp
+            for (Player player: Bukkit.getOnlinePlayers()) {
                 team.addMember(state, player.getUniqueId());
             }
         }

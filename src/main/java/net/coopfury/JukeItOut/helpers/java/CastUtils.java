@@ -12,17 +12,4 @@ public final class CastUtils {
             return Optional.empty();
         }
     }
-
-    public static<T, D> void tryCast(Class<T> type, D unCasted, Consumer<T> ifSuccess, Consumer<D> ifFailure) {
-        Optional<T> casted = dynamicCast(type, unCasted);
-        if (casted.isPresent()) {
-            ifSuccess.accept(casted.get());
-        } else {
-            ifFailure.accept(unCasted);
-        }
-    }
-
-    public static<T, D> void tryCast(Class<T> type, D unCasted, Consumer<T> ifSuccess) {
-        tryCast(type, unCasted, ifSuccess, e -> {});
-    }
 }

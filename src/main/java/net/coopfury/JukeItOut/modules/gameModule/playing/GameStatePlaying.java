@@ -39,12 +39,14 @@ public class GameStatePlaying implements GameState {
 
     private final List<GameTeam> teams = new ArrayList<>();
     private final Map<UUID, GameTeamMember> memberMap = new HashMap<>();
+    private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
+
+    // Round state
     private int roundId;
     private long roundEndTime;
     private boolean spawnedDiamond;
     private boolean chaseStarted;
     private GameTeamMember diamondHolder;
-    private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
 
     // Round management
     public void startRound() {

@@ -2,7 +2,6 @@ package net.coopfury.JukeItOut.helpers.java;
 
 import java.util.Optional;
 
-// Eww, inheritance that doesnt't strictly extend. Unfortunately, this is the easiest way to quickly relay a bunch of functions.
 public class EnumStringConverter<T> extends EnumConverter<String, T> {
     @Override
     public EnumConverter<String, T> addMapping(String s, T target) {

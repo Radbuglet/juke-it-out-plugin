@@ -38,17 +38,6 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             return true;
                         });
 
-                        /*{
-                            CommandRouter<Player> editingRouter = new CommandRouter<>();
-
-                            router.registerSub("edit", (sender, args) -> {
-                                if (args.getCount() < 1) {
-
-                                    return false;
-                                }
-                            });
-                        }*/
-
                         router.registerSub("recolor", VirtCommandUtils.makeMapEditingHandler(map, new String[]{"color"}, (sender, args, entry) -> {
                             String newColor = args.getPart(0);
                             if (!SpigotEnumConverters.DYE_COLOR.isValid(newColor)) {
