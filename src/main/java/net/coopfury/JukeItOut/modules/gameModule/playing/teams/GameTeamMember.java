@@ -1,4 +1,4 @@
-package net.coopfury.JukeItOut.modules.gameModule.playing;
+package net.coopfury.JukeItOut.modules.gameModule.playing.teams;
 
 import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
@@ -21,7 +21,7 @@ public class GameTeamMember {
         this.playerUuid = playerUuid;
     }
 
-    void resetCharacter(int roundId, DyeColor teamColor) {
+    public void resetCharacter(int roundId, DyeColor teamColor) {
         // Reset game state
         isAlive = true;
 

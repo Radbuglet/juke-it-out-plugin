@@ -1,10 +1,10 @@
-package net.coopfury.JukeItOut.modules.gameModule.playing;
+package net.coopfury.JukeItOut.modules.gameModule.playing.teams;
 
 import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
+import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +13,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.*;
 
 public class GameTeam {
+    // Jukebox effect declaration
     private static class EffectLevel {
         public final int effectLevel;
         public final int range;
@@ -44,15 +45,12 @@ public class GameTeam {
         }
     }
 
-    public final ConfigTeam configTeam;
-    public final List<GameTeamMember> members = new ArrayList<>();
-
     private final EffectType[] friendlyTypes = new EffectType[]{
-        new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, 1, new EffectLevel[]{
-                new EffectLevel(2, -1, 1),
-                new EffectLevel(3, -1, 1),
-                new EffectLevel(4, -1, 1)
-        })
+            new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, 1, new EffectLevel[]{
+                    new EffectLevel(2, -1, 1),
+                    new EffectLevel(3, -1, 1),
+                    new EffectLevel(4, -1, 1)
+            })
     };
     private final EffectType[] offensiveTypes = new EffectType[]{
             new EffectType(new ItemStack(Material.POISONOUS_POTATO), PotionEffectType.POISON, 0, new EffectLevel[]{
@@ -62,26 +60,32 @@ public class GameTeam {
             })
     };
 
+    // Team management
+    public final ConfigTeam configTeam;
+    public final List<GameTeamMember> members = new ArrayList<>();
+
     public GameTeam(ConfigTeam configTeam) {
         this.configTeam = configTeam;
     }
 
-    public GameTeamMember addMember(GameStatePlaying playingState, UUID playerUuid) {
+    public GameTeamMember addMember(TeamManager teamManager, UUID playerUuid) {
         GameTeamMember member = new GameTeamMember(this, playerUuid);
-        playingState.registerMember(member);
+        teamManager.internalRegisterMember(member);
         members.add(member);
         return member;
     }
 
-    void unregisterMember(GameTeamMember member) {
+    void internalUnregisterMember(GameTeamMember member) {
         members.remove(member);
     }
 
-    Optional<ChatColor> getTextColor() {
+    // Text formatting
+    public Optional<ChatColor> getTextColor() {
         return configTeam.getWoolColor().flatMap(SpigotEnumConverters.DYE_TO_CHAT::parse);
     }
 
-    void applyFriendlyEffects() {
+    // Jukebox management
+    public void applyFriendlyEffects() {
         for (GameTeamMember member: members) {
             Player player = member.getPlayer();
             PlayerUtils.resetPlayerEffects(player);

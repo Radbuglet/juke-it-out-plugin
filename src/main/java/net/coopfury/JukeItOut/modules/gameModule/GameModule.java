@@ -6,7 +6,7 @@ import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
-import net.coopfury.JukeItOut.modules.gameModule.playing.GameTeam;
+import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +16,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Optional;
 
+/**
+ * The game module manages the swapping of game states.
+ * There can only be one GameState at a time and any shared behavior is handled programmatically by this class. This
+ * avoids the messy declarative systems necessary when trying to combine, group and/or nest multiple states.
+ */
 public class GameModule extends PluginModule {
     public GameState currentState;
 
