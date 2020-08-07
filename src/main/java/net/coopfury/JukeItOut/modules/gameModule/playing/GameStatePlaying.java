@@ -5,6 +5,7 @@ import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.spigot.BlockPointer;
+import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
@@ -27,11 +28,13 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
+// TODO: In the future, this implementation should be split up into multiple classes (e.g. MemberManager, RoundManager, MainManager (this))
 public class GameStatePlaying implements GameState {
     private static final FireworkEffect diamondSpawnFwEffect = FireworkEffect.builder()
             .trail(false).flicker(false)
             .with(FireworkEffect.Type.BALL_LARGE)
             .withColor(Color.TEAL).build();
+    private static final String stolen_diamond_name = ChatColor.BLUE + "Stolen Diamond";
 
     private final List<GameTeam> teams = new ArrayList<>();
     private final Map<UUID, GameTeamMember> memberMap = new HashMap<>();
@@ -39,6 +42,7 @@ public class GameStatePlaying implements GameState {
     private long roundEndTime;
     private boolean spawnedDiamond;
     private boolean chaseStarted;
+    private GameTeamMember diamondHolder;
     private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
 
     // Round management
@@ -48,6 +52,7 @@ public class GameStatePlaying implements GameState {
         roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 30);
         spawnedDiamond = false;
         chaseStarted = false;
+        diamondHolder = null;
 
         // Reset characters
         for (GameTeam team: teams) {
@@ -118,57 +123,6 @@ public class GameStatePlaying implements GameState {
         return builder.toString();
     }
 
-    @Override
-    public void onTick() {
-        long timeUntilRoundEnd = TimestampUtils.getTimeUntil(roundEndTime, TimeUnits.Ms);
-        if (timeUntilRoundEnd < 0) {
-            startRound();
-            return;
-        }
-        if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 15) {
-            spawnedDiamond = true;
-            // Spawn diamond
-            Optional<Location> diamondSpawn = Plugin.getModule(ConfigLoadingModule.class).root.getDiamondSpawn();
-            if (diamondSpawn.isPresent()) {
-                World world = diamondSpawn.get().getWorld();
-
-                Firework firework = world.spawn(diamondSpawn.get(), Firework.class);
-                FireworkMeta fwMeta = firework.getFireworkMeta();
-                fwMeta.addEffect(diamondSpawnFwEffect);
-                fwMeta.setPower(0);
-                firework.setFireworkMeta(fwMeta);
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        firework.detonate();
-                    }
-                }.runTaskLater(Plugin.instance, 1);
-
-                Item spawnedDiamond = world.dropItem(diamondSpawn.get(), new ItemStack(Material.DIAMOND));
-                spawnedDiamond.setVelocity(new Vector(0, .5, 0));
-            } else {
-                Plugin.instance.getLogger().warning("Failed to spawn diamond: no spawn location set.");
-            }
-
-            // Announce spawn
-            for (GameTeamMember member: memberMap.values()) {
-                if (member.isAlive) {
-                    Player player = member.getPlayer();
-                    UiUtils.playTitle(player, ChatColor.LIGHT_PURPLE + "Diamond Spawned", Constants.title_timings_important);
-                    UiUtils.playSound(player, Sound.LEVEL_UP);
-                }
-            }
-        }
-
-        // Display round time
-        for (GameTeamMember member: memberMap.values()) {
-            Player player = member.getPlayer();  // Runnables are executed before any player disconnection handling occurs
-
-            player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);
-            player.setLevel((int) (timeUntilRoundEnd / 1000) + 1);
-        }
-    }
-
     // Block handling
     @EventHandler
     private void onPlaceBlock(BlockPlaceEvent event) {
@@ -213,6 +167,43 @@ public class GameStatePlaying implements GameState {
     }
 
     // Other fun events that make me cry
+    private boolean isSpawnedDiamond(ItemStack stack) {
+        return stack != null && stack.getType() == Material.DIAMOND && stack.getItemMeta().getDisplayName().equals(stolen_diamond_name);
+    }
+
+    private boolean hasSpawnedDiamond(Player player) {
+        for (ItemStack stack : player.getInventory()) {
+            if (isSpawnedDiamond(stack))
+                return true;
+        }
+        return false;
+    }
+
+    private void changeDiamondHolder(GameTeamMember member) {
+        if (member == diamondHolder) return;
+        diamondHolder = member;
+
+        if (diamondHolder != null) {
+            Player player = member.getPlayer();
+
+            // Update player with halo
+            // TODO
+
+            // Update everyone else
+            for (GameTeamMember otherMember : memberMap.values()) {
+                // Send message
+                Player otherPlayer = otherMember.getPlayer();
+                UiUtils.playSound(otherPlayer, Sound.GHAST_SCREAM2);
+                otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.AQUA + " picked up the diamond!");
+
+                // Give items
+                if (otherMember != member && !chaseStarted)
+                    otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+            }
+            chaseStarted = true;
+        }
+    }
+
     private void handleDeathCommon(GameTeamMember member, Player player) {
         World world = player.getWorld();
         player.setGameMode(GameMode.SPECTATOR);
@@ -223,6 +214,8 @@ public class GameStatePlaying implements GameState {
         }
         player.getInventory().clear();
         member.isAlive = false;
+        if (member == diamondHolder)
+            changeDiamondHolder(null);
     }
 
     @EventHandler
@@ -245,31 +238,14 @@ public class GameStatePlaying implements GameState {
 
         // Set the player's state
         handleDeathCommon(member.get(), player);
-
-
         event.setDamage(0);
     }
 
     @EventHandler
-    private void onPickup(PlayerPickupItemEvent event) {  // FIXME: This detects the pickup of all diamonds (use entity metadata)!
+    private void onPickup(PlayerPickupItemEvent event) {
         Optional<GameTeamMember> member = getMember(event.getPlayer());
-        if (!member.isPresent() || event.getItem().getItemStack().getType() != Material.DIAMOND) return;
-
-        // Update player with halo
-        Player player = member.get().getPlayer();
-
-        // Update everyone else
-        for (GameTeamMember otherMember: memberMap.values()) {
-            // Send message
-            Player otherPlayer = otherMember.getPlayer();
-            UiUtils.playSound(otherPlayer, Sound.GHAST_SCREAM2);
-            otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.AQUA + " picked up the diamond!");
-
-            // Give items
-            if (otherMember != member.get() && !chaseStarted)
-                otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-        }
-        chaseStarted = true;
+        if (member.isPresent() && isSpawnedDiamond(event.getItem().getItemStack()))
+            changeDiamondHolder(member.get());
     }
 
     @EventHandler
@@ -283,8 +259,81 @@ public class GameStatePlaying implements GameState {
         }
         removeMember(member.get());
 
-        // Check that players are still in the game
+        // Ensure that players are still in the game
         // TODO
+    }
+
+    // Lifecycle
+    @Override
+    public void onTick() {
+        long timeUntilRoundEnd = TimestampUtils.getTimeUntil(roundEndTime, TimeUnits.Ms);
+        if (timeUntilRoundEnd < 0) {
+            startRound();
+            return;
+        }
+        if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 15) {
+            spawnedDiamond = true;
+            // Spawn diamond
+            Optional<Location> diamondSpawn = Plugin.getModule(ConfigLoadingModule.class).root.getDiamondSpawn();
+            if (diamondSpawn.isPresent()) {
+                World world = diamondSpawn.get().getWorld();
+
+                // Spawn firework effect
+                Firework firework = world.spawn(diamondSpawn.get(), Firework.class);
+                FireworkMeta fwMeta = firework.getFireworkMeta();
+                fwMeta.addEffect(diamondSpawnFwEffect);
+                fwMeta.setPower(0);
+                firework.setFireworkMeta(fwMeta);
+                new BukkitRunnable() {  // Runnable used here because it seems that fireworks can't get detonated until CraftBukkit has processed them for at least one tick.
+                    @Override
+                    public void run() {
+                        firework.detonate();
+                    }
+                }.runTaskLater(Plugin.instance, 1);
+
+                // Spawn item
+                Item spawnedDiamond = world.dropItem(diamondSpawn.get(), new ItemBuilder(Material.DIAMOND)
+                        .setName(stolen_diamond_name)
+                        .toItemStack());
+                spawnedDiamond.setVelocity(new Vector(0, .5, 0));
+            } else {
+                Plugin.instance.getLogger().warning("Failed to spawn diamond: no spawn location set.");
+            }
+
+            // Announce spawn
+            for (GameTeamMember member: memberMap.values()) {
+                if (member.isAlive) {
+                    Player player = member.getPlayer();
+                    UiUtils.playTitle(player, ChatColor.LIGHT_PURPLE + "Diamond Spawned", Constants.title_timings_important);
+                    UiUtils.playSound(player, Sound.LEVEL_UP);
+                }
+            }
+        }
+
+        // Poll for chase target change (fallback for the other events)
+        // TODO: Polling is less than ideal for performance (O(36N) or O(N)). Once all possible exchange events are handled, this should be removed.
+        if (diamondHolder == null || !diamondHolder.isAlive || !hasSpawnedDiamond(diamondHolder.getPlayer())) {
+            boolean foundHolder = false;
+            // Since the current holder no longer has the diamond, check the other players.
+            for (GameTeamMember newHolder: memberMap.values()) {
+                if (newHolder.isAlive && hasSpawnedDiamond(newHolder.getPlayer())) {
+                    changeDiamondHolder(newHolder);
+                    foundHolder = true;
+                    break;
+                }
+            }
+
+            if (!foundHolder)
+                changeDiamondHolder(null);
+        }
+
+        // Display round time
+        for (GameTeamMember member: memberMap.values()) {
+            Player player = member.getPlayer();  // Runnables are executed before any player disconnection handling occurs
+
+            player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);
+            player.setLevel((int) (timeUntilRoundEnd / 1000) + 1);
+        }
     }
 
     @Override
