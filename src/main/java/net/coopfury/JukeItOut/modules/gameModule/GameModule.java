@@ -67,7 +67,9 @@ public class GameModule extends PluginModule {
     }
 
     // Global game event handlers (mostly delegates to current state after some mandatory preliminary handling)
-    // TODO: Join and leave
+    // In the future, I would probably implement a event handler tree to allow game states to opt into certain event handling singletons
+    // and configure them to the needs of that handler.
+    // TODO: Join and leave events
     @EventHandler
     private void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
