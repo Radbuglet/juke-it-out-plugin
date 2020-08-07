@@ -28,6 +28,7 @@ public class GameTeamMember {
         // Reset character
         Player player = getPlayer();
         PlayerUtils.resetPlayer(player);
+        player.setGameMode(GameMode.SURVIVAL);
 
         PlayerInventory inventory = player.getInventory();
         inventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));

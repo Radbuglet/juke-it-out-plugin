@@ -1,17 +1,16 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing;
 
+import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class GameTeam {
     private static class EffectLevel {
@@ -29,13 +28,19 @@ public class GameTeam {
     private static class EffectType {
         public int currentLevel;
         public final PotionEffectType effectType;
+        public final int defaultLevel;
         public final ItemStack icon;
         public final EffectLevel[] levels;
 
-        public EffectType(ItemStack icon, PotionEffectType effectType, EffectLevel[] levels) {
+        public EffectType(ItemStack icon, PotionEffectType effectType, int defaultLevel, EffectLevel[] levels) {
             this.icon = icon;
+            this.defaultLevel = defaultLevel;
             this.effectType = effectType;
             this.levels = levels;
+        }
+
+        public int getCurrentPotency() {
+            return currentLevel < 0 ? defaultLevel : levels[currentLevel].effectLevel;
         }
     }
 
@@ -43,14 +48,14 @@ public class GameTeam {
     public final List<GameTeamMember> members = new ArrayList<>();
 
     private final EffectType[] friendlyTypes = new EffectType[]{
-        new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, new EffectLevel[]{
-                new EffectLevel(1, -1, 1),
+        new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, 1, new EffectLevel[]{
                 new EffectLevel(2, -1, 1),
-                new EffectLevel(3, -1, 1)
+                new EffectLevel(3, -1, 1),
+                new EffectLevel(4, -1, 1)
         })
     };
     private final EffectType[] offensiveTypes = new EffectType[]{
-            new EffectType(new ItemStack(Material.POISONOUS_POTATO), PotionEffectType.POISON, new EffectLevel[]{
+            new EffectType(new ItemStack(Material.POISONOUS_POTATO), PotionEffectType.POISON, 0, new EffectLevel[]{
                     new EffectLevel(1, 5, 1),
                     new EffectLevel(2, 10, 1),
                     new EffectLevel(3, 15, 2)
@@ -72,7 +77,21 @@ public class GameTeam {
         members.remove(member);
     }
 
-    public Optional<ChatColor> getTextColor() {
+    Optional<ChatColor> getTextColor() {
         return configTeam.getWoolColor().flatMap(SpigotEnumConverters.DYE_TO_CHAT::parse);
+    }
+
+    void applyFriendlyEffects() {
+        for (GameTeamMember member: members) {
+            Player player = member.getPlayer();
+            PlayerUtils.resetPlayerEffects(player);
+            for (EffectType type: friendlyTypes) {
+                PlayerUtils.setEffectLevel(player, type.effectType, type.getCurrentPotency());
+            }
+        }
+    }
+
+    void reapplyOffensiveEffects() {
+        // TODO
     }
 }

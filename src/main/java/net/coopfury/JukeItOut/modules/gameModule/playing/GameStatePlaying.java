@@ -6,6 +6,7 @@ import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.spigot.BlockPointer;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
+import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
@@ -197,7 +198,7 @@ public class GameStatePlaying implements GameState {
                 otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.AQUA + " picked up the diamond!");
 
                 // Give items
-                if (otherMember != member && !chaseStarted)
+                if (!chaseStarted && otherMember.isAlive && otherMember != member)
                     otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
             }
             chaseStarted = true;
@@ -206,13 +207,13 @@ public class GameStatePlaying implements GameState {
 
     private void handleDeathCommon(GameTeamMember member, Player player) {
         World world = player.getWorld();
-        player.setGameMode(GameMode.SPECTATOR);
         world.playEffect(player.getLocation(), Effect.VILLAGER_THUNDERCLOUD, 0);
         for (ItemStack stack: player.getInventory()) {
             if (stack != null && stack.getType() == Material.DIAMOND)
                 world.dropItem(player.getLocation(), stack.clone());
         }
-        player.getInventory().clear();
+        PlayerUtils.resetPlayer(player);
+        player.setGameMode(GameMode.SPECTATOR);
         member.isAlive = false;
         if (member == diamondHolder)
             changeDiamondHolder(null);
@@ -229,7 +230,7 @@ public class GameStatePlaying implements GameState {
         // Check that the player died.
         if (player.getHealth() - event.getFinalDamage() > 0) return;
 
-        // Announce the sad news (happens here so the spectator flag doesn't get added to the message)
+        // Announce the sad news (happens here so the spectator flare doesn't get added to the message)
         for (GameTeamMember otherMember: memberMap.values()) {
             Player otherPlayer = otherMember.getPlayer();
             otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.GRAY + " died.");
