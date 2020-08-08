@@ -11,7 +11,11 @@ import net.coopfury.JukeItOut.helpers.virtualCommand.VirtualCommandHandler;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
+import java.util.Optional;
+import java.util.function.Consumer;
 
 class CommandConfMan extends PlayerCommandVirtualForward {
     private static final String message_invalid_team_color = ChatColor.RED + "Invalid color. Color must be a valid DyeColor.";
@@ -48,7 +52,30 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             sender.sendMessage(ChatColor.GREEN + "Successfully recolored team!");
                             return true;
                         }));
-                    }))
+
+                        router.registerSub("set-location", VirtCommandUtils.makeMapEditingHandler(
+                                map, new String[]{"jukebox|chest"}, ((sender, args, team) -> {  // TODO: Support for enums, make this automatic.
+                                    Consumer<Location> setter;
+                                    String locationName = args.getPart(0);
+                                    if (locationName.equals("jukebox")) {
+                                        setter = team::setJukeboxLocation;
+                                    } else if (locationName.equals("chest")) {
+                                        setter = team::setChestLocation;
+                                    } else {
+                                        sender.sendMessage(ChatColor.RED + "Location name should either be jukebox or chest. Got " + locationName + "!");
+                                        return false;
+                                    }
+
+                                    Optional<Location> location = VirtCommandUtils.getTargetBlockReasoned(sender, 5);
+                                    if (!location.isPresent())  // Error message handled by method above.
+                                        return false;
+
+                                    setter.accept(location.get());
+                                    sender.sendMessage(ChatColor.GREEN + "Location set to block you were looking at.");
+                                    return true;
+                        })));
+                    })
+            )
             .registerSub("set-diamond-spawn", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
                 getConfig().root.setDiamondSpawn(sender.getLocation());
                 sender.sendMessage(ChatColor.GREEN + "Set diamond spawn location!");

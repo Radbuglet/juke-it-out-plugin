@@ -39,7 +39,26 @@ public class ConfigTeam {
         ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "spawn"), location);
     }
 
+    public Optional<Location> getJukeboxLocation() {
+        return ConfigUtils.getLocation(section.getConfigurationSection("jukebox"));
+    }
+
+    public void setJukeboxLocation(Location location) {
+        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "jukebox"), location);
+    }
+
+    public Optional<Location> getChestLocation() {
+        return ConfigUtils.getLocation(section.getConfigurationSection("chest"));
+    }
+
+    public void setChestLocation(Location location) {
+        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "chest"), location);
+    }
+
     public boolean isValid() {
-        return getName().isPresent() && getSpawnLocation().isPresent() && getWoolColor().isPresent();
+        return getName().isPresent() && getWoolColor().isPresent()
+                && getSpawnLocation().isPresent()
+                && getJukeboxLocation().isPresent()
+                && getChestLocation().isPresent();
     }
 }

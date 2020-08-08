@@ -38,6 +38,8 @@ public final class ConfigUtils {
     }
 
     public static Optional<Location> getLocation(ConfigurationSection section) {
+        if (section == null) return Optional.empty();
+
         // Get world
         String worldName = section.getString("world");
         if (worldName == null) return Optional.empty();
