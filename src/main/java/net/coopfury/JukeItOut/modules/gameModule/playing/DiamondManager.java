@@ -5,15 +5,19 @@ import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
+import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -38,7 +42,7 @@ public class DiamondManager {
     // Diamond detection methods
     public boolean isSpawnedDiamond(ItemStack stack) {
         return stack != null && stack.getType() == Material.DIAMOND
-                && stack.getItemMeta().getDisplayName().equals(stolenDiamondName);
+                && stolenDiamondName.equals(stack.getItemMeta().getDisplayName());
     }
 
     private boolean hasSpawnedDiamond(Inventory inventory) {
@@ -134,8 +138,24 @@ public class DiamondManager {
         return diamondHolder;
     }
 
-    public void resetRoundState() {
+    public void resetRoundState(TeamManager teamManager) {
+        // Reset state
         chaseStarted = false;
         diamondHolder = null;
+
+        // Unmark diamonds as stolen
+        for (GameTeam team: teamManager.getTeams()) {
+            team.configTeam.getChestLocation().map(Location::getBlock).ifPresent(block -> {
+                if (!(block.getState() instanceof Chest)) return;
+                Chest chest = (Chest) block.getState();
+                for (ItemStack stack: chest.getBlockInventory()) {
+                    if (!isSpawnedDiamond(stack)) continue;
+                    ItemMeta meta = stack.getItemMeta();
+                    meta.setDisplayName(null);
+                    stack.setItemMeta(meta);
+                }
+            });
+        }
+
     }
 }

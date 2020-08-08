@@ -1,9 +1,11 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing;
 
+import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.spigot.BlockPointer;
+import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
@@ -17,12 +19,15 @@ import org.bukkit.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -39,7 +44,6 @@ public class GameStatePlaying implements GameState {
     private boolean spawnedDiamond;
 
     // Public team management API
-    // TODO: Figure out encapsulation for the service.
     public GameTeam makeTeam(ConfigTeam teamConfig) {
         return teamManager.makeTeam(teamConfig);
     }
@@ -58,18 +62,41 @@ public class GameStatePlaying implements GameState {
         roundId++;
         roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 30);
         spawnedDiamond = false;
-        diamondManager.resetRoundState();
+        diamondManager.resetRoundState(teamManager);
 
         // Reset characters
         for (GameTeam team: teamManager.getTeams()) {
             DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);
             for (GameTeamMember member: team.members) {
-                member.resetCharacter(roundId, color);
+                // Reset game state
+                member.isAlive = true;
+
+                // Reset character
+                Player player = member.getPlayer();
+                PlayerUtils.resetPlayer(player);
+                player.setGameMode(GameMode.SURVIVAL);
+
+                PlayerInventory inventory = player.getInventory();
+                inventory.setBoots(new ItemStack(Material.DIAMOND_BOOTS));
+                inventory.setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
+                inventory.setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE)
+                        .setLeatherArmorColor(color.getColor()).toItemStack());
+                inventory.setHelmet(new ItemBuilder(Material.LEATHER_HELMET)
+                        .setLeatherArmorColor(color.getColor()).toItemStack());
+
+                inventory.addItem(new ItemStack(Material.STONE_SWORD));
+                inventory.addItem(new ItemStack(Material.IRON_PICKAXE));
+                inventory.addItem(new ItemStack(Material.GOLDEN_APPLE, 4));
+                inventory.addItem(new ItemBuilder(Material.STAINED_CLAY, 64).setDyeColor(color).toItemStack());
+
+                player.teleport(team.configTeam.getSpawnLocation().orElse(null));
+                UiUtils.playTitle(player,
+                        String.format(ChatColor.RED + "Round %s", roundId),
+                        (isDefenseRound() ? ChatColor.DARK_RED + "Defense round" : null),
+                        Constants.title_timings_important);
+                UiUtils.playSound(player, Sound.ENDERDRAGON_HIT);
             }
         }
-
-        // Unmark all stolen diamonds
-        // TODO
 
         // Reset world
         resetWorld(false);
@@ -152,6 +179,10 @@ public class GameStatePlaying implements GameState {
             diamondManager.changeDiamondHolder(teamManager, null);
     }
 
+    private boolean isDefenseRound() {
+        return roundId % 5 == 0;
+    }
+
     @EventHandler
     private void onDamage(EntityDamageEvent event) {  // TODO: Check friendly fire
         // Check that the damage was done to a playing player.
@@ -166,7 +197,7 @@ public class GameStatePlaying implements GameState {
         // Announce the sad news (happens here so the spectator flare doesn't get added to the message)
         for (GameTeamMember otherMember: teamManager.getMembers()) {
             Player otherPlayer = otherMember.getPlayer();
-            otherPlayer.sendMessage(teamManager.formatPlayerName(player) + ChatColor.GRAY + " died.");
+            otherPlayer.sendMessage(teamManager.formatPlayerName(player) + ChatColor.GRAY + " died.");  // TODO: Include death cause
             UiUtils.playSound(otherPlayer, Sound.BLAZE_DEATH);
         }
 
@@ -180,6 +211,23 @@ public class GameStatePlaying implements GameState {
         Optional<GameTeamMember> member = teamManager.getMember(event.getPlayer());
         if (member.isPresent() && diamondManager.isSpawnedDiamond(event.getItem().getItemStack()))
             diamondManager.changeDiamondHolder(teamManager, member.get());
+    }
+
+    @EventHandler
+    private void onInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Optional<GameTeamMember> member = teamManager.getMember(player);
+        if (!member.isPresent() || !member.get().isAlive) return;
+        if (event.getClickedBlock() == null || event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        if (event.getClickedBlock().getType() == Material.CHEST) {
+            Optional<Location> teamChestLocation = member.get().team.configTeam.getChestLocation();
+            if (!isDefenseRound() && (!teamChestLocation.isPresent() || !event.getClickedBlock().equals(teamChestLocation.get().getBlock()))) {
+                player.sendMessage(ChatColor.RED + "You can only open your team's chest on non-defense rounds.");
+                player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
+                event.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler
