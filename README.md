@@ -13,12 +13,24 @@ This plugin is not intended for use by other servers as it makes a few assumptio
   - This system is easier to write
 - Commands are handled using a virtual command abstraction, where normal Bukkit command handlers forward the invocation to `VirtualCommandHandlers`. Virtual command handlers take a list of arguments that gets shortened to the argument list local to that specific handler (e.g. if a handler operates on a sub-command, it will receive the list of arguments for that sub command only) as well as a sender. From there, a few generic virtual command handlers were constructed to handle sub-command routing, argument parsing, and editing subs for map-like objects (think `scoreboard objectives add/remove/rename <map key> <extra arguments>`).
 
-The following is a theory crafted refactor for empowering the current event handling system:
+### Event Trees
 
-- A Godot-like scene tree system is constructed out of nodes. Each node contains a list of children. When one node is freed, all its children are also freed. These nodes are used for two things: broadcasting events (in Godot, these are called notifications) and automating cleanup (e.g. cleanup on plugin disable, event un-registration on game state change).
-- The plugin singleton can be obtained by searching for the scene root (this will probably still be a static field for performance reasons).
-- Nodes can register multiple lifecycle/cleanup handlers called plugins.
-- If a node needs to listen to Bukkit events, it can register a generic Bukkit event listener node plugin.
-- There will also be a special type of node which tells the server to enable a specific event listener singleton. This would allow event handler list rules to be defined declaratively.
+In the future, there might be a third interesting system called the "event tree". However, I wanted to finish the implementation before dealing with the technical debt as the debt doesn't really affect what I'm trying to do. Is it foolish to put off the resolution of technical debt? Probably.
 
-By doing the above, sharing behavior between game states would be much easier and much more flexible.
+The event tree attempts to solve a big limitation in my current design: game states are completely distinct. While I can easily share logic between multiple game states by decoupling the shared logic from the game state object, sharing event handlers is not that easy. The easiest way to do this would be register the handler in the game state and remember to unregister it once the game state is swapped. However, doing so is quite annoying and tricky and this turns out to be a fairly common pattern and as such, I would like to implement an abstraction that takes care of nested event handler hierarchies for me.
+
+In order to make this change, I would first decouple event handlers and game logic. This has a few notable benefits:
+
+- It would allow me to enforce a single handler instance rule at a global level. It doesn't make sense to have more than one handler for a specific task however it could make sense to have multiple game state controllers in the case where multiple games are hosted on one server.
+- It would facilitate headless unit testing.
+- It could help separate game logic and Bukkit handling logic, making things easier to maintain.
+
+The actual abstraction providing this behavior would consist of multiple classes:
+
+- Core tree definition classes:
+  - `EventHandlerType`: an object implementing `org.bukkit.event.Listener`. Events would be declared here like in any other Bukkit event listener. It can also hook into registration and un-registration events to cleanup any remaining resources (e.g. `BukkitRunnables` and other threads)
+  - `EventTreeNode`: the node forming the event tree. Contains references to its children and can optionally be associated with an `EventHandlerType` (a null `EventHandlerType` makes the node a dummy node). The node can also provide tasks to perform when it enters and leaves the tree. These are used to perform and undo the configuration changes made to the `EventHandlerType` singletons (e.g. register and unregister a reference to a relevant controller object).
+  - `EventTreeRoot`: the class at the root of the event tree. Provides methods to interact with the tree and fetch event handler singletons by their type. The tree root will also register the event handler if it hasn't been registered yet and unregister it once no more event handlers exist.
+- Handle utility classes:
+  - `RegisteredEventList`: a list of events that have been registered in the tree that can be cleared using the destroy method. This allows the game logic objects to easily manage which events are in the tree without having to worry about cleanup.
+  - `RegisterEventSingular`: same as a `RegisteredEventList` except it only stores one value at a time. This is most useful in the game state handler as there is only ever one event handler active at a time (shared events are composed using the new tree system).
