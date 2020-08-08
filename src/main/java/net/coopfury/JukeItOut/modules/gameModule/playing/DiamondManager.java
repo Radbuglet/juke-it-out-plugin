@@ -36,7 +36,7 @@ public class DiamondManager {
     private GameTeamMember diamondHolder;
 
     // Diamond detection methods
-    private boolean isSpawnedDiamond(ItemStack stack) {
+    public boolean isSpawnedDiamond(ItemStack stack) {
         return stack != null && stack.getType() == Material.DIAMOND
                 && stack.getItemMeta().getDisplayName().equals(stolenDiamondName);
     }
@@ -128,5 +128,14 @@ public class DiamondManager {
                 UiUtils.playSound(player, Sound.LEVEL_UP);
             }
         }
+    }
+
+    public GameTeamMember getDiamondHolder() {
+        return diamondHolder;
+    }
+
+    public void resetRoundState() {
+        chaseStarted = false;
+        diamondHolder = null;
     }
 }

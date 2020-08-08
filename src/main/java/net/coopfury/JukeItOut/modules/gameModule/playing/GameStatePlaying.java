@@ -8,9 +8,11 @@ import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
+import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
+import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
 import org.bukkit.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -28,11 +30,27 @@ import java.util.Set;
 
 public class GameStatePlaying implements GameState {
     private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
+    private final DiamondManager diamondManager = new DiamondManager();
+    private final TeamManager teamManager = new TeamManager();
 
     // Round state
     private int roundId;
     private long roundEndTime;
     private boolean spawnedDiamond;
+
+    // Public team management API
+    // TODO: Figure out encapsulation for the service.
+    public GameTeam makeTeam(ConfigTeam teamConfig) {
+        return teamManager.makeTeam(teamConfig);
+    }
+
+    public void addPlayerToTeam(GameTeam team, Player player) {
+        team.addMember(teamManager, player.getUniqueId());
+    }
+
+    public void formatAppendTeamName(StringBuilder builder, Player player) {
+        teamManager.formatAppendTeamName(builder, player);
+    }
 
     // Round management
     public void startRound() {
@@ -40,14 +58,18 @@ public class GameStatePlaying implements GameState {
         roundId++;
         roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 30);
         spawnedDiamond = false;
+        diamondManager.resetRoundState();
 
         // Reset characters
-        for (GameTeam team: teams) {
+        for (GameTeam team: teamManager.getTeams()) {
             DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);
             for (GameTeamMember member: team.members) {
                 member.resetCharacter(roundId, color);
             }
         }
+
+        // Unmark all stolen diamonds
+        // TODO
 
         // Reset world
         resetWorld(false);
@@ -72,8 +94,6 @@ public class GameStatePlaying implements GameState {
         }
     }
 
-    // Team management
-
     // Block handling
     @EventHandler
     private void onPlaceBlock(BlockPlaceEvent event) {
@@ -81,7 +101,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (!getMember(event.getPlayer()).isPresent()) {
+        if (!teamManager.getMember(event.getPlayer()).isPresent()) {
             event.setCancelled(true);
             return;
         }
@@ -103,7 +123,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (!getMember(event.getPlayer()).isPresent()) {
+        if (!teamManager.getMember(event.getPlayer()).isPresent()) {
             event.setCancelled(true);
             return;
         }
@@ -128,8 +148,8 @@ public class GameStatePlaying implements GameState {
         PlayerUtils.resetPlayer(player);
         player.setGameMode(GameMode.SPECTATOR);
         member.isAlive = false;
-        if (member == diamondHolder)
-            changeDiamondHolder(null);
+        if (member == diamondManager.getDiamondHolder())
+            diamondManager.changeDiamondHolder(teamManager, null);
     }
 
     @EventHandler
@@ -137,16 +157,16 @@ public class GameStatePlaying implements GameState {
         // Check that the damage was done to a playing player.
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        Optional<GameTeamMember> member = getMember(player);
+        Optional<GameTeamMember> member = teamManager.getMember(player);
         if (!member.isPresent()) return;
 
         // Check that the player died.
         if (player.getHealth() - event.getFinalDamage() > 0) return;
 
         // Announce the sad news (happens here so the spectator flare doesn't get added to the message)
-        for (GameTeamMember otherMember: memberMap.values()) {
+        for (GameTeamMember otherMember: teamManager.getMembers()) {
             Player otherPlayer = otherMember.getPlayer();
-            otherPlayer.sendMessage(formatPlayerName(player) + ChatColor.GRAY + " died.");
+            otherPlayer.sendMessage(teamManager.formatPlayerName(player) + ChatColor.GRAY + " died.");
             UiUtils.playSound(otherPlayer, Sound.BLAZE_DEATH);
         }
 
@@ -157,21 +177,21 @@ public class GameStatePlaying implements GameState {
 
     @EventHandler
     private void onPickup(PlayerPickupItemEvent event) {
-        Optional<GameTeamMember> member = getMember(event.getPlayer());
-        if (member.isPresent() && isSpawnedDiamond(event.getItem().getItemStack()))
-            changeDiamondHolder(member.get());
+        Optional<GameTeamMember> member = teamManager.getMember(event.getPlayer());
+        if (member.isPresent() && diamondManager.isSpawnedDiamond(event.getItem().getItemStack()))
+            diamondManager.changeDiamondHolder(teamManager, member.get());
     }
 
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        Optional<GameTeamMember> member = getMember(player);
+        Optional<GameTeamMember> member = teamManager.getMember(player);
         if (!member.isPresent()) return;
 
         if (member.get().isAlive) {
             handleDeathCommon(member.get(), player);
         }
-        removeMember(member.get());
+        teamManager.removeMember(member.get());
 
         // Ensure that players are still in the game
         // TODO
@@ -187,15 +207,14 @@ public class GameStatePlaying implements GameState {
         }
         if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 15) {
             spawnedDiamond = true;
-            // TODO
+            diamondManager.spawnDiamond(teamManager);
         }
 
         // Poll for chase target change (fallback for the other events)
-        // TODO: Polling is less than ideal for performance (O(36N) or O(N)). Once all possible exchange events are handled, this should be removed.
-
+        diamondManager.pollDiamondHolderChange(teamManager);
 
         // Display round time
-        for (GameTeamMember member: memberMap.values()) {
+        for (GameTeamMember member: teamManager.getMembers()) {
             Player player = member.getPlayer();  // Runnables are executed before any player disconnection handling occurs
 
             player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);

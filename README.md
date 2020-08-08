@@ -11,11 +11,11 @@ This plugin is not intended for use by other servers as it makes a few assumptio
   - Metadata gets preserved
   -  There is less redundancy in memory as only one memory representation is used instead of two
   - This system is easier to write
-- Commands are handled using a virtual command abstraction, where normal Bukkit command handlers forward the invocation to `VirtualCommandHandlers`. Virtual command handlers take a list of arguments that gets shortened to the argument list local to that specific handler (e.g. if a handler operates on a sub-command, it will receive the list of arguments for that sub command only) as well as a sender. From there, a few generic virtual command handlers were constructed to handle sub-command routing, argument parsing, and editing subs for map-like objects (think `scoreboard objectives add/remove <map key> <extra arguments>`).
+- Commands are handled using a virtual command abstraction, where normal Bukkit command handlers forward the invocation to `VirtualCommandHandlers`. Virtual command handlers take a list of arguments that gets shortened to the argument list local to that specific handler (e.g. if a handler operates on a sub-command, it will receive the list of arguments for that sub command only) as well as a sender. From there, a few generic virtual command handlers were constructed to handle sub-command routing, argument parsing, and editing subs for map-like objects (think `scoreboard objectives add/remove/rename <map key> <extra arguments>`).
 
 The following is a theory crafted refactor for empowering the current event handling system:
 
-- A Godot-like scene tree system is constructed out of nodes. Each node contains a list of children. When one node is freed, all its children are also freed. These nodes are used for two things: broadcasting events (in Godot, these are called notifications) and automating cleanup (e.g. cleanup on plugin disable, cleanup on game state change).
+- A Godot-like scene tree system is constructed out of nodes. Each node contains a list of children. When one node is freed, all its children are also freed. These nodes are used for two things: broadcasting events (in Godot, these are called notifications) and automating cleanup (e.g. cleanup on plugin disable, event un-registration on game state change).
 - The plugin singleton can be obtained by searching for the scene root (this will probably still be a static field for performance reasons).
 - Nodes can register multiple lifecycle/cleanup handlers called plugins.
 - If a node needs to listen to Bukkit events, it can register a generic Bukkit event listener node plugin.

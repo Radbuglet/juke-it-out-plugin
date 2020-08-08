@@ -53,7 +53,7 @@ public class GameModule extends PluginModule {
             }
             GameTeam team = state.makeTeam(teamConfig.get());
             for (Player player: Bukkit.getOnlinePlayers()) {
-                team.addMember(state, player.getUniqueId());
+                state.addPlayerToTeam(team, player);
             }
         }
         setGameState(state);
