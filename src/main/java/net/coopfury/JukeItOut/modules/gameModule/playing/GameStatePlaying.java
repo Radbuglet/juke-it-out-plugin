@@ -92,10 +92,11 @@ public class GameStatePlaying implements GameState {
                 player.teleport(team.configTeam.getSpawnLocation().orElse(null));
                 UiUtils.playTitle(player,
                         String.format(ChatColor.RED + "Round %s", roundId),
-                        (isDefenseRound() ? ChatColor.DARK_RED + "Defense round" : null),
-                        Constants.title_timings_important);
-                UiUtils.playSound(player, Sound.ENDERDRAGON_HIT);
+                        isDefenseRound() ? ChatColor.DARK_RED + "Defense round" : null,
+                        isDefenseRound() ? Constants.title_timings_long : Constants.title_timings_short);
+                UiUtils.playSound(player, isDefenseRound() ? Sound.ENDERDRAGON_GROWL : Sound.ENDERDRAGON_HIT);
             }
+            team.applyFriendlyEffects();
         }
 
         // Reset world
@@ -217,7 +218,12 @@ public class GameStatePlaying implements GameState {
     private void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         Optional<GameTeamMember> member = teamManager.getMember(player);
-        if (!member.isPresent() || !member.get().isAlive) return;
+        if (!member.isPresent()) return;
+        if (!member.get().isAlive) {
+            event.setCancelled(true);
+            return;
+        }
+
         if (event.getClickedBlock() == null || event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         if (event.getClickedBlock().getType() == Material.CHEST) {
@@ -227,7 +233,7 @@ public class GameStatePlaying implements GameState {
                 player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
                 event.setCancelled(true);
             }
-        }
+        }  // TODO: Jukeboxes
     }
 
     @EventHandler

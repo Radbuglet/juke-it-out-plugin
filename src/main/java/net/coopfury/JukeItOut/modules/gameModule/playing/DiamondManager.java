@@ -9,7 +9,6 @@ import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
@@ -128,7 +127,7 @@ public class DiamondManager {
         for (GameTeamMember member: teamManager.getMembers()) {
             if (member.isAlive) {
                 Player player = member.getPlayer();
-                UiUtils.playTitle(player, ChatColor.LIGHT_PURPLE + "Diamond Spawned", Constants.title_timings_important);
+                UiUtils.playTitle(player, ChatColor.LIGHT_PURPLE + "Diamond Spawned", Constants.title_timings_short);
                 UiUtils.playSound(player, Sound.LEVEL_UP);
             }
         }

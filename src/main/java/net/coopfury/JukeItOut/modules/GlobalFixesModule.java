@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 public class GlobalFixesModule extends PluginModule {
@@ -32,6 +33,14 @@ public class GlobalFixesModule extends PluginModule {
     private void onCraftConfirm(CraftItemEvent event) {
         HumanEntity clicker = event.getWhoClicked();
         if (!(clicker instanceof Player) || shouldDenyMapMakePrivilege((Player) clicker)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void onInteract(PlayerInteractEvent event) {
+        if (shouldDenyMapMakePrivilege(event.getPlayer()) &&
+                event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.DRAGON_EGG) {
             event.setCancelled(true);
         }
     }
