@@ -21,7 +21,7 @@ import java.util.Optional;
  * There can only be one GameState at a time and any shared behavior is handled programmatically by this class. This
  * avoids the messy declarative systems necessary when trying to combine, group and/or nest multiple states.
  */
-public class GameModule extends PluginModule {
+public class GameModule implements PluginModule {
     public GameState currentState;
 
     public void setGameState(GameState newState) {
@@ -33,7 +33,7 @@ public class GameModule extends PluginModule {
 
     // Run loop handlers
     @Override
-    protected void onEnable(Plugin pluginInstance) {
+    public void onEnable(Plugin pluginInstance) {
         // Bind run loop
         new BukkitRunnable() {
             @Override
@@ -61,7 +61,7 @@ public class GameModule extends PluginModule {
     }
 
     @Override
-    protected void onDisable(Plugin pluginInstance) {
+    public void onDisable(Plugin pluginInstance) {
         if (currentState != null)
             currentState.onPluginDisable();
     }

@@ -6,7 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.logging.Logger;
 
-public class ConfigLoadingModule extends PluginModule {
+public class ConfigLoadingModule implements PluginModule {
     public ConfigRoot root;
 
     private Logger getLogger() {
@@ -29,12 +29,12 @@ public class ConfigLoadingModule extends PluginModule {
     }
 
     @Override
-    protected void onEnable(Plugin pluginInstance) {
+    public void onEnable(Plugin pluginInstance) {
         reloadConfig();
     }
 
     @Override
-    protected void onDisable(Plugin pluginInstance) {
+    public void onDisable(Plugin pluginInstance) {
         saveConfig();
     }
 }

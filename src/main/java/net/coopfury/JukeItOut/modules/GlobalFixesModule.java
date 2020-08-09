@@ -14,7 +14,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
 
-public class GlobalFixesModule extends PluginModule {
+public class GlobalFixesModule implements PluginModule {
     public static boolean shouldDenyMapMakePrivilege(Player player) {
         return player.getGameMode() != GameMode.CREATIVE || !player.hasPermission(Constants.permission_map_making);
     }

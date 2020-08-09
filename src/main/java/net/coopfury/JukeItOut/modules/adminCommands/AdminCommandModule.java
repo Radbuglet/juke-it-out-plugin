@@ -6,10 +6,9 @@ import net.coopfury.JukeItOut.Constants;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 
-public class AdminCommandModule extends PluginModule {
+public class AdminCommandModule implements PluginModule {
     @Override
-    protected void onEnable(Plugin pluginInstance) {
-        super.onEnable(pluginInstance);
+    public void onEnable(Plugin pluginInstance) {
         registerCommand(pluginInstance, Constants.command_fly_speed, new CommandFlySpeed());
         registerCommand(pluginInstance, Constants.command_conf_man, new CommandConfMan());
     }
