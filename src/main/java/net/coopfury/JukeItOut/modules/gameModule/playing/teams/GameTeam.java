@@ -27,10 +27,30 @@ public class GameTeam {
     }
 
     private static class EffectType {
-        public int currentLevel;
+        /**
+         * The current level of the effect.
+         * -1 means that the effect has never been bought.
+         */
+        public int currentLevel = -1;
+
+        /**
+         * The type of the potion effect.
+         */
         public final PotionEffectType effectType;
+
+        /**
+         * The potency of this effect if the effect hasn't been bought.
+         */
         public final int defaultLevel;
+
+        /**
+         * The icon that displays in the jukebox (lore will be added)
+         */
         public final ItemStack icon;
+
+        /**
+         * The different upgradable versions of the effect.
+         */
         public final EffectLevel[] levels;
 
         public EffectType(ItemStack icon, PotionEffectType effectType, int defaultLevel, EffectLevel[] levels) {
@@ -46,14 +66,15 @@ public class GameTeam {
     }
 
     private final EffectType[] friendlyTypes = new EffectType[]{
-            new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, 1, new EffectLevel[]{
-                    new EffectLevel(2, -1, 1),
-                    new EffectLevel(3, -1, 1),
-                    new EffectLevel(4, -1, 1)
+            new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, -1, new EffectLevel[]{
+                    new EffectLevel(0, -1, 1),
+                    new EffectLevel(1, -1, 1),
+                    new EffectLevel(2, -1, 1)
             })
     };
+
     private final EffectType[] offensiveTypes = new EffectType[]{
-            new EffectType(new ItemStack(Material.POISONOUS_POTATO), PotionEffectType.POISON, 0, new EffectLevel[]{
+            new EffectType(new ItemStack(Material.POISONOUS_POTATO), PotionEffectType.POISON, -1, new EffectLevel[]{
                     new EffectLevel(1, 5, 1),
                     new EffectLevel(2, 10, 1),
                     new EffectLevel(3, 15, 2)

@@ -16,6 +16,7 @@ import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
 import org.bukkit.*;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -112,6 +113,10 @@ public class GameStatePlaying implements GameState {
 
         for (Item item: world.get().getEntitiesByClass(Item.class)) {
             item.remove();
+        }
+
+        for (EnderPearl pearl: world.get().getEntitiesByClass(EnderPearl.class)) {
+            pearl.remove();
         }
 
         if (resetBlocks) {

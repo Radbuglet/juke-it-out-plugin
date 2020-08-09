@@ -24,6 +24,11 @@ public final class PlayerUtils {
         player.closeInventory();
     }
 
+    /**
+     * Sets the exact level of specific potion effect on the player.
+     * This effect will last forever.
+     * The level of the effect starts at zero, not one. If the value is negative, nothing will be applied.
+     */
     public static void setEffectLevel(Player player, PotionEffectType type, int level) {
         player.removePotionEffect(type);
         if (level >= 0)
