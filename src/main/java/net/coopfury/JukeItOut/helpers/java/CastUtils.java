@@ -1,7 +1,6 @@
 package net.coopfury.JukeItOut.helpers.java;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public final class CastUtils {
     @SuppressWarnings("unchecked")  // The cast is checked here but IntelliJ doesn't recognize it.

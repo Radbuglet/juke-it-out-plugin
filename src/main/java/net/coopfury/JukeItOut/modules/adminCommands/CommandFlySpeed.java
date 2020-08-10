@@ -1,6 +1,5 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
-import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.helpers.spigot.AbstractPlayerCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

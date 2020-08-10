@@ -1,6 +1,7 @@
 package net.coopfury.JukeItOut.helpers.spigot;
 
 import net.coopfury.JukeItOut.Plugin;
+import net.minecraft.server.v1_8_R3.ChatMessage;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
 import net.minecraft.server.v1_8_R3.PlayerConnection;
@@ -28,8 +29,7 @@ public final class UiUtils {
     }
 
     public static IChatBaseComponent toNewChatFormat(String oldFormat) {
-        // FIXME: Someone could break this by adding `"`s and escape sequences!!!
-        return IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + oldFormat + "\"}");
+        return new ChatMessage(oldFormat);
     }
 
     public static void playTitle(Player player, String titleText, String subtitleText, TitleTimings timings) {

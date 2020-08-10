@@ -1,8 +1,8 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
+import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.PluginModule;
-import net.coopfury.JukeItOut.Constants;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 

@@ -1,7 +1,7 @@
 package net.coopfury.JukeItOut.modules;
 
-import net.coopfury.JukeItOut.PluginModule;
 import net.coopfury.JukeItOut.Constants;
+import net.coopfury.JukeItOut.PluginModule;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
