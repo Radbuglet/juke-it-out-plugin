@@ -17,8 +17,16 @@ public final class ConfigUtils {
         return Optional.ofNullable(section.getString(key));
     }
 
+    public static boolean isNumeric(ConfigurationSection section, String key) {
+        return section.isDouble(key) || section.isInt(key);
+    }
+
     public static Optional<Integer> readInteger(ConfigurationSection section, String key) {
         return readGeneric(key, section::getInt, section::isInt);
+    }
+
+    public static Optional<Double> readNumeric(ConfigurationSection section, String key) {
+        return isNumeric(section, key) ? Optional.of(section.getDouble(key)) : Optional.empty();
     }
 
     public static ConfigurationSection readOrMakeSection(ConfigurationSection section, String key) {
@@ -54,9 +62,5 @@ public final class ConfigUtils {
         // Construct location
         return Optional.of(new Location(world, section.getDouble("x"), section.getDouble("y"), section.getDouble("z"),
                 (float) section.getDouble("yaw"), (float) section.getDouble("pitch")));
-    }
-
-    public static boolean isNumeric(ConfigurationSection section, String key) {
-        return section.isDouble(key) || section.isInt(key);
     }
 }

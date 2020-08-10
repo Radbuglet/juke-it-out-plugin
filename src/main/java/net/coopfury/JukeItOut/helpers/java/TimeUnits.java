@@ -10,7 +10,7 @@ public enum TimeUnits {
         this.unitMultiplier = unitMultiplier;
     }
 
-    public long encode(int val) {
+    public long encode(long val) {
         return val * unitMultiplier;
     }
 
