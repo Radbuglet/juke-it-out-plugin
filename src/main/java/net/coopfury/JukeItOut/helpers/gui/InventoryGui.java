@@ -37,10 +37,10 @@ public class InventoryGui {
         setItem(slot, itemStack, event -> event.setCancelled(true));
     }
 
-    public int computeSlot(int row, int column) {
-        assert row >= 0 && row < 9;
-        assert column >= 0 && column < inventory.getSize() / 9;
-        return row * 9 + column;
+    public int computeSlot(int horizontal, int vertical) {
+        assert horizontal >= 0 && horizontal < 9;
+        assert vertical >= 0 && vertical < inventory.getSize() / 9;
+        return horizontal + vertical * 9;
     }
 
     public int getSize() {

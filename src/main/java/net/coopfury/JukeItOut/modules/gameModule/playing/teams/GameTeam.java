@@ -6,14 +6,18 @@ import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
-import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class GameTeam {
     // Jukebox effect declaration
@@ -92,19 +96,43 @@ public class GameTeam {
 
     public GameTeam(ConfigTeam configTeam) {
         this.configTeam = configTeam;
-        // TODO: Register inventoryGui to delegator
+
+        // Make GUI background
         jukeboxUi = new InventoryGui("Jukebox", 4);
-        jukeboxUi.setItem(jukeboxUi.computeSlot(1, 0), new ItemBuilder(Material.STAINED_GLASS_PANE)
+        jukeboxUi.setItem(jukeboxUi.computeSlot(0, 1), new ItemBuilder(Material.STAINED_GLASS_PANE)
             .setName(ChatColor.GREEN + "Team Effects")
             .setDyeColor(DyeColor.LIME)
             .addLoreLine(ChatColor.GOLD + "Team effects apply throughout the map to your team.")
             .toItemStack());
 
-        jukeboxUi.setItem(jukeboxUi.computeSlot(2, 0), new ItemBuilder(Material.STAINED_GLASS_PANE)
+        jukeboxUi.setItem(jukeboxUi.computeSlot(0, 2), new ItemBuilder(Material.STAINED_GLASS_PANE)
                 .setName(ChatColor.RED + "Offensive Effects")
                 .setDyeColor(DyeColor.RED)
                 .addLoreLine(ChatColor.GOLD + "Offensive effects apply to enemy team members that are in range.")
                 .toItemStack());
+
+        for (int row = 0; row < 9; row++) {
+            ItemStack discStack = new ItemBuilder(new Material[]{
+                    Material.RECORD_3,
+                    Material.RECORD_4,
+                    Material.RECORD_5,
+                    Material.RECORD_6,
+                    Material.RECORD_7,
+                    Material.RECORD_8,
+                    Material.RECORD_9,
+                    Material.RECORD_10,
+                    Material.RECORD_11
+            }[row]).setName(" ").toItemStack();
+
+            jukeboxUi.setItem(jukeboxUi.computeSlot(row, 0), discStack);
+            jukeboxUi.setItem(jukeboxUi.computeSlot(row, 3), discStack.clone());
+
+            // Make GUI options
+            // TODO
+
+            // Register GUI
+            // TODO
+        }
     }
 
     public GameTeamMember addMember(TeamManager teamManager, UUID playerUuid) {

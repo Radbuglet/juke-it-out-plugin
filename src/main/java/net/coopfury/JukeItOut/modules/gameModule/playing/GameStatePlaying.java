@@ -204,7 +204,7 @@ public class GameStatePlaying implements GameState {
         // Announce the sad news (happens here so the spectator flare doesn't get added to the message)
         for (GameTeamMember otherMember: teamManager.getMembers()) {
             Player otherPlayer = otherMember.getPlayer();
-            otherPlayer.sendMessage(teamManager.formatPlayerName(player) + ChatColor.GRAY + " died.");  // TODO: Include death cause
+            otherPlayer.sendMessage(teamManager.formatPlayerName(player) + ChatColor.GRAY + " died.");
             UiUtils.playSound(otherPlayer, Sound.BLAZE_DEATH);
         }
 
@@ -272,6 +272,7 @@ public class GameStatePlaying implements GameState {
 
         // Handle normal logic (only does anything for jukebox)
         if (clickedBlock.getType() == Material.JUKEBOX) {
+            event.setCancelled(true);
             owningTeam.openJukebox(player);  // openJukebox() plays the sound for us.
         }
     }
