@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class InventoryGui {
     public interface ClickHandler {
-        default void handle(InventoryClickEvent event) {}
+        void handle(InventoryClickEvent event);
     }
 
     final Inventory inventory;
@@ -21,16 +21,20 @@ public class InventoryGui {
         inventory = Bukkit.createInventory(null, columns * 9, name);
     }
 
-    public void setItem(int slot, ItemStack itemStack) {
+    public void setItemRaw(int slot, ItemStack itemStack) {
         ItemStack previousStack = inventory.getItem(slot);
         if (previousStack != null) guiItems.remove(previousStack);
         inventory.setItem(slot, itemStack);
     }
 
     public void setItem(int slot, ItemStack itemStack, ClickHandler handler) {
-        setItem(slot, itemStack);
+        setItemRaw(slot, itemStack);
         if (itemStack != null)
             guiItems.put(itemStack, handler);
+    }
+
+    public void setItem(int slot, ItemStack itemStack) {
+        setItem(slot, itemStack, event -> event.setCancelled(true));
     }
 
     public int computeSlot(int row, int column) {

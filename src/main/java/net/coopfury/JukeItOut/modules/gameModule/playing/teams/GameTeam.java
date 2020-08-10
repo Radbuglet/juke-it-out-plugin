@@ -92,6 +92,7 @@ public class GameTeam {
 
     public GameTeam(ConfigTeam configTeam) {
         this.configTeam = configTeam;
+        // TODO: Register inventoryGui to delegator
         jukeboxUi = new InventoryGui("Jukebox", 4);
         jukeboxUi.setItem(jukeboxUi.computeSlot(1, 0), new ItemBuilder(Material.STAINED_GLASS_PANE)
             .setName(ChatColor.GREEN + "Team Effects")
@@ -102,7 +103,7 @@ public class GameTeam {
         jukeboxUi.setItem(jukeboxUi.computeSlot(2, 0), new ItemBuilder(Material.STAINED_GLASS_PANE)
                 .setName(ChatColor.RED + "Offensive Effects")
                 .setDyeColor(DyeColor.RED)
-                .addLoreLine(ChatColor.GOLD + "Team effects apply throughout the map to your team.")
+                .addLoreLine(ChatColor.GOLD + "Offensive effects apply to enemy team members that are in range.")
                 .toItemStack());
     }
 

@@ -14,6 +14,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -43,18 +44,19 @@ public class GameModule implements PluginModule {
             }
         }.runTaskTimer(pluginInstance, 0, 0);
 
-        // Setup initial game state  TODO: Temp
+        // Setup initial game state
         ConfigLoadingModule configLoadingModule = Plugin.getModule(ConfigLoadingModule.class);
         GameStatePlaying state = new GameStatePlaying();
+
+        Iterator<? extends Player> playerPool = Bukkit.getOnlinePlayers().iterator();
         for (Optional<ConfigTeam> teamConfig : configLoadingModule.root.getTeams().values()) {
+            if (!playerPool.hasNext()) break;
             if (!teamConfig.isPresent() || !teamConfig.get().isValid()) {
                 pluginInstance.getLogger().warning("Team is invalid!");
                 continue;
             }
             GameTeam team = state.makeTeam(teamConfig.get());
-            for (Player player: Bukkit.getOnlinePlayers()) {
-                state.addPlayerToTeam(team, player);
-            }
+            state.addPlayerToTeam(team, playerPool.next());
         }
         setGameState(state);
         state.startRound();

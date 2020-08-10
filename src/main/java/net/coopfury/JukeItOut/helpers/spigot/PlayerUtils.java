@@ -19,7 +19,7 @@ public final class PlayerUtils {
         player.setLastDamageCause(null);
         player.setVelocity(new Vector(0, 0, 0));
         resetPlayerEffects(player);
-        player.getInventory().clear();
+        player.getInventory().clear();  // TODO: Clear armor slots correctly.
         player.setItemOnCursor(null);
         player.closeInventory();
     }

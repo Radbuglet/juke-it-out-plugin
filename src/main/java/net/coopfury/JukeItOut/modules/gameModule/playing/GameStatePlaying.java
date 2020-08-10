@@ -16,6 +16,7 @@ import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -221,6 +222,7 @@ public class GameStatePlaying implements GameState {
 
     @EventHandler
     private void onInteract(PlayerInteractEvent event) {
+        // Check if player is affected
         Player player = event.getPlayer();
         Optional<GameTeamMember> member = teamManager.getMember(player);
         if (!member.isPresent()) return;
@@ -229,16 +231,49 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (event.getClickedBlock() == null || event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        Block clickedBlock = event.getClickedBlock();
+        if (clickedBlock == null || event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
-        if (event.getClickedBlock().getType() == Material.CHEST) {
-            Optional<Location> teamChestLocation = member.get().team.configTeam.getChestLocation();
-            if (!isDefenseRound() && (!teamChestLocation.isPresent() || !event.getClickedBlock().equals(teamChestLocation.get().getBlock()))) {
-                player.sendMessage(ChatColor.RED + "You can only open your team's chest on non-defense rounds.");
-                player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
-                event.setCancelled(true);
+        // Find owner
+        GameTeam owningTeam = null;
+        for (GameTeam team: teamManager.getTeams()) {
+            Optional<Location> teamLocation;
+            switch (clickedBlock.getType()) {
+                case CHEST:
+                    teamLocation = team.configTeam.getChestLocation();
+                    break;
+                case JUKEBOX:
+                    teamLocation = team.configTeam.getJukeboxLocation();
+                    break;
+                default:
+                    return;  // Never mind, the clicked block isn't a chest or a jukebox. Sorry for wasting your time, iterator.
             }
-        }  // TODO: Jukeboxes
+
+            if (teamLocation.isPresent() && teamLocation.get().getBlock().equals(clickedBlock)) {
+                owningTeam = team;
+                break;
+            }
+        }
+
+        if (owningTeam == null) {
+            player.sendMessage(ChatColor.RED + "You can't open the diamond reserves of empty teams.");
+            player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
+            event.setCancelled(true);
+            return;
+        }
+
+        // Check defense round
+        if (!isDefenseRound() && owningTeam != member.get().team) {
+            player.sendMessage(ChatColor.RED + "You can only open your team's diamond reserves on non-defense rounds.");
+            player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
+            event.setCancelled(true);
+            return;
+        }
+
+        // Handle normal logic (only does anything for jukebox)
+        if (clickedBlock.getType() == Material.JUKEBOX) {
+            owningTeam.openJukebox(player);  // openJukebox() plays the sound for us.
+        }
     }
 
     @EventHandler
