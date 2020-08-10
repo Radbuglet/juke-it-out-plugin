@@ -1,12 +1,15 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing.teams;
 
+import net.coopfury.JukeItOut.helpers.gui.InventoryGui;
+import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
+import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
@@ -81,12 +84,26 @@ public class GameTeam {
             })
     };
 
+    private final InventoryGui jukeboxUi;
+
     // Team management
     public final ConfigTeam configTeam;
     public final List<GameTeamMember> members = new ArrayList<>();
 
     public GameTeam(ConfigTeam configTeam) {
         this.configTeam = configTeam;
+        jukeboxUi = new InventoryGui("Jukebox", 4);
+        jukeboxUi.setItem(jukeboxUi.computeSlot(1, 0), new ItemBuilder(Material.STAINED_GLASS_PANE)
+            .setName(ChatColor.GREEN + "Team Effects")
+            .setDyeColor(DyeColor.LIME)
+            .addLoreLine(ChatColor.GOLD + "Team effects apply throughout the map to your team.")
+            .toItemStack());
+
+        jukeboxUi.setItem(jukeboxUi.computeSlot(2, 0), new ItemBuilder(Material.STAINED_GLASS_PANE)
+                .setName(ChatColor.RED + "Offensive Effects")
+                .setDyeColor(DyeColor.RED)
+                .addLoreLine(ChatColor.GOLD + "Team effects apply throughout the map to your team.")
+                .toItemStack());
     }
 
     public GameTeamMember addMember(TeamManager teamManager, UUID playerUuid) {
@@ -118,5 +135,10 @@ public class GameTeam {
 
     void reapplyOffensiveEffects() {
         // TODO
+    }
+
+    public void openJukebox(Player player) {
+        UiUtils.playSound(player, Sound.CHEST_OPEN);
+        jukeboxUi.open(player);
     }
 }
