@@ -1,5 +1,6 @@
 package net.coopfury.JukeItOut;
 
+import net.coopfury.JukeItOut.helpers.gui.InventoryActionDelegator;
 import net.coopfury.JukeItOut.helpers.java.CastUtils;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.adminCommands.AdminCommandModule;
@@ -17,17 +18,21 @@ public class Plugin extends JavaPlugin {
     // Properties
     public static Plugin instance;
     public static Chat vaultChat;
+    public static InventoryActionDelegator inventoryGui;
     private final List<PluginModule> registeredModulesList = new ArrayList<>();
     private final Map<Class<?>, PluginModule> registeredModulesMap = new HashMap<>();
 
     // Module loading
     @Override
     public void onEnable() {
-        // Setup core
         getLogger().info("JukeItOut enabling...");
         instance = this;
+
+        // Setup external services
         vaultChat = Optional.ofNullable(getServer().getServicesManager().getRegistration(Chat.class))
             .map(RegisteredServiceProvider::getProvider).orElseThrow(() -> new IllegalStateException("Failed to get Vault chat service!"));
+        inventoryGui = new InventoryActionDelegator();
+        inventoryGui.bind(this);
 
         // Register and initialize modules
         PluginManager pluginManager = getServer().getPluginManager();

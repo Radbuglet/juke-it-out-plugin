@@ -1,5 +1,6 @@
 package net.coopfury.JukeItOut.modules.gameModule.playing.teams;
 
+import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.gui.InventoryGui;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
@@ -131,7 +132,7 @@ public class GameTeam {
             // TODO
 
             // Register GUI
-            // TODO
+            Plugin.inventoryGui.registerMenu(jukeboxUi);
         }
     }
 
@@ -169,5 +170,9 @@ public class GameTeam {
     public void openJukebox(Player player) {
         UiUtils.playSound(player, Sound.CHEST_OPEN);
         jukeboxUi.open(player);
+    }
+
+    public void onGameStateChange() {
+        Plugin.inventoryGui.unregisterMenu(jukeboxUi);
     }
 }

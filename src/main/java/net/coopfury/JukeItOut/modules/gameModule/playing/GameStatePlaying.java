@@ -321,4 +321,11 @@ public class GameStatePlaying implements GameState {
     public void onPluginDisable() {
         resetWorld(true);
     }
+
+    @Override
+    public void onStateDisable() {
+        for (GameTeam team: teamManager.getTeams()) {
+            team.onGameStateChange();
+        }
+    }
 }

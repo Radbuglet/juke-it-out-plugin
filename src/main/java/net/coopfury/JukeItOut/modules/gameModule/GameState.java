@@ -5,4 +5,5 @@ import org.bukkit.event.Listener;
 public interface GameState extends Listener {
     void onTick();
     void onPluginDisable();
+    void onStateDisable();
 }

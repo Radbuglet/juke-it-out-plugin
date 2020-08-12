@@ -54,6 +54,7 @@ public class InventoryGui {
     public void handleClickEvent(InventoryClickEvent event) {
         assert event.getClickedInventory() == inventory;
         ClickHandler handler = guiItems.get(event.getCurrentItem());
-        handler.handle(event);
+        if (handler != null)
+            handler.handle(event);
     }
 }

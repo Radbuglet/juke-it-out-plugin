@@ -26,8 +26,10 @@ public class GameModule implements PluginModule {
     public GameState currentState;
 
     public void setGameState(GameState newState) {
-        if (currentState != null)
+        if (currentState != null) {
+            currentState.onStateDisable();
             HandlerList.unregisterAll(currentState);
+        }
         currentState = newState;
         Plugin.instance.bindListener(newState);
     }
