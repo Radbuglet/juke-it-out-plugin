@@ -33,6 +33,10 @@ public class TeamManager {
         return Optional.ofNullable(memberMap.get(player.getUniqueId()));
     }
 
+    public Optional<GameTeam> getMemberTeam(Player player) {
+        return getMember(player).map(member -> member.team);
+    }
+
     public Collection<GameTeam> getTeams() {
         return teams;
     }

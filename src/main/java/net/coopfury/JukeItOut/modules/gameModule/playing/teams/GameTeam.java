@@ -13,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,75 +20,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class GameTeam {
-    // Jukebox effect declaration
-    private static class EffectLevel {
-        public final int effectLevel;
-        public final int range;
-        public final int cost;
-
-        private EffectLevel(int effectLevel, int range, int cost) {
-            this.effectLevel = effectLevel;
-            this.range = range;
-            this.cost = cost;
-        }
-    }
-
-    private static class EffectType {
-        /**
-         * The current level of the effect.
-         * -1 means that the effect has never been bought.
-         */
-        public int currentLevel = -1;
-
-        /**
-         * The type of the potion effect.
-         */
-        public final PotionEffectType effectType;
-
-        /**
-         * The potency of this effect if the effect hasn't been bought.
-         */
-        public final int defaultLevel;
-
-        /**
-         * The icon that displays in the jukebox (lore will be added)
-         */
-        public final ItemStack icon;
-
-        /**
-         * The different upgradable versions of the effect.
-         */
-        public final EffectLevel[] levels;
-
-        public EffectType(ItemStack icon, PotionEffectType effectType, int defaultLevel, EffectLevel[] levels) {
-            this.icon = icon;
-            this.defaultLevel = defaultLevel;
-            this.effectType = effectType;
-            this.levels = levels;
-        }
-
-        public int getCurrentPotency() {
-            return currentLevel < 0 ? defaultLevel : levels[currentLevel].effectLevel;
-        }
-    }
-
-    private final EffectType[] friendlyTypes = new EffectType[]{
-            new EffectType(new ItemStack(Material.RABBIT_FOOT), PotionEffectType.SPEED, -1, new EffectLevel[]{
-                    new EffectLevel(0, -1, 1),
-                    new EffectLevel(1, -1, 1),
-                    new EffectLevel(2, -1, 1)
-            })
-    };
-
-    private final EffectType[] offensiveTypes = new EffectType[]{
-            new EffectType(new ItemStack(Material.POISONOUS_POTATO), PotionEffectType.POISON, -1, new EffectLevel[]{
-                    new EffectLevel(1, 5, 1),
-                    new EffectLevel(2, 10, 1),
-                    new EffectLevel(3, 15, 2)
-            })
-    };
-
+    // Jukebox
     private final InventoryGui jukeboxUi;
+    private final JukeboxEffects jukeboxEffects = new JukeboxEffects();
 
     // Team management
     public final ConfigTeam configTeam;
@@ -127,13 +60,32 @@ public class GameTeam {
 
             jukeboxUi.setItem(jukeboxUi.computeSlot(row, 0), discStack);
             jukeboxUi.setItem(jukeboxUi.computeSlot(row, 3), discStack.clone());
-
-            // Make GUI options
-            // TODO
-
-            // Register GUI
-            Plugin.inventoryGui.registerMenu(jukeboxUi);
         }
+
+        // Make GUI options
+        populateEffectRow(jukeboxEffects.friendlyTypes, 1);
+        populateEffectRow(jukeboxEffects.offensiveTypes, 2);
+
+        // Register GUI
+        Plugin.inventoryGui.registerMenu(jukeboxUi);
+    }
+
+    private void populateEffectRow(JukeboxEffects.EffectType[] types, int column) {
+        // TODO
+        /*int slotOffset = column * 9;
+        int row = 1;
+        for (JukeboxEffects.EffectType type: types) {
+            jukeboxUi.setItem(slotOffset + row, type.renderItem(), event -> {
+                event.setCancelled(true);
+
+                // Update
+
+                // Rerender
+                ItemStack stack = event.getCurrentItem();
+                type.renderItem(stack);
+            });
+            row++;
+        }*/
     }
 
     public GameTeamMember addMember(TeamManager teamManager, UUID playerUuid) {
@@ -157,13 +109,13 @@ public class GameTeam {
         for (GameTeamMember member: members) {
             Player player = member.getPlayer();
             PlayerUtils.resetPlayerEffects(player);
-            for (EffectType type: friendlyTypes) {
+            for (JukeboxEffects.EffectType type: jukeboxEffects.friendlyTypes) {
                 PlayerUtils.setEffectLevel(player, type.effectType, type.getCurrentPotency());
             }
         }
     }
 
-    void reapplyOffensiveEffects() {
+    void applyOffensiveEffects() {
         // TODO
     }
 

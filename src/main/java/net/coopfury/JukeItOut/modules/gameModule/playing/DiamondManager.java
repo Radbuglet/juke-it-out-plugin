@@ -146,12 +146,12 @@ public class DiamondManager {
         for (GameTeam team: teamManager.getTeams()) {
             team.configTeam.getChestLocation().map(Location::getBlock).ifPresent(block -> {
                 if (!(block.getState() instanceof Chest)) return;
-                Chest chest = (Chest) block.getState();
-                for (ItemStack stack: chest.getBlockInventory()) {
+                Inventory chestInventory = ((Chest) block.getState()).getBlockInventory();
+                for (ItemStack stack: chestInventory) {
                     if (!isSpawnedDiamond(stack)) continue;
-                    ItemMeta meta = stack.getItemMeta();
-                    meta.setDisplayName(null);
-                    stack.setItemMeta(meta);
+                    chestInventory.remove(stack);
+                    chestInventory.addItem(new ItemStack(Material.DIAMOND, stack.getAmount()));
+                    return;  // There's only ever one stolen diamond, so we can get away with early returns and stack removal.
                 }
             });
         }

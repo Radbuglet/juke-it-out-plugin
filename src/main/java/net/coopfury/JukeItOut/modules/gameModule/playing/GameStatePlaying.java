@@ -21,9 +21,11 @@ import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -191,7 +193,18 @@ public class GameStatePlaying implements GameState {
     }
 
     @EventHandler
-    private void onDamage(EntityDamageEvent event) {  // TODO: Check friendly fire
+    private void onDamageByOther(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player && event.getDamager() instanceof Player))
+            return;
+
+        if (teamManager.getMemberTeam((Player) event.getEntity()).orElse(null) == teamManager.getMemberTeam((Player) event.getDamager()).orElse(null)) {
+            event.setCancelled(true);
+            event.getDamager().sendMessage(ChatColor.RED + "Do not try to damage your teammates!");
+        }
+    }
+
+    @EventHandler(priority=EventPriority.HIGHEST)  // TODO: This should happen after WorldGuard damage cancel
+    private void onDamage(EntityDamageEvent event) {
         // Check that the damage was done to a playing player.
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
