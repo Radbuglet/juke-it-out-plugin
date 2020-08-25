@@ -15,26 +15,22 @@ public class InventoryGui {
     }
 
     final Inventory inventory;
-    private final Map<ItemStack, ClickHandler> guiItems = new HashMap<>();
+    private final Map<Integer, ClickHandler> guiItems = new HashMap<>();
 
     public InventoryGui(String name, int columns) {
         inventory = Bukkit.createInventory(null, columns * 9, name);
     }
 
-    public void setItemRaw(int slot, ItemStack itemStack) {
+    public void setItem(int slot, ItemStack itemStack) {
         ItemStack previousStack = inventory.getItem(slot);
-        if (previousStack != null) guiItems.remove(previousStack);
+        if (previousStack != null) guiItems.remove(slot);
         inventory.setItem(slot, itemStack);
     }
 
     public void setItem(int slot, ItemStack itemStack, ClickHandler handler) {
-        setItemRaw(slot, itemStack);
+        setItem(slot, itemStack);
         if (itemStack != null)
-            guiItems.put(itemStack, handler);
-    }
-
-    public void setItem(int slot, ItemStack itemStack) {
-        setItem(slot, itemStack, event -> event.setCancelled(true));
+            guiItems.put(slot, handler);
     }
 
     public int computeSlot(int horizontal, int vertical) {
@@ -53,7 +49,8 @@ public class InventoryGui {
 
     public void handleClickEvent(InventoryClickEvent event) {
         assert event.getClickedInventory() == inventory;
-        ClickHandler handler = guiItems.get(event.getCurrentItem());
+        ClickHandler handler = guiItems.get(event.getSlot());
+        event.setCancelled(true);
         if (handler != null)
             handler.handle(event);
     }

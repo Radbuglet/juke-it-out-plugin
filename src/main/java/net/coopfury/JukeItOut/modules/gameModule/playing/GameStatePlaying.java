@@ -197,7 +197,10 @@ public class GameStatePlaying implements GameState {
         if (!(event.getEntity() instanceof Player && event.getDamager() instanceof Player))
             return;
 
-        if (teamManager.getMemberTeam((Player) event.getEntity()).orElse(null) == teamManager.getMemberTeam((Player) event.getDamager()).orElse(null)) {
+        Optional<GameTeam> damagerTeam = teamManager.getMemberTeam((Player) event.getDamager());
+        if (!damagerTeam.isPresent()) return;
+
+        if (teamManager.getMemberTeam((Player) event.getEntity()).orElse(null) == damagerTeam.orElse(null)) {
             event.setCancelled(true);
             event.getDamager().sendMessage(ChatColor.RED + "Do not try to damage your teammates!");
         }
