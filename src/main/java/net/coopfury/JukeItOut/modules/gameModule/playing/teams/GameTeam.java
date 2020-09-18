@@ -77,32 +77,46 @@ public class GameTeam {
                 event.setCancelled(true);
                 HumanEntity player = event.getWhoClicked();
 
+                // Perform the relevant action
                 if (event.getAction() == InventoryAction.PICKUP_ALL) {
                     // Check purchase
                     Optional<JukeboxEffects.EffectLevel> nextLevel = type.getNextLevel();
                     if (!nextLevel.isPresent()) {
                         player.sendMessage(ChatColor.RED + "That effect is already at its max level!");
-                        player.closeInventory();
                         return;
                     }
 
                     if (!InventoryUtils.tryPurchase(player.getInventory(), stack -> stack.getType() == Material.DIAMOND, nextLevel.get().cost))
                     {
                         player.sendMessage(ChatColor.RED + "Not enough diamonds to purchase that upgrade!");
-                        player.closeInventory();
                         return;
                     }
 
-                    // Rerender
-                    ItemStack stack = event.getCurrentItem();
+                    // Increase the level
                     type.currentLevel++;
-                    type.renderIcon(stack);
-
-                    // Reapply team effects (enemy effects will be applied every tick anyways)
-                    if (isFriendly) applyFriendlyEffects();
                 } else if (event.getAction() == InventoryAction.PICKUP_HALF) {
-                    // TODO: Down-grade
+                    Optional<JukeboxEffects.EffectLevel> currentLevel = type.getCurrentLevel();
+
+                    if (!currentLevel.isPresent()) {
+                        player.sendMessage(ChatColor.RED + "That effect is already at its lowest level!");
+                        return;
+                    }
+
+                    player.getInventory().addItem(new ItemStack(Material.DIAMOND, currentLevel.get().cost));
+
+                    // Decrease the level
+                    type.currentLevel--;
+                } else {
+                    return;
                 }
+
+                // Reapply team effects (enemy effects will be applied every tick anyways)
+                if (isFriendly) applyFriendlyEffects();
+
+                // Rerender icon
+                ItemStack stack = event.getCurrentItem();
+                type.renderIcon(stack);
+                UiUtils.playSound((Player) player, Sound.NOTE_PLING);  // Player is the only subclass of HumanEntity.
             });
             row++;
         }

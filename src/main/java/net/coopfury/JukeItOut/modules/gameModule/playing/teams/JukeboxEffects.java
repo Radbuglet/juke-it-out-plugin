@@ -54,12 +54,12 @@ class JukeboxEffects {
             this.levels = levels;
         }
 
-        public int getCurrentPotency() {
-            return currentLevel < 0 ? -1 : levels[currentLevel].effectLevel;
+        public Optional<EffectLevel> getCurrentLevel() {
+            return currentLevel > -1 ? Optional.of(levels[currentLevel]) : Optional.empty();
         }
 
-        public Optional<EffectLevel> getPrevLevel() {
-            return currentLevel - 1 > 0 ? Optional.of(levels[currentLevel - 1]) : Optional.empty();
+        public int getCurrentPotency() {
+            return getCurrentLevel().map(level -> level.effectLevel).orElse(-1);
         }
 
         public Optional<EffectLevel> getNextLevel() {
@@ -68,11 +68,37 @@ class JukeboxEffects {
 
         public ItemStack renderIcon(ItemStack target) {
             ItemMeta meta = target.getItemMeta();
-            meta.setDisplayName(icon.getItemMeta().getDisplayName() + " - Level " + (currentLevel + 1));
+            meta.setDisplayName(icon.getItemMeta().getDisplayName());
 
+            // Generate lore
             List<String> lore = new ArrayList<>();
-            // TODO
 
+            // Add level heading
+            lore.add(ChatColor.GRAY + "Current level: " + ChatColor.WHITE + (currentLevel + 1));
+            {
+                Optional<EffectLevel> nextLevel = getNextLevel();
+                if (nextLevel.isPresent()) {
+                    lore.add(ChatColor.GRAY + "Cost to upgrade: " + ChatColor.WHITE + nextLevel.get().cost);
+                } else {
+                    lore.add(ChatColor.RED + "Effect is at its max level!");
+                }
+            }
+            lore.add("");
+
+            // Add levels
+            {
+                int levelNumber = 0;
+                for (EffectLevel level : levels) {
+                    lore.add((currentLevel == levelNumber ? ChatColor.AQUA + "> " : ChatColor.BLUE + "  ") +
+                            (levelNumber + 1) + ChatColor.GRAY + " - " + ChatColor.GOLD + "Cost: " + ChatColor.YELLOW + level.cost);
+                    levelNumber++;
+                }
+            }
+            lore.add("");
+            lore.add(ChatColor.GREEN + "Left click to upgrade");
+            lore.add(ChatColor.GREEN + "Right click to downgrade");
+
+            // Set lore
             meta.setLore(lore);
             target.setItemMeta(meta);
             return target;

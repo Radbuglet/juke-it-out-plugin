@@ -64,7 +64,7 @@ public class GameStatePlaying implements GameState {
     public void startRound() {
         // Reset game state
         roundId++;
-        roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 30);
+        roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 45);
         spawnedDiamond = false;
         diamondManager.resetRoundState(teamManager);
 
@@ -225,6 +225,7 @@ public class GameStatePlaying implements GameState {
         }
 
         // Set the player's state
+        UiUtils.playTitle(player, ChatColor.BOLD.toString() + ChatColor.RED + "You died", Constants.title_timings_long);
         handleDeathCommon(member.get(), player);
         event.setDamage(0);
     }
@@ -316,7 +317,7 @@ public class GameStatePlaying implements GameState {
             startRound();
             return;
         }
-        if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 15) {
+        if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 25) {
             spawnedDiamond = true;
             diamondManager.spawnDiamond(teamManager);
         }
