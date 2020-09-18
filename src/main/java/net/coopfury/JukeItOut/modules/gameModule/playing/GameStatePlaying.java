@@ -332,6 +332,11 @@ public class GameStatePlaying implements GameState {
             player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);
             player.setLevel((int) (timeUntilRoundEnd / 1000) + 1);
         }
+
+        // Apply offensive effects
+        for (GameTeam team: teamManager.getTeams()) {
+            team.applyOffensiveEffects(teamManager);
+        }
     }
 
     @Override

@@ -4,14 +4,12 @@ import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.gui.InventoryGui;
 import net.coopfury.JukeItOut.helpers.spigot.*;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +71,7 @@ public class GameTeam {
         int slotOffset = column * 9;
         int row = 1;
         for (JukeboxEffects.EffectType type: types) {
-            jukeboxUi.setItem(slotOffset + row, type.renderIcon(), event -> {
+            jukeboxUi.setItem(slotOffset + row, type.renderIcon(!isFriendly), event -> {
                 event.setCancelled(true);
                 HumanEntity player = event.getWhoClicked();
 
@@ -115,7 +113,7 @@ public class GameTeam {
 
                 // Rerender icon
                 ItemStack stack = event.getCurrentItem();
-                type.renderIcon(stack);
+                type.renderIcon(stack, !isFriendly);
                 UiUtils.playSound((Player) player, Sound.NOTE_PLING);  // Player is the only subclass of HumanEntity.
             });
             row++;
@@ -149,8 +147,28 @@ public class GameTeam {
         }
     }
 
-    void applyOffensiveEffects() {
-        // TODO
+    public void applyOffensiveEffects(TeamManager manager) {
+        Optional<Location> jukeboxLocation = configTeam.getJukeboxLocation();
+        if (!jukeboxLocation.isPresent()) return;
+
+        for (GameTeam otherTeam : manager.getTeams()) {
+            if (otherTeam == this) continue;
+
+            for (GameTeamMember member : otherTeam.members) {
+                if (!member.isAlive) continue;
+
+                Player player = member.getPlayer();
+                double distance = player.getLocation().distance(jukeboxLocation.get());
+
+                for (JukeboxEffects.EffectType type : jukeboxEffects.offensiveTypes) {
+                    Optional<JukeboxEffects.EffectLevel> level = type.getCurrentLevel();
+                    if (!level.isPresent()) continue;
+                    if (distance <= level.get().range) {
+                        player.addPotionEffect(new PotionEffect(type.effectType, 20 * 2, level.get().effectLevel));
+                    }
+                }
+            }
+        }
     }
 
     public void openJukebox(Player player) {
