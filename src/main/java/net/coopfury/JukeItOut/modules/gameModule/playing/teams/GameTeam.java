@@ -67,6 +67,22 @@ public class GameTeam {
         Plugin.inventoryGui.registerMenu(jukeboxUi);
     }
 
+    public void addMember(TeamManager teamManager, UUID playerUuid) {
+        GameTeamMember member = new GameTeamMember(this, playerUuid);
+        teamManager.internalRegisterMember(member);
+        members.add(member);
+    }
+
+    void internalUnregisterMember(GameTeamMember member) {
+        members.remove(member);
+    }
+
+    // Text formatting
+    public Optional<ChatColor> getTextColor() {
+        return configTeam.getWoolColor().flatMap(SpigotEnumConverters.DYE_TO_CHAT::parse);
+    }
+
+    // Jukebox UI
     private void populateEffectRow(JukeboxEffects.EffectType[] types, int column, boolean isFriendly) {
         int slotOffset = column * 9;
         int row = 1;
@@ -120,23 +136,12 @@ public class GameTeam {
         }
     }
 
-    public GameTeamMember addMember(TeamManager teamManager, UUID playerUuid) {
-        GameTeamMember member = new GameTeamMember(this, playerUuid);
-        teamManager.internalRegisterMember(member);
-        members.add(member);
-        return member;
+    public void openJukebox(Player player) {
+        UiUtils.playSound(player, Sound.CHEST_OPEN);
+        jukeboxUi.open(player);
     }
 
-    void internalUnregisterMember(GameTeamMember member) {
-        members.remove(member);
-    }
-
-    // Text formatting
-    public Optional<ChatColor> getTextColor() {
-        return configTeam.getWoolColor().flatMap(SpigotEnumConverters.DYE_TO_CHAT::parse);
-    }
-
-    // Jukebox management
+    // Jukebox effects
     public void applyFriendlyEffects() {
         for (GameTeamMember member: members) {
             Player player = member.getPlayer();
@@ -169,11 +174,6 @@ public class GameTeam {
                 }
             }
         }
-    }
-
-    public void openJukebox(Player player) {
-        UiUtils.playSound(player, Sound.CHEST_OPEN);
-        jukeboxUi.open(player);
     }
 
     public void onGameStateChange() {

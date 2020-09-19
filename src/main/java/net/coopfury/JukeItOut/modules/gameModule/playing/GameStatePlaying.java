@@ -37,6 +37,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Handles game exclusive events and serves as an entry point to game mechanics.
+ */
 public class GameStatePlaying implements GameState {
     private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
     private final DiamondManager diamondManager = new DiamondManager();
@@ -130,6 +133,10 @@ public class GameStatePlaying implements GameState {
         }
     }
 
+    private boolean isDefenseRound() {
+        return roundId % 5 == 0;
+    }
+
     // Block handling
     @EventHandler
     private void onPlaceBlock(BlockPlaceEvent event) {
@@ -149,7 +156,7 @@ public class GameStatePlaying implements GameState {
 
         dirtyBlocks.add(new BlockPointer(event.getBlock()));
     }
-    
+
     @EventHandler
     private void onBreakBlock(BlockBreakEvent event) {
         BlockPointer blockPointer = new BlockPointer(event.getBlock());
@@ -173,7 +180,7 @@ public class GameStatePlaying implements GameState {
         dirtyBlocks.remove(blockPointer);
     }
 
-    // Other fun events that make me cry
+    // Damage and death events
     private void handleDeathCommon(GameTeamMember member, Player player) {
         World world = player.getWorld();
         world.playEffect(player.getLocation(), Effect.VILLAGER_THUNDERCLOUD, 0);
@@ -186,10 +193,6 @@ public class GameStatePlaying implements GameState {
         member.isAlive = false;
         if (member == diamondManager.getDiamondHolder())
             diamondManager.changeDiamondHolder(teamManager, null);
-    }
-
-    private boolean isDefenseRound() {
-        return roundId % 5 == 0;
     }
 
     @EventHandler
@@ -230,6 +233,7 @@ public class GameStatePlaying implements GameState {
         event.setDamage(0);
     }
 
+    // Gameplay events
     @EventHandler
     private void onPickup(PlayerPickupItemEvent event) {
         Optional<GameTeamMember> member = teamManager.getMember(event.getPlayer());
@@ -294,6 +298,7 @@ public class GameStatePlaying implements GameState {
         }
     }
 
+    // Join and leave events
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
@@ -305,7 +310,7 @@ public class GameStatePlaying implements GameState {
         }
         teamManager.removeMember(member.get());
 
-        // Ensure that players are still in the game
+        // End the game if everyone left
         // TODO
     }
 
