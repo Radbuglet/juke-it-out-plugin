@@ -54,11 +54,4 @@ public class ConfigTeam {
     public void setChestLocation(Location location) {
         ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "chest"), location);
     }
-
-    public boolean isValid() {
-        return getName().isPresent() && getWoolColor().isPresent()
-                && getSpawnLocation().isPresent()
-                && getJukeboxLocation().isPresent()
-                && getChestLocation().isPresent();
-    }
 }

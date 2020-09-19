@@ -53,8 +53,8 @@ public class GameModule implements PluginModule {
         Iterator<? extends Player> playerPool = Bukkit.getOnlinePlayers().iterator();
         for (Optional<ConfigTeam> teamConfig : configLoadingModule.root.getTeams().values()) {
             if (!playerPool.hasNext()) break;
-            if (!teamConfig.isPresent() || !teamConfig.get().isValid()) {
-                pluginInstance.getLogger().warning("Team is invalid!");
+            if (!teamConfig.isPresent()) {
+                pluginInstance.getLogger().warning("Failed to get a team config instance from that team!");
                 continue;
             }
             GameTeam team = state.makeTeam(teamConfig.get());

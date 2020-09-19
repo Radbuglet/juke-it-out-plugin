@@ -176,7 +176,9 @@ public class GameTeam {
         }
     }
 
-    public void onGameStateChange() {
+    // Resetting
+    public void onStateDisable() {
+        // Clean up resources
         Plugin.inventoryGui.unregisterMenu(jukeboxUi);
     }
 }

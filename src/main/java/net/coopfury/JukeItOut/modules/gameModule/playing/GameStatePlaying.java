@@ -17,6 +17,8 @@ import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -117,6 +119,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
+        // Remove entities
         for (Item item: world.get().getEntitiesByClass(Item.class)) {
             item.remove();
         }
@@ -125,11 +128,23 @@ public class GameStatePlaying implements GameState {
             pearl.remove();
         }
 
+        // Reset world (only happens on game reset)
         if (resetBlocks) {
+            // Remove dirty blocks
             for (BlockPointer blockPointer : dirtyBlocks) {
                 blockPointer.getBlock(world.get()).ifPresent(block -> block.setType(Material.AIR));
             }
             dirtyBlocks.clear();
+
+            // Clear chests
+            for (GameTeam team: teamManager.getTeams()) {
+                Optional<Location> chestLocation = team.configTeam.getChestLocation();
+                if (!chestLocation.isPresent()) continue;
+                BlockState blockState = chestLocation.get().getBlock().getState();
+                if (!(blockState instanceof Chest)) continue;
+                ((Chest) blockState).getBlockInventory().clear();
+                blockState.update(true);
+            }
         }
     }
 
@@ -351,8 +366,9 @@ public class GameStatePlaying implements GameState {
 
     @Override
     public void onStateDisable() {
+        resetWorld(true);
         for (GameTeam team: teamManager.getTeams()) {
-            team.onGameStateChange();
+            team.onStateDisable();
         }
     }
 }
