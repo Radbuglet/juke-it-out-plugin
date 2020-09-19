@@ -55,8 +55,12 @@ class JukeboxEffects {
             this.levels = levels;
         }
 
+        public boolean hasBeenUpgraded() {
+            return currentLevel > -1;
+        }
+
         public Optional<EffectLevel> getCurrentLevel() {
-            return currentLevel > -1 ? Optional.of(levels[currentLevel]) : Optional.empty();
+            return hasBeenUpgraded() ? Optional.of(levels[currentLevel]) : Optional.empty();
         }
 
         public int getCurrentPotency() {
@@ -107,8 +111,15 @@ class JukeboxEffects {
             lore.add(ChatColor.GREEN + "Left click to upgrade");
             lore.add(ChatColor.GREEN + "Right click to downgrade");
 
-            // Set lore
             meta.setLore(lore);
+
+            // Update metadata
+            if (hasBeenUpgraded()) {
+                meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            } else {
+                meta.removeEnchant(Enchantment.DURABILITY);
+            }
             target.setItemMeta(meta);
             return target;
         }
