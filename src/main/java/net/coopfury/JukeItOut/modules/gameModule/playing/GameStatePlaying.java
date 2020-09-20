@@ -4,10 +4,7 @@ import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
-import net.coopfury.JukeItOut.helpers.spigot.BlockPointer;
-import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
-import net.coopfury.JukeItOut.helpers.spigot.PlayerUtils;
-import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
+import net.coopfury.JukeItOut.helpers.spigot.*;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
@@ -19,6 +16,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -34,6 +32,11 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -41,20 +44,64 @@ import java.util.Set;
 
 /**
  * Handles game exclusive events and serves as an entry point to game mechanics.
+ * TODO: After the beta releases, please make these files smaller for the sanity of us all!
  */
 public class GameStatePlaying implements GameState {
-    private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
+    // Services
     private final DiamondManager diamondManager = new DiamondManager();
     private final TeamManager teamManager = new TeamManager();
+
+    // Resources
+    private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
+    private final Objective guiObjective;
+    private final BukkitTask taskPollTimer;
 
     // Round state
     private int roundId;
     private long roundEndTime;
     private boolean spawnedDiamond;
 
+    // Lifecycle
+    public GameStatePlaying() {
+        // Make GUI
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        guiObjective = ScoreboardUtils.obtainObjective(scoreboard, "cf_diamonds_gui", ChatColor.GOLD + "Team Diamonds", "dummy");
+        guiObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        // Create the poll timer
+        taskPollTimer = new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (GameTeam team: teamManager.getTeams()) {
+                    team.updateDiamondScoreGui();
+                }
+            }
+        }.runTaskTimer(Plugin.instance, 0, 5);
+    }
+
+    private void cleanupResources() {
+        guiObjective.unregister();
+        taskPollTimer.cancel();
+    }
+
+    @Override
+    public void onPluginDisable() {
+        resetWorld(true);
+        cleanupResources();
+    }
+
+    @Override
+    public void onStateDisable() {
+        resetWorld(true);
+        cleanupResources();
+        for (GameTeam team: teamManager.getTeams()) {
+            team.onStateDisable();
+        }
+    }
+
     // Public team management API
     public GameTeam makeTeam(ConfigTeam teamConfig) {
-        return teamManager.makeTeam(teamConfig);
+        return teamManager.makeTeam(guiObjective, teamConfig);
     }
 
     public void addPlayerToTeam(GameTeam team, Player player) {
@@ -94,7 +141,8 @@ public class GameStatePlaying implements GameState {
                         .setLeatherArmorColor(color.getColor()).toItemStack());
 
                 inventory.addItem(new ItemStack(Material.STONE_SWORD));
-                inventory.addItem(new ItemStack(Material.IRON_PICKAXE));
+                inventory.addItem(new ItemBuilder(Material.IRON_PICKAXE)
+                        .addEnchant(Enchantment.DIG_SPEED, 2).toItemStack());
                 inventory.addItem(new ItemStack(Material.GOLDEN_APPLE, 4));
                 inventory.addItem(new ItemBuilder(Material.STAINED_CLAY, 64).setDyeColor(color).toItemStack());
 
@@ -150,6 +198,36 @@ public class GameStatePlaying implements GameState {
 
     private boolean isDefenseRound() {
         return roundId % 5 == 0;
+    }
+
+    // Tick handling
+    @Override
+    public void onTick() {
+        long timeUntilRoundEnd = TimestampUtils.getTimeUntil(roundEndTime, TimeUnits.Ms);
+        if (timeUntilRoundEnd < 0) {
+            startRound();
+            return;
+        }
+        if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 25) {
+            spawnedDiamond = true;
+            diamondManager.spawnDiamond(teamManager);
+        }
+
+        // Poll for chase target change (fallback for the other events)
+        diamondManager.pollDiamondHolderChange(teamManager);
+
+        // Display round time
+        for (GameTeamMember member: teamManager.getMembers()) {
+            Player player = member.getPlayer();  // Runnables are executed before any player disconnection handling occurs
+
+            player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);
+            player.setLevel((int) (timeUntilRoundEnd / 1000) + 1);
+        }
+
+        // Apply offensive effects
+        for (GameTeam team: teamManager.getTeams()) {
+            team.applyOffensiveEffects(teamManager);
+        }
     }
 
     // Block handling
@@ -327,48 +405,5 @@ public class GameStatePlaying implements GameState {
 
         // End the game if everyone left
         // TODO
-    }
-
-    // Lifecycle
-    @Override
-    public void onTick() {
-        long timeUntilRoundEnd = TimestampUtils.getTimeUntil(roundEndTime, TimeUnits.Ms);
-        if (timeUntilRoundEnd < 0) {
-            startRound();
-            return;
-        }
-        if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 25) {
-            spawnedDiamond = true;
-            diamondManager.spawnDiamond(teamManager);
-        }
-
-        // Poll for chase target change (fallback for the other events)
-        diamondManager.pollDiamondHolderChange(teamManager);
-
-        // Display round time
-        for (GameTeamMember member: teamManager.getMembers()) {
-            Player player = member.getPlayer();  // Runnables are executed before any player disconnection handling occurs
-
-            player.setExp((float) (timeUntilRoundEnd % 1000) / 1000);
-            player.setLevel((int) (timeUntilRoundEnd / 1000) + 1);
-        }
-
-        // Apply offensive effects
-        for (GameTeam team: teamManager.getTeams()) {
-            team.applyOffensiveEffects(teamManager);
-        }
-    }
-
-    @Override
-    public void onPluginDisable() {
-        resetWorld(true);
-    }
-
-    @Override
-    public void onStateDisable() {
-        resetWorld(true);
-        for (GameTeam team: teamManager.getTeams()) {
-            team.onStateDisable();
-        }
     }
 }

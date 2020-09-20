@@ -4,6 +4,7 @@ import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Objective;
 
 import java.util.*;
 
@@ -13,8 +14,8 @@ public class TeamManager {
     private final Map<UUID, GameTeamMember> memberMap = new HashMap<>();
 
     // Registration
-    public GameTeam makeTeam(ConfigTeam teamConfig) {
-        GameTeam team = new GameTeam(teamConfig);
+    public GameTeam makeTeam(Objective guiObjective, ConfigTeam teamConfig) {
+        GameTeam team = new GameTeam(guiObjective, teamConfig);
         teams.add(team);
         return team;
     }

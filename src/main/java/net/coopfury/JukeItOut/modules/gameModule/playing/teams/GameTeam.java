@@ -2,14 +2,19 @@ package net.coopfury.JukeItOut.modules.gameModule.playing.teams;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.gui.InventoryGui;
+import net.coopfury.JukeItOut.helpers.java.CastUtils;
 import net.coopfury.JukeItOut.helpers.spigot.*;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import org.bukkit.*;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,16 +22,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class GameTeam {
-    // Jukebox
+    // Team management
+    public final List<GameTeamMember> members = new ArrayList<>();
+    public final ConfigTeam configTeam;
+
+    // Game
     private final InventoryGui jukeboxUi;
     private final JukeboxEffects jukeboxEffects = new JukeboxEffects();
+    public final Score guiScoreEntry;
 
-    // Team management
-    public final ConfigTeam configTeam;
-    public final List<GameTeamMember> members = new ArrayList<>();
-
-    public GameTeam(ConfigTeam configTeam) {
+    public GameTeam(Objective guiObjective, ConfigTeam configTeam) {
         this.configTeam = configTeam;
+        guiScoreEntry = guiObjective.getScore(getTextColor().orElse(ChatColor.GRAY) + configTeam.getName().orElse("Unnamed").toUpperCase());
+        guiScoreEntry.setScore(0);
 
         // Make GUI background
         jukeboxUi = new InventoryGui("Jukebox", 4);
@@ -77,9 +85,15 @@ public class GameTeam {
         members.remove(member);
     }
 
-    // Text formatting
+    // Config aliases
     public Optional<ChatColor> getTextColor() {
         return configTeam.getWoolColor().flatMap(SpigotEnumConverters.DYE_TO_CHAT::parse);
+    }
+
+    public Optional<Chest> getTeamChest() {
+        return configTeam.getChestLocation()  // Get location
+                .map(Location::getBlock)  // Get block
+                .flatMap(block -> CastUtils.dynamicCast(Chest.class, block.getState()));  // Get state
     }
 
     // Jukebox UI
@@ -107,7 +121,7 @@ public class GameTeam {
                     }
 
                     // Increase the level
-                    type.currentLevel++;
+                    jukeboxEffects.upgradeEffect(type);
                 } else if (event.getAction() == InventoryAction.PICKUP_HALF) {
                     Optional<JukeboxEffects.EffectLevel> currentLevel = type.getCurrentLevel();
 
@@ -119,7 +133,7 @@ public class GameTeam {
                     player.getInventory().addItem(new ItemStack(Material.DIAMOND, currentLevel.get().cost));
 
                     // Decrease the level
-                    type.currentLevel--;
+                    jukeboxEffects.downgradeEffect(type);
                 } else {
                     return;
                 }
@@ -131,6 +145,7 @@ public class GameTeam {
                 ItemStack stack = event.getCurrentItem();
                 type.renderIcon(stack, !isFriendly);
                 UiUtils.playSound((Player) player, Sound.NOTE_PLING);  // Player is the only subclass of HumanEntity.
+                updateDiamondScoreGui();
             });
             row++;
         }
@@ -147,7 +162,7 @@ public class GameTeam {
             Player player = member.getPlayer();
             PlayerUtils.resetPlayerEffects(player);
             for (JukeboxEffects.EffectType type: jukeboxEffects.friendlyTypes) {
-                PlayerUtils.setEffectLevel(player, type.effectType, type.getCurrentPotency());
+                PlayerUtils.setEffectLevel(player, type.effectType, type.getCurrentLevel().map(level -> level.effectLevel).orElse(-1));
             }
         }
     }
@@ -176,9 +191,28 @@ public class GameTeam {
         }
     }
 
+    // Diamond counting
+    public int getTeamDiamondCount() {
+        int accumulator = jukeboxEffects.getStoredDiamonds();
+
+        Optional<Chest> teamChest = getTeamChest();
+        if (teamChest.isPresent()) {
+            Inventory inventory = teamChest.get().getBlockInventory();
+            for (ItemStack stack: inventory.getContents()) {
+                if (stack == null || stack.getType() != Material.DIAMOND) continue;
+                accumulator += stack.getAmount();
+            }
+        }
+
+        return accumulator;
+    }
+
+    public void updateDiamondScoreGui() {
+        guiScoreEntry.setScore(getTeamDiamondCount());
+    }
+
     // Resetting
     public void onStateDisable() {
-        // Clean up resources
         Plugin.inventoryGui.unregisterMenu(jukeboxUi);
     }
 }

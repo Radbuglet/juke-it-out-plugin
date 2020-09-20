@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 class JukeboxEffects {
-    // TODO: To avoid wasting memory, all final fields should be stored in a static "config" class.
+    // Config types
     public static class EffectLevel {
         public final int effectLevel;
         public final int range;
@@ -28,26 +28,10 @@ class JukeboxEffects {
     }
 
     public static class EffectType {
-        /**
-         * The current level of the effect.
-         * -1 means that the effect has never been bought.
-         */
-        public int currentLevel = -1;
-
-        /**
-         * The type of the potion effect.
-         */
-        public final PotionEffectType effectType;
-
-        /**
-         * The icon that displays in the jukebox (lore will be added)
-         */
-        private final ItemStack icon;
-
-        /**
-         * The different upgradable versions of the effect.
-         */
+        private int currentLevel = -1;
         private final EffectLevel[] levels;
+        public final PotionEffectType effectType;
+        private final ItemStack icon;
 
         public EffectType(ItemStack icon, PotionEffectType effectType, EffectLevel[] levels) {
             this.icon = icon;
@@ -61,10 +45,6 @@ class JukeboxEffects {
 
         public Optional<EffectLevel> getCurrentLevel() {
             return hasBeenUpgraded() ? Optional.of(levels[currentLevel]) : Optional.empty();
-        }
-
-        public int getCurrentPotency() {
-            return getCurrentLevel().map(level -> level.effectLevel).orElse(-1);
         }
 
         public Optional<EffectLevel> getNextLevel() {
@@ -129,10 +109,13 @@ class JukeboxEffects {
         }
     }
 
+    // Properties
+    private int storedDiamonds;
+
     public final EffectType[] friendlyTypes = new EffectType[]{
             new EffectType(new ItemBuilder(Material.RABBIT_FOOT).setName(ChatColor.GREEN + "Speed").toItemStack(), PotionEffectType.SPEED, new EffectLevel[]{
                     new EffectLevel(0, -1, 1),
-                    new EffectLevel(1, -1, 2),
+                    new EffectLevel(1, -1, 1),
                     new EffectLevel(2, -1, 2)
             }),
             new EffectType(new ItemBuilder(Material.SPECKLED_MELON).setName(ChatColor.RED + "Regeneration").toItemStack(), PotionEffectType.REGENERATION, new EffectLevel[]{
@@ -145,8 +128,7 @@ class JukeboxEffects {
                     new EffectLevel(2, -1, 3)
             }),
             new EffectType(new ItemBuilder(Material.NETHER_STAR).setName(ChatColor.DARK_RED + "Strength").toItemStack(), PotionEffectType.INCREASE_DAMAGE, new EffectLevel[]{
-                    new EffectLevel(0, -1, 5),
-                    new EffectLevel(1, -1, 6)
+                    new EffectLevel(0, -1, 8)
             }),
             new EffectType(new ItemBuilder(Material.GOLD_PICKAXE).setName(ChatColor.GOLD + "Haste").toItemStack(), PotionEffectType.FAST_DIGGING, new EffectLevel[]{
                     new EffectLevel(0, -1, 1),
@@ -157,8 +139,8 @@ class JukeboxEffects {
 
     public final EffectType[] offensiveTypes = new EffectType[]{
             new EffectType(new ItemBuilder(Material.POISONOUS_POTATO).setName(ChatColor.DARK_GREEN + "Poison").toItemStack(), PotionEffectType.POISON, new EffectLevel[]{
-                    new EffectLevel(0, 5, 1),
-                    new EffectLevel(1, 10, 1),
+                    new EffectLevel(0, 5, 2),
+                    new EffectLevel(1, 10, 2),
                     new EffectLevel(2, 15, 2)
             }),
             new EffectType(new ItemBuilder(Material.BROWN_MUSHROOM).setName(ChatColor.DARK_BLUE + "Slowness").toItemStack(), PotionEffectType.SLOW, new EffectLevel[]{
@@ -175,4 +157,18 @@ class JukeboxEffects {
                     new EffectLevel(0, 10, 6)
             })
     };
+
+    public void upgradeEffect(EffectType type) {
+        storedDiamonds += type.getNextLevel().orElseThrow(NullPointerException::new).cost;
+        type.currentLevel++;
+    }
+
+    public void downgradeEffect(EffectType type) {
+        storedDiamonds -= type.getCurrentLevel().orElseThrow(NullPointerException::new).cost;
+        type.currentLevel--;
+    }
+
+    public int getStoredDiamonds() {
+        return storedDiamonds;
+    }
 }
