@@ -8,13 +8,18 @@ import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -50,16 +55,26 @@ public class GameModule implements PluginModule {
         ConfigLoadingModule configLoadingModule = Plugin.getModule(ConfigLoadingModule.class);
         GameStatePlaying state = new GameStatePlaying();
 
-        Iterator<? extends Player> playerPool = Bukkit.getOnlinePlayers().iterator();
-        for (Optional<ConfigTeam> teamConfig : configLoadingModule.root.getTeams().values()) {
-            if (!playerPool.hasNext()) break;
-            if (!teamConfig.isPresent()) {
-                pluginInstance.getLogger().warning("Failed to get a team config instance from that team!");
-                continue;
-            }
-            GameTeam team = state.makeTeam(teamConfig.get());
-            state.addPlayerToTeam(team, playerPool.next());
+        // Make teams
+        List<GameTeam> teams = new ArrayList<>();
+        for (Optional<ConfigTeam> configTeam : configLoadingModule.root.getTeams().values()) {
+            configTeam.ifPresent(team -> teams.add(state.makeTeam(team)));
         }
+
+        // Add players to teams
+        Iterator<GameTeam> teamPool = null;
+        for (Player player: Bukkit.getOnlinePlayers()) {
+            // Make team pool cycle
+            if (teamPool == null || !teamPool.hasNext()) {
+                teamPool = teams.iterator();
+            }
+            if (!teamPool.hasNext()) return;
+
+            // Add player to the next team
+            state.addPlayerToTeam(teamPool.next(), player);
+        }
+
+        // Start the game
         setGameState(state);
         state.startRound();
     }
@@ -70,10 +85,28 @@ public class GameModule implements PluginModule {
             currentState.onPluginDisable();
     }
 
-    // Global game event handlers (mostly delegates to current state after some mandatory preliminary handling)
-    // In the future, I would probably implement a event handler tree to allow game states to opt into certain event handling singletons
-    // and configure them to the needs of that handler.
-    // TODO: Join and leave events
+    // Global game event handlers
+    private void appendPlayerName(StringBuilder builder, Player player, String displayName) {
+        builder.append(UiUtils.formatVaultName(player, displayName));  // Chat color
+    }
+
+    private String formatActionMessage(Player player, String action) {
+        StringBuilder builder = new StringBuilder();
+        appendPlayerName(builder, player, player.getDisplayName());
+        builder.append(" ").append(ChatColor.GRAY).append(action);
+        return builder.toString();
+    }
+
+    @EventHandler
+    private void onJoin(PlayerJoinEvent event) {
+        event.setJoinMessage(formatActionMessage(event.getPlayer(), "joined the game."));
+    }
+
+    @EventHandler
+    private void onLeave(PlayerQuitEvent event) {
+        event.setQuitMessage(formatActionMessage(event.getPlayer(), "left the game."));
+    }
+
     @EventHandler
     private void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
@@ -82,10 +115,10 @@ public class GameModule implements PluginModule {
             ((GameStatePlaying) currentState).formatAppendTeamName(formatBuilder, player);
         }
 
-        formatBuilder.append(UiUtils.formatVaultName(player, "%s")).append(": ")  // Name
-            .append(UiUtils.translateConfigText(Plugin.vaultChat.getPlayerSuffix(player)))  // Chat color
-                .append("%s");  // Message
-
+        appendPlayerName(formatBuilder, event.getPlayer(), "%s");
+        formatBuilder.append(": ")  // Message separator
+                .append(UiUtils.translateConfigText(Plugin.vaultChat.getPlayerSuffix(player)))  // Suffix (chat color)
+                .append("%s"); // Message
         event.setFormat(formatBuilder.toString());
     }
 }

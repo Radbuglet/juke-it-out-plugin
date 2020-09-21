@@ -44,7 +44,6 @@ import java.util.Set;
 
 /**
  * Handles game exclusive events and serves as an entry point to game mechanics.
- * TODO: After the beta releases, please make these files smaller for the sanity of us all!
  */
 public class GameStatePlaying implements GameState {
     // Services
@@ -63,7 +62,7 @@ public class GameStatePlaying implements GameState {
 
     // Lifecycle
     public GameStatePlaying() {
-        // Make GUI
+        // Make scoreboard GUI
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         guiObjective = ScoreboardUtils.obtainObjective(scoreboard, "cf_diamonds_gui", ChatColor.GOLD + "Team Diamonds", "dummy");
         guiObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
