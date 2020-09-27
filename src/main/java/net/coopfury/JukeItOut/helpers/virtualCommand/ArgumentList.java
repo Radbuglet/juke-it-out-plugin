@@ -28,7 +28,7 @@ public class ArgumentList {
 
     public final String commandName;
     private final String[] args;
-    int rootOffset;
+    public int rootOffset;
 
     public ArgumentList(String commandName, String[] args) {
         this.commandName = commandName;

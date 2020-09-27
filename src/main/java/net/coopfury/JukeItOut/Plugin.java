@@ -51,6 +51,7 @@ public class Plugin extends JavaPlugin {
             module.onDisable(this);
         }
         getLogger().info("JukeItOut disabled!");
+        instance = null;
     }
 
     public void bindListener(Listener listener, PluginManager pluginManager) {

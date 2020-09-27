@@ -2,6 +2,7 @@ package net.coopfury.JukeItOut.modules.adminCommands;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
+import net.coopfury.JukeItOut.helpers.config.ConfigEditingUtils;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.helpers.virtualCommand.*;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
@@ -25,8 +26,8 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                         ConfigDictionary<ConfigTeam> map = getConfig().root.getTeams();
 
                         // Generic editing subs
-                        VirtCommandUtils.registerMapEditingSubs(router, map);
-                        VirtCommandUtils.registerMapAdder(router, map, new String[]{"color"}, (sender, name, args, instance) -> {
+                        ConfigEditingUtils.registerMapEditingSubs(router, map);
+                        ConfigEditingUtils.registerMapAdder(router, map, new String[]{"color"}, (sender, name, args, instance) -> {
                             if (!SpigotEnumConverters.DYE_COLOR.isValid(args.getPart(0))) {
                                 sender.sendMessage(message_invalid_team_color);
                                 return false;
@@ -38,7 +39,7 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             return true;
                         });
 
-                        router.registerSub("recolor", VirtCommandUtils.makeMapEditingHandler(map, new String[]{"color"}, (sender, args, entry) -> {
+                        router.registerSub("recolor", ConfigEditingUtils.makeMapEditingHandler(map, new String[]{"color"}, (sender, args, entry) -> {
                             String newColor = args.getPart(0);
                             if (!SpigotEnumConverters.DYE_COLOR.isValid(newColor)) {
                                 sender.sendMessage(message_invalid_team_color);
@@ -49,7 +50,7 @@ class CommandConfMan extends PlayerCommandVirtualForward {
                             return true;
                         }));
 
-                        router.registerSub("set-location", VirtCommandUtils.makeMapEditingHandler(
+                        router.registerSub("set-location", ConfigEditingUtils.makeMapEditingHandler(
                                 map, new String[]{"jukebox|chest"}, ((sender, args, team) -> {  // TODO: Support for enums, make this automatic.
                                     Consumer<Location> setter;
                                     String locationName = args.getPart(0);
@@ -75,6 +76,11 @@ class CommandConfMan extends PlayerCommandVirtualForward {
             .registerSub("set-diamond-spawn", new FixedArgCommand<>(new String[]{}, (sender, args) -> {
                 getConfig().root.setDiamondSpawn(sender.getLocation());
                 sender.sendMessage(ChatColor.GREEN + "Set diamond spawn location!");
+                return true;
+            }))
+            .registerSub("set-lobby-spawn", new FixedArgCommand<>(new String[]{}, (sender, args) -> {  // TODO: This is awful. We *need* to restructure virtual commands!!!
+                getConfig().root.setLobbySpawn(sender.getLocation());
+                sender.sendMessage(ChatColor.GREEN + "Set lobby spawn location!");
                 return true;
             }))
             .registerSub("save", new FixedArgCommand<>(new String[]{}, (sender, args) -> {

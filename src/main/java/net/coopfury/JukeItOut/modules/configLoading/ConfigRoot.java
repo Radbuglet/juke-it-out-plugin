@@ -8,15 +8,6 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.Optional;
 
-/**
- * ConfigRoot and ConfigTeam are wrapper classes around a ConfigurationSection and provide a type safe
- * way to access the underlying config. All modifications are made directly to the section. This has a few key benefits
- * over loading the entire config to RAM:
- * - loading is not destructive
- * - there's only one representation instead of two, saving space
- * - it's easier to implement
- * - unused keys/user metadata don't get discarded
- */
 public class ConfigRoot {
     private final ConfigurationSection section;
 
@@ -34,6 +25,14 @@ public class ConfigRoot {
 
     public Optional<Location> getDiamondSpawn() {
         return ConfigUtils.getLocation(section.getConfigurationSection("diamond_spawn"));
+    }
+
+    public void setLobbySpawn(Location location) {
+        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "lobby"), location);
+    }
+
+    public Optional<Location> getLobbySpawn() {
+        return ConfigUtils.getLocation(section.getConfigurationSection("lobby"));
     }
 
     public Optional<World> getGameWorld() {

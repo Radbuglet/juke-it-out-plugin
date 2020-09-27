@@ -33,7 +33,7 @@ public class GameTeam {
 
     public GameTeam(Objective guiObjective, ConfigTeam configTeam) {
         this.configTeam = configTeam;
-        guiScoreEntry = guiObjective.getScore(getTextColor().orElse(ChatColor.GRAY) + configTeam.getName().orElse("Unnamed").toUpperCase());
+        guiScoreEntry = guiObjective.getScore(getTeamDisplayName());
         guiScoreEntry.setScore(0);
 
         // Make GUI background
@@ -94,6 +94,10 @@ public class GameTeam {
         return configTeam.getChestLocation()  // Get location
                 .map(Location::getBlock)  // Get block
                 .flatMap(block -> CastUtils.dynamicCast(Chest.class, block.getState()));  // Get state
+    }
+
+    public String getTeamDisplayName() {
+        return getTextColor().orElse(ChatColor.GRAY) + configTeam.getName().orElse("Unnamed").toUpperCase();
     }
 
     // Jukebox UI

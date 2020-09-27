@@ -8,7 +8,9 @@ import net.coopfury.JukeItOut.helpers.spigot.*;
 import net.coopfury.JukeItOut.modules.GlobalFixesModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
+import net.coopfury.JukeItOut.modules.gameModule.GameModule;
 import net.coopfury.JukeItOut.modules.gameModule.GameState;
+import net.coopfury.JukeItOut.modules.gameModule.lobby.GameStateLobby;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.GameTeamMember;
 import net.coopfury.JukeItOut.modules.gameModule.playing.teams.TeamManager;
@@ -38,9 +40,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Handles game exclusive events and serves as an entry point to game mechanics.
@@ -113,6 +113,25 @@ public class GameStatePlaying implements GameState {
 
     // Round management
     public void startRound() {
+        if (roundId >= 25) {
+            List<GameTeam> sortedTeams = new ArrayList<>(teamManager.getTeams());
+            sortedTeams.sort((o1, o2) -> o2.getTeamDiamondCount() - o1.getTeamDiamondCount());
+
+            for (Player player: Bukkit.getOnlinePlayers()) {
+                player.sendMessage(ChatColor.GRAY + "=== Game Results ===");
+                for (GameTeam team: sortedTeams) {
+                    int count = team.getTeamDiamondCount();
+                    player.sendMessage(team.getTeamDisplayName() + ": " + count + " diamond" + (count == 1 ? "" : "s") + ".");
+                }
+                player.sendMessage(ChatColor.GRAY + "====================");
+            }
+            Plugin.getModule(GameModule.class).setGameState(new GameStateLobby());
+            for (Player player: Bukkit.getOnlinePlayers()) {
+                UiUtils.playSound(player, Sound.ENDERDRAGON_DEATH);
+            }
+            return;
+        }
+
         // Reset game state
         roundId++;
         roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 45);

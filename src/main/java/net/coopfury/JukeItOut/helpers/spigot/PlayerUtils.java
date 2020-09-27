@@ -1,6 +1,7 @@
 package net.coopfury.JukeItOut.helpers.spigot;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -13,13 +14,15 @@ public final class PlayerUtils {
     }
 
     public static void resetPlayer(Player player) {
-        player.setTotalExperience(0);
+        player.setExp(0);
+        player.setLevel(0);
         player.setHealth(player.getMaxHealth());
         player.setFireTicks(0);
         player.setLastDamageCause(null);
         player.setVelocity(new Vector(0, 0, 0));
         resetPlayerEffects(player);
-        player.getInventory().clear();  // TODO: Clear armor slots correctly.
+        player.getInventory().clear();
+        player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
         player.setItemOnCursor(null);
         player.closeInventory();
     }
