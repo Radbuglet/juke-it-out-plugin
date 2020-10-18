@@ -128,7 +128,7 @@ public class GameStatePlaying implements GameState {
 
                 // Reset character
                 Player player = member.getPlayer();
-                PlayerUtils.resetPlayer(player);
+                PlayerUtils.resetAll(player);
                 player.setGameMode(GameMode.SURVIVAL);
 
                 PlayerInventory inventory = player.getInventory();
@@ -280,7 +280,7 @@ public class GameStatePlaying implements GameState {
             if (stack != null && stack.getType() == Material.DIAMOND)
                 world.dropItem(player.getLocation(), stack.clone());
         }
-        PlayerUtils.resetPlayer(player);
+        PlayerUtils.resetAll(player);
         player.setGameMode(GameMode.SPECTATOR);
         member.isAlive = false;
         if (member == diamondManager.getDiamondHolder())

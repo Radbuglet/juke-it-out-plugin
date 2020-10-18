@@ -22,7 +22,8 @@ import java.util.Map;
  * STOLEN FROM: https://www.spigotmc.org/threads/util-itembuilder-manage-items-easily.48397
  */
 public class ItemBuilder {
-    private ItemStack is;
+    private final ItemStack is;
+
     /**
      * Create a new ItemBuilder from scratch.
      * @param m The material to create the ItemBuilder with.
@@ -30,6 +31,7 @@ public class ItemBuilder {
     public ItemBuilder(Material m){
         this(m, 1);
     }
+
     /**
      * Create a new ItemBuilder over an existing itemstack.
      * @param is The itemstack to create the ItemBuilder over.
@@ -37,6 +39,7 @@ public class ItemBuilder {
     public ItemBuilder(ItemStack is){
         this.is=is;
     }
+
     /**
      * Create a new ItemBuilder from scratch.
      * @param m The material of the item.
@@ -45,6 +48,7 @@ public class ItemBuilder {
     public ItemBuilder(Material m, int amount){
         is= new ItemStack(m, amount);
     }
+
     /**
      * Create a new ItemBuilder from scratch.
      * @param m The material of the item.
@@ -54,6 +58,7 @@ public class ItemBuilder {
     public ItemBuilder(Material m, int amount, byte durability){
         is = new ItemStack(m, amount, durability);
     }
+
     /**
      * Clone the ItemBuilder into a new one.
      * @return The cloned instance.
@@ -61,6 +66,7 @@ public class ItemBuilder {
     public ItemBuilder clone(){
         return new ItemBuilder(is);
     }
+
     /**
      * Change the durability of the item.
      * @param dur The durability to set it to.
@@ -69,6 +75,7 @@ public class ItemBuilder {
         is.setDurability(dur);
         return this;
     }
+
     /**
      * Set the displayname of the item.
      * @param name The name to change it to.
@@ -79,6 +86,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Add an unsafe enchantment.
      * @param ench The enchantment to add.
@@ -88,6 +96,7 @@ public class ItemBuilder {
         is.addUnsafeEnchantment(ench, level);
         return this;
     }
+
     /**
      * Remove a certain enchant from the item.
      * @param ench The enchantment to remove
@@ -96,18 +105,20 @@ public class ItemBuilder {
         is.removeEnchantment(ench);
         return this;
     }
+
     /**
      * Set the skull owner for the item. Works on skulls only.
      * @param owner The name of the skull's owner.
      */
     public ItemBuilder setSkullOwner(String owner){
-        try{
+        try {
             SkullMeta im = (SkullMeta)is.getItemMeta();
             im.setOwner(owner);
             is.setItemMeta(im);
-        }catch(ClassCastException expected){}
+        } catch (ClassCastException ignored) { }
         return this;
     }
+
     /**
      * Add an enchant to the item.
      * @param ench The enchant to add
@@ -119,6 +130,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Add multiple enchants at once.
      * @param enchantments The enchants to add.
@@ -127,13 +139,15 @@ public class ItemBuilder {
         is.addEnchantments(enchantments);
         return this;
     }
+
     /**
      * Sets infinity durability on the item by setting the durability to Short.MAX_VALUE.
      */
-    public ItemBuilder setInfinityDurability(){
+    public ItemBuilder setInfinityDurability() {
         is.setDurability(Short.MAX_VALUE);
         return this;
     }
+
     /**
      * Re-sets the lore.
      * @param lore The lore to set it to.
@@ -144,6 +158,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Re-sets the lore.
      * @param lore The lore to set it to.
@@ -154,9 +169,10 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Remove a lore line.
-     * @param lore The lore to remove.
+     * @param line The lore to remove.
      */
     public ItemBuilder removeLoreLine(String line){
         ItemMeta im = is.getItemMeta();
@@ -167,6 +183,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Remove a lore line.
      * @param index The index of the lore line to remove.
@@ -180,6 +197,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Add a lore line.
      * @param line The lore line to add.
@@ -193,6 +211,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Add a lore line.
      * @param line The lore line to add.
@@ -206,6 +225,7 @@ public class ItemBuilder {
         is.setItemMeta(im);
         return this;
     }
+
     /**
      * Sets the dye color on an item.
      * <b>* Notice that this doesn't check for item type, sets the literal data of the dyecolor as durability.</b>
@@ -216,6 +236,7 @@ public class ItemBuilder {
         this.is.setDurability(color.getData());
         return this;
     }
+
     /**
      * Sets the dye color of a wool item. Works only on wool.
      * @deprecated As of version 1.2 changed to setDyeColor.
@@ -228,18 +249,20 @@ public class ItemBuilder {
         this.is.setDurability(color.getData());
         return this;
     }
+
     /**
      * Sets the armor color of a leather armor piece. Works only on leather armor pieces.
      * @param color The color to set it to.
      */
     public ItemBuilder setLeatherArmorColor(Color color){
-        try{
+        try {
             LeatherArmorMeta im = (LeatherArmorMeta)is.getItemMeta();
             im.setColor(color);
             is.setItemMeta(im);
-        }catch(ClassCastException expected){}
+        } catch(ClassCastException ignored) { }
         return this;
     }
+
     /**
      * Retrieves the itemstack from the ItemBuilder.
      * @return The itemstack created/modified by the ItemBuilder instance.

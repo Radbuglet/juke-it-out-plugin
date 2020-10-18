@@ -44,6 +44,4 @@ public class GlobalFixesModule implements PluginModule {
             event.setCancelled(true);
         }
     }
-
-    // TODO: Disable everything!
 }

@@ -114,7 +114,7 @@ public class GameTeam {
                         return;
                     }
 
-                    if (!InventoryUtils.tryPurchase(player.getInventory(), stack -> stack.getType() == Material.DIAMOND, nextLevel.get().cost))
+                    if (!PlayerUtils.tryPurchase(player.getInventory(), stack -> stack.getType() == Material.DIAMOND, nextLevel.get().cost))
                     {
                         player.sendMessage(ChatColor.RED + "Not enough diamonds to purchase that upgrade!");
                         return;
@@ -160,7 +160,7 @@ public class GameTeam {
     public void applyFriendlyEffects() {
         for (GameTeamMember member: members) {
             Player player = member.getPlayer();
-            PlayerUtils.resetPlayerEffects(player);
+            PlayerUtils.resetEffects(player);
             for (JukeboxEffects.EffectType type: jukeboxEffects.friendlyTypes) {
                 PlayerUtils.setEffectLevel(player, type.effectType, type.getCurrentLevel().map(level -> level.effectLevel).orElse(-1));
             }
