@@ -11,4 +11,12 @@ public final class CastUtils {
             return Optional.empty();
         }
     }
+
+    public static Optional<Double> interpretDouble(Object value) {
+        return value instanceof Number ? Optional.of(((Number) value).doubleValue()) : Optional.empty();
+    }
+
+    public static Optional<Float> interpretFloat(Object value) {
+        return value instanceof Number ? Optional.of(((Number) value).floatValue()) : Optional.empty();
+    }
 }

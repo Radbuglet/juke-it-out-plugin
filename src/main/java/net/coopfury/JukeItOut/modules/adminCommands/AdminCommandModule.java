@@ -1,6 +1,5 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
-import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.PluginModule;
 import org.bukkit.command.CommandExecutor;
@@ -9,7 +8,8 @@ import org.bukkit.command.PluginCommand;
 public class AdminCommandModule implements PluginModule {
     @Override
     public void onEnable(Plugin pluginInstance) {
-        registerCommand(pluginInstance, Constants.command_fly_speed, new CommandFlySpeed());
+        registerCommand(pluginInstance, "fspeed", new CommandFlySpeed());
+        registerCommand(pluginInstance, "confman", new CommandConfMan());
     }
 
     private void registerCommand(Plugin pluginInstance, String commandName, CommandExecutor executor) {

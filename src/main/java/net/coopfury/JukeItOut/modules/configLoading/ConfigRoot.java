@@ -1,7 +1,7 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
 import net.coopfury.JukeItOut.helpers.config.ConfigDictionary;
-import net.coopfury.JukeItOut.helpers.config.ConfigUtils;
+import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,15 +16,15 @@ public class ConfigRoot {
     }
 
     public ConfigDictionary<ConfigTeam> getTeams() {
-        return new ConfigDictionary<>(ConfigUtils.readOrMakeSection(section, "teams"), ConfigTeam::new);
+        return new ConfigDictionary<>(ConfigPrimitives.readOrMakeSection(section, "teams"), ConfigTeam::new);
     }
 
     public void setDiamondSpawn(Location location) {
-        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "diamond_spawn"), location);
+        ConfigPrimitives.setLocation(ConfigPrimitives.readOrMakeSection(section, "diamond_spawn"), location);
     }
 
     public Optional<Location> getDiamondSpawn() {
-        return ConfigUtils.getLocation(section.getConfigurationSection("diamond_spawn"));
+        return ConfigPrimitives.getLocation(section.getConfigurationSection("diamond_spawn"));
     }
 
     public Optional<World> getGameWorld() {

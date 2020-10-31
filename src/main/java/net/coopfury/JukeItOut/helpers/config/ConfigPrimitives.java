@@ -1,32 +1,24 @@
 package net.coopfury.JukeItOut.helpers.config;
 
+import net.coopfury.JukeItOut.helpers.java.CastUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.Optional;
-import java.util.function.Function;
 
-public final class ConfigUtils {
-    public static<T> Optional<T> readGeneric(String key, Function<String, T> getter, Function<String, Boolean> validator) {
-        return validator.apply(key) ? Optional.of(getter.apply(key)) : Optional.empty();
-    }
-
+public final class ConfigPrimitives {
     public static Optional<String> readString(ConfigurationSection section, String key) {
         return Optional.ofNullable(section.getString(key));
     }
 
-    public static boolean isNumeric(ConfigurationSection section, String key) {
-        return section.isDouble(key) || section.isInt(key);
+    public static Optional<Double> readNumericDouble(ConfigurationSection section, String key) {
+        return CastUtils.interpretDouble(section.get(key));
     }
 
-    public static Optional<Integer> readInteger(ConfigurationSection section, String key) {
-        return readGeneric(key, section::getInt, section::isInt);
-    }
-
-    public static Optional<Double> readNumeric(ConfigurationSection section, String key) {
-        return isNumeric(section, key) ? Optional.of(section.getDouble(key)) : Optional.empty();
+    public static Optional<Float> readNumericFloat(ConfigurationSection section, String key) {
+        return CastUtils.interpretFloat(section.get(key));
     }
 
     public static ConfigurationSection readOrMakeSection(ConfigurationSection section, String key) {
@@ -55,12 +47,24 @@ public final class ConfigUtils {
         if (world == null) return Optional.empty();
 
         // Ensure that all numeric fields are present
-        if (!(ConfigUtils.isNumeric(section, "x") && ConfigUtils.isNumeric(section, "y") && ConfigUtils.isNumeric(section, "z") &&
-                ConfigUtils.isNumeric(section, "pitch") && ConfigUtils.isNumeric(section, "yaw")))
-            return Optional.empty();
+        Optional<Double> x = readNumericDouble(section, "x");
+        if (!x.isPresent()) return Optional.empty();
+
+        Optional<Double> y = readNumericDouble(section, "y");
+        if (!y.isPresent()) return Optional.empty();
+
+        Optional<Double> z = readNumericDouble(section, "z");
+        if (!z.isPresent()) return Optional.empty();
+
+        Optional<Float> pitch = readNumericFloat(section, "pitch");
+        if (!pitch.isPresent()) return Optional.empty();
+
+        Optional<Float> yaw = readNumericFloat(section, "yaw");
+
+        //noinspection OptionalIsPresent
+        if (!yaw.isPresent()) return Optional.empty();
 
         // Construct location
-        return Optional.of(new Location(world, section.getDouble("x"), section.getDouble("y"), section.getDouble("z"),
-                (float) section.getDouble("yaw"), (float) section.getDouble("pitch")));
+        return Optional.of(new Location(world, x.get(), y.get(), z.get(), yaw.get(), pitch.get()));
     }
 }

@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut.modules.configLoading;
 
-import net.coopfury.JukeItOut.helpers.config.ConfigUtils;
+import net.coopfury.JukeItOut.helpers.config.ConfigPrimitives;
 import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -16,7 +16,7 @@ public class ConfigTeam {
     }
 
     public Optional<String> getName() {
-        return ConfigUtils.readString(section, "name");
+        return ConfigPrimitives.readString(section, "name");
     }
 
     public void setName(String newName) {
@@ -24,7 +24,7 @@ public class ConfigTeam {
     }
 
     public Optional<DyeColor> getWoolColor() {
-        return ConfigUtils.readString(section, "color").flatMap(SpigotEnumConverters.DYE_COLOR::parse);
+        return ConfigPrimitives.readString(section, "color").flatMap(SpigotEnumConverters.DYE_COLOR::parse);
     }
 
     public void setWoolColor(String id) {
@@ -32,26 +32,26 @@ public class ConfigTeam {
     }
 
     public Optional<Location> getSpawnLocation() {
-        return ConfigUtils.getLocation(section.getConfigurationSection("spawn"));  // getLocation accepts null sections
+        return ConfigPrimitives.getLocation(section.getConfigurationSection("spawn"));  // getLocation accepts null sections
     }
 
     public void setSpawnLocation(Location location) {
-        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "spawn"), location);
+        ConfigPrimitives.setLocation(ConfigPrimitives.readOrMakeSection(section, "spawn"), location);
     }
 
     public Optional<Location> getJukeboxLocation() {
-        return ConfigUtils.getLocation(section.getConfigurationSection("jukebox"));
+        return ConfigPrimitives.getLocation(section.getConfigurationSection("jukebox"));
     }
 
     public void setJukeboxLocation(Location location) {
-        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "jukebox"), location);
+        ConfigPrimitives.setLocation(ConfigPrimitives.readOrMakeSection(section, "jukebox"), location);
     }
 
     public Optional<Location> getChestLocation() {
-        return ConfigUtils.getLocation(section.getConfigurationSection("chest"));
+        return ConfigPrimitives.getLocation(section.getConfigurationSection("chest"));
     }
 
     public void setChestLocation(Location location) {
-        ConfigUtils.setLocation(ConfigUtils.readOrMakeSection(section, "chest"), location);
+        ConfigPrimitives.setLocation(ConfigPrimitives.readOrMakeSection(section, "chest"), location);
     }
 }

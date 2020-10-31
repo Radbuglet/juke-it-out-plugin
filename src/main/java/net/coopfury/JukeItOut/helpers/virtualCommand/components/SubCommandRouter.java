@@ -21,24 +21,27 @@ public class SubCommandRouter<TSender extends CommandSender> implements VirtualC
                 summary.append(ChatColor.RED);
                 summary.append("Error: Unknown sub-command in ");
                 summary.append(ChatColor.GRAY);
-                summary.append(args.getCommandPrefix());
-                for (String part : args.iterateLeft()) {
-                    summary.append(part);
-                    summary.append(" ");
-                }
+                summary.append(args.getLeftStr(true));
+                summary.append(" ");
 
                 boolean first = true;
-                for (String part : args.iterateRight()) {
-                    if (first) {
-                        summary.append(ChatColor.RED);
-                        summary.append(ChatColor.UNDERLINE);
-                        summary.append(part);
-                        summary.append(ChatColor.DARK_RED);
-                        first = false;
-                    } else {
-                        summary.append(" ");
+                if (args.getCount() == 0) {
+                    summary.append(ChatColor.RED);
+                    summary.append(ChatColor.UNDERLINE);
+                    summary.append("<missing argument>");
+                } else {
+                    for (String part : args.iterateRight()) {
+                        if (first) {
+                            summary.append(ChatColor.RED);
+                            summary.append(ChatColor.UNDERLINE);
+                            summary.append(part);
+                            summary.append(ChatColor.RED);
+                            first = false;
+                        } else {
+                            summary.append(" ");
+                            summary.append(part);
+                        }
                     }
-                    summary.append(part);
                 }
 
                 sender.sendMessage(summary.toString());
@@ -48,13 +51,20 @@ public class SubCommandRouter<TSender extends CommandSender> implements VirtualC
             {
                 SubCommandRouter<?> router = context.getData(LAST_ROUTER).orElseThrow(IllegalStateException::new);
                 StringBuilder subs = new StringBuilder(ChatColor.RED.toString());
-                boolean second = false;
-                for (String sub : router.handlerMap.keySet()) {
-                    if (second) {
-                        subs.append(", ");
+                subs.append("Valid sub commands: ");
+                subs.append(ChatColor.WHITE);
+
+                if (router.handlerMap.size() == 0) {
+                    subs.append("none?");
+                } else {
+                    boolean second = false;
+                    for (String sub : router.handlerMap.keySet()) {
+                        if (second) {
+                            subs.append(", ");
+                        }
+                        second = true;
+                        subs.append(sub);
                     }
-                    second = true;
-                    subs.append(sub);
                 }
                 sender.sendMessage(subs.toString());
             }
@@ -88,7 +98,8 @@ public class SubCommandRouter<TSender extends CommandSender> implements VirtualC
 
     @Override
     public boolean runCommand(TSender sender, ArgumentList args, CommandContext context) {
-        VirtualCommandHandler<? super TSender> handler = handlerMap.getOrDefault(args.getPart(0), fallbackHandler);
+        VirtualCommandHandler<? super TSender> handler = args.getCount() > 0 ?
+                handlerMap.getOrDefault(args.getPart(0), fallbackHandler) : fallbackHandler;
 
         context.pushFrame();
         context.postData(LAST_ROUTER, this);

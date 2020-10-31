@@ -22,8 +22,9 @@ public class FixedCommandValidator<TSender extends CommandSender> implements Vir
         if (args.getCount() != usage.size()) {
             StringBuilder builder = new StringBuilder();
             builder.append(ChatColor.RED);
-            builder.append("Usage: ");
+            builder.append("Error: Invalid usage in ");
             builder.append(args.getLeftStr(true));
+            builder.append(ChatColor.UNDERLINE);
             for (String part : usage) {
                 builder.append(" <");
                 builder.append(part);
@@ -32,6 +33,6 @@ public class FixedCommandValidator<TSender extends CommandSender> implements Vir
             sender.sendMessage(builder.toString());
             return false;
         }
-        return false;
+        return handler.runCommand(sender, args, context);
     }
 }
