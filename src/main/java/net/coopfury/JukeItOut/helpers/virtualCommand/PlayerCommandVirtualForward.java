@@ -9,6 +9,6 @@ public abstract class PlayerCommandVirtualForward extends AbstractPlayerCommand 
 
     @Override
     protected boolean onCommandPlayer(Player commandSender, Command command, String commandName, String[] args) {
-        return getHandler().handleCommand(commandSender, new ArgumentList(commandName, args));
+        return getHandler().runCommand(commandSender, new ArgumentList(commandName, args), new CommandContext());
     }
 }

@@ -9,5 +9,4 @@ public final class Constants {
     public static final String command_conf_man = "confman";
     public static final UiUtils.TitleTimings title_timings_short = new UiUtils.TitleTimings(5, 20, 5);
     public static final UiUtils.TitleTimings title_timings_long = new UiUtils.TitleTimings(5, 40, 5);
-    public static final String message_list_prefix = ChatColor.GOLD + "- ";
 }

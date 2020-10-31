@@ -10,7 +10,6 @@ public class AdminCommandModule implements PluginModule {
     @Override
     public void onEnable(Plugin pluginInstance) {
         registerCommand(pluginInstance, Constants.command_fly_speed, new CommandFlySpeed());
-        registerCommand(pluginInstance, Constants.command_conf_man, new CommandConfMan());
     }
 
     private void registerCommand(Plugin pluginInstance, String commandName, CommandExecutor executor) {

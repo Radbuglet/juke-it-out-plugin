@@ -5,7 +5,7 @@ public final class TimestampUtils {
         return System.currentTimeMillis();
     }
 
-    public boolean timestampOccurred(long timestamp) {
+    public static boolean hasOccurred(long timestamp) {
         return getTimeNow() > timestamp;
     }
 

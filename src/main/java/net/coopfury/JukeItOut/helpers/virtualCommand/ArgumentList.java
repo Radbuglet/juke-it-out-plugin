@@ -28,7 +28,7 @@ public class ArgumentList {
 
     public final String commandName;
     private final String[] args;
-    int rootOffset;
+    public int rootOffset;
 
     public ArgumentList(String commandName, String[] args) {
         this.commandName = commandName;
@@ -54,6 +54,10 @@ public class ArgumentList {
             buffer.append(part);
         }
         return buffer.toString();
+    }
+
+    public String getCommandPrefix() {
+        return "/" + commandName;
     }
 
     public String getPart(int index) {
