@@ -30,7 +30,7 @@ public class CommandLocationEditor implements VirtualCommandHandler<Player> {
             Optional<Location> location = getLocation.get();
             if (location.isPresent()) {
                 sender.teleport(location.get());
-                sender.sendMessage(ChatColor.GREEN + "Woosh!");
+                sender.sendMessage(ChatColor.GREEN + "Whoosh!");
                 return true;
             } else {
                 sender.sendMessage(ChatColor.RED + "Failed to teleport: no location set!");
