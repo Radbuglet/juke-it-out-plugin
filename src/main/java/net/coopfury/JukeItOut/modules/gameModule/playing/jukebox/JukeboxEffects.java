@@ -1,4 +1,4 @@
-package net.coopfury.JukeItOut.modules.gameModule.playing.teams;
+package net.coopfury.JukeItOut.modules.gameModule.playing.jukebox;
 
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import org.bukkit.ChatColor;
@@ -12,8 +12,9 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
-class JukeboxEffects {
+public class JukeboxEffects {
     // Config types
     public static class EffectLevel {
         public final int effectLevel;
@@ -110,6 +111,8 @@ class JukeboxEffects {
     }
 
     // Properties
+    public Consumer<EffectType> effectUpgradedListener;
+    public Consumer<EffectType> effectDowngradedListener;
     private int storedDiamonds;
 
     public final EffectType[] friendlyTypes = new EffectType[]{
@@ -161,11 +164,17 @@ class JukeboxEffects {
     public void upgradeEffect(EffectType type) {
         storedDiamonds += type.getNextLevel().orElseThrow(NullPointerException::new).cost;
         type.currentLevel++;
+        if (effectUpgradedListener != null) {
+            effectUpgradedListener.accept(type);
+        }
     }
 
     public void downgradeEffect(EffectType type) {
         storedDiamonds -= type.getCurrentLevel().orElseThrow(NullPointerException::new).cost;
         type.currentLevel--;
+        if (effectDowngradedListener != null) {
+            effectDowngradedListener.accept(type);
+        }
     }
 
     public int getStoredDiamonds() {

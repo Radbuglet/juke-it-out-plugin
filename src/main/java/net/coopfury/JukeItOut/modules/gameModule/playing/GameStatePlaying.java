@@ -2,6 +2,7 @@ package net.coopfury.JukeItOut.modules.gameModule.playing;
 
 import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
+import net.coopfury.JukeItOut.helpers.game.MemberPair;
 import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.spigot.*;
@@ -100,11 +101,13 @@ public class GameStatePlaying implements GameState {
 
     // Public team management API
     public GameTeam makeTeam(ConfigTeam teamConfig) {
-        return teamManager.makeTeam(guiObjective, teamConfig);
+        GameTeam team = new GameTeam(guiObjective, teamConfig);
+        teamManager.addTeam(team);
+        return team;
     }
 
     public void addPlayerToTeam(GameTeam team, Player player) {
-        team.addMember(teamManager, player.getUniqueId());
+        teamManager.addMemberInto(player.getUniqueId(), team, new GameTeamMember(player.getUniqueId()));
     }
 
     public void formatAppendTeamName(StringBuilder builder, Player player) {
@@ -122,7 +125,7 @@ public class GameStatePlaying implements GameState {
         // Reset characters
         for (GameTeam team: teamManager.getTeams()) {
             DyeColor color = team.configTeam.getWoolColor().orElse(DyeColor.WHITE);
-            for (GameTeamMember member: team.members) {
+            for (GameTeamMember member: team.getMembers()) {
                 // Reset game state
                 member.isAlive = true;
 
@@ -236,7 +239,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (!teamManager.getMember(event.getPlayer()).isPresent()) {
+        if (!teamManager.getMember(event.getPlayer().getUniqueId()).isPresent()) {
             event.setCancelled(true);
             return;
         }
@@ -258,7 +261,7 @@ public class GameStatePlaying implements GameState {
             return;
         }
 
-        if (!teamManager.getMember(event.getPlayer()).isPresent()) {
+        if (!teamManager.getMember(event.getPlayer().getUniqueId()).isPresent()) {
             event.setCancelled(true);
             return;
         }
@@ -292,22 +295,28 @@ public class GameStatePlaying implements GameState {
         if (!(event.getEntity() instanceof Player && event.getDamager() instanceof Player))
             return;
 
-        Optional<GameTeam> damagerTeam = teamManager.getMemberTeam((Player) event.getDamager());
+        Optional<GameTeam> damagerTeam = teamManager.getMemberTeam(event.getDamager().getUniqueId());
         if (!damagerTeam.isPresent()) return;
 
-        if (teamManager.getMemberTeam((Player) event.getEntity()).orElse(null) == damagerTeam.orElse(null)) {
+        if (teamManager.getMemberTeam(event.getEntity().getUniqueId()).orElse(null) == damagerTeam.get()) {
             event.setCancelled(true);
             event.getDamager().sendMessage(ChatColor.RED + "Do not try to damage your teammates!");
         }
     }
 
-    @EventHandler(priority=EventPriority.HIGHEST)  // TODO: This should happen after WorldGuard damage cancel
+    @EventHandler(priority=EventPriority.HIGHEST)
     private void onDamage(EntityDamageEvent event) {
         // Check that the damage was done to a playing player.
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        Optional<GameTeamMember> member = teamManager.getMember(player);
+        Optional<GameTeamMember> member = teamManager.getMember(player.getUniqueId());
         if (!member.isPresent()) return;
+
+        // Prevent fall damage
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            event.setCancelled(true);
+            return;
+        }
 
         // Check that the player died.
         if (player.getHealth() - event.getFinalDamage() > 0) return;
@@ -328,7 +337,7 @@ public class GameStatePlaying implements GameState {
     // Gameplay events
     @EventHandler
     private void onPickup(PlayerPickupItemEvent event) {
-        Optional<GameTeamMember> member = teamManager.getMember(event.getPlayer());
+        Optional<GameTeamMember> member = teamManager.getMember(event.getPlayer().getUniqueId());
         if (member.isPresent() && diamondManager.isSpawnedDiamond(event.getItem().getItemStack()))
             diamondManager.changeDiamondHolder(teamManager, member.get());
     }
@@ -337,9 +346,12 @@ public class GameStatePlaying implements GameState {
     private void onInteract(PlayerInteractEvent event) {
         // Check if player is affected
         Player player = event.getPlayer();
-        Optional<GameTeamMember> member = teamManager.getMember(player);
-        if (!member.isPresent()) return;
-        if (!member.get().isAlive) {
+
+        Optional<MemberPair<GameTeam, GameTeamMember>> memberPair =
+                teamManager.getMemberPair(player.getUniqueId());
+
+        if (!memberPair.isPresent()) return;
+        if (!memberPair.get().member.isAlive) {
             event.setCancelled(true);
             return;
         }
@@ -376,7 +388,7 @@ public class GameStatePlaying implements GameState {
         }
 
         // Check defense round
-        if (!isDefenseRound() && owningTeam != member.get().team) {
+        if (!isDefenseRound() && owningTeam != memberPair.get().team) {
             player.sendMessage(ChatColor.RED + "You can only open your team's diamond reserves on non-defense rounds.");
             player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
             event.setCancelled(true);
@@ -394,13 +406,13 @@ public class GameStatePlaying implements GameState {
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        Optional<GameTeamMember> member = teamManager.getMember(player);
+        Optional<GameTeamMember> member = teamManager.getMember(player.getUniqueId());
         if (!member.isPresent()) return;
 
         if (member.get().isAlive) {
             handleDeathCommon(member.get(), player);
         }
-        teamManager.removeMember(member.get());
+        teamManager.removeMember(player.getUniqueId());
 
         // End the game if everyone left
         // TODO
