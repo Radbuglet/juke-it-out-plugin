@@ -29,6 +29,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -39,16 +40,14 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Handles game exclusive events and serves as an entry point to game mechanics.
  */
 public class GameStatePlaying implements GameState {
     // Services
-    private final DiamondManager diamondManager = new DiamondManager();
+    private final DiamondSpawner diamondSpawner = new DiamondSpawner();
     private final TeamManager teamManager = new TeamManager();
 
     // Resources
@@ -100,14 +99,13 @@ public class GameStatePlaying implements GameState {
     }
 
     // Public team management API
-    public GameTeam makeTeam(ConfigTeam teamConfig) {
+    public void makeTeam(ConfigTeam teamConfig) {
         GameTeam team = new GameTeam(guiObjective, teamConfig);
         teamManager.addTeam(team);
-        return team;
     }
 
-    public void addPlayerToTeam(GameTeam team, Player player) {
-        teamManager.addMemberInto(player.getUniqueId(), team, new GameTeamMember(player.getUniqueId()));
+    public void addPlayerToGame(Player player) {
+        teamManager.addPlayerToGame(player.getUniqueId());
     }
 
     public void formatAppendTeamName(StringBuilder builder, Player player) {
@@ -120,7 +118,7 @@ public class GameStatePlaying implements GameState {
         roundId++;
         roundEndTime = TimestampUtils.getTimeIn(TimeUnits.Secs, 45);
         spawnedDiamond = false;
-        diamondManager.resetRoundState(teamManager);
+        diamondSpawner.resetRoundState(teamManager);
 
         // Reset characters
         for (GameTeam team: teamManager.getTeams()) {
@@ -212,11 +210,11 @@ public class GameStatePlaying implements GameState {
         }
         if (!spawnedDiamond && timeUntilRoundEnd < 1000 * 25) {
             spawnedDiamond = true;
-            diamondManager.spawnDiamond(teamManager);
+            diamondSpawner.spawnDiamond(teamManager);
         }
 
         // Poll for chase target change (fallback for the other events)
-        diamondManager.pollDiamondHolderChange(teamManager);
+        diamondSpawner.pollDiamondHolderChange(teamManager);
 
         // Display round time
         for (GameTeamMember member: teamManager.getMembers()) {
@@ -286,8 +284,8 @@ public class GameStatePlaying implements GameState {
         PlayerUtils.resetAll(player);
         player.setGameMode(GameMode.SPECTATOR);
         member.isAlive = false;
-        if (member == diamondManager.getDiamondHolder())
-            diamondManager.changeDiamondHolder(teamManager, null);
+        if (member == diamondSpawner.getDiamondHolder())
+            diamondSpawner.changeDiamondHolder(teamManager, null);
     }
 
     @EventHandler
@@ -338,8 +336,8 @@ public class GameStatePlaying implements GameState {
     @EventHandler
     private void onPickup(PlayerPickupItemEvent event) {
         Optional<GameTeamMember> member = teamManager.getMember(event.getPlayer().getUniqueId());
-        if (member.isPresent() && diamondManager.isSpawnedDiamond(event.getItem().getItemStack()))
-            diamondManager.changeDiamondHolder(teamManager, member.get());
+        if (member.isPresent() && diamondSpawner.isSpawnedDiamond(event.getItem().getItemStack()))
+            diamondSpawner.changeDiamondHolder(teamManager, member.get());
     }
 
     @EventHandler
@@ -404,15 +402,40 @@ public class GameStatePlaying implements GameState {
 
     // Join and leave events
     @EventHandler
+    private void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // Add player back into game
+        Optional<MemberPair<GameTeam, GameTeamMember>> memberPair = teamManager.addPlayerToGame(player.getUniqueId());
+        if (!memberPair.isPresent()) {
+            player.sendMessage(ChatColor.RED + "Failed to add you into a team (game not configured correctly)");
+            return;
+        }
+
+        // Setup player
+        memberPair.get().member.isAlive = false;
+        PlayerUtils.resetAll(player);
+        player.setGameMode(GameMode.SPECTATOR);
+        diamondSpawner.getDiamondSpawnLocation().ifPresent(player::teleport);
+
+        // Explain what's happening
+        UiUtils.playSound(player, Sound.NOTE_PLING);
+        UiUtils.playTitle(player, ChatColor.GREEN + "Please wait", ChatColor.GRAY + "You will join the game next round.", Constants.title_timings_long);
+        player.sendMessage(ChatColor.GREEN + "You are currently a spectator until the next round starts!");
+    }
+
+    @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+
+        // Handle member removal
         Optional<GameTeamMember> member = teamManager.getMember(player.getUniqueId());
         if (!member.isPresent()) return;
 
         if (member.get().isAlive) {
             handleDeathCommon(member.get(), player);
         }
-        teamManager.removeMember(player.getUniqueId());
+        teamManager.removePlayerFromGame(player.getUniqueId());
 
         // End the game if everyone left
         // TODO

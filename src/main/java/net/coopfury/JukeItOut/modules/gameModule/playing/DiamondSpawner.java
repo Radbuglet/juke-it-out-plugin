@@ -26,7 +26,7 @@ import java.util.Optional;
  * These behaviors were extracted from the GameModule for the purposes of encapsulation and to make the implementation
  * easier to read.
  */
-public class DiamondManager {
+public class DiamondSpawner {
     private static final String stolenDiamondName = ChatColor.BLUE + "Stolen Diamond";
     private static final FireworkEffect spawnFireworkEffect = FireworkEffect.builder()
             .trail(false).flicker(false)
@@ -94,9 +94,13 @@ public class DiamondManager {
         }
     }
 
+    public Optional<Location> getDiamondSpawnLocation() {
+        return Plugin.getModule(ConfigLoadingModule.class).root.getDiamondSpawn();
+    }
+
     public void spawnDiamond(TeamManager teamManager) {
         // Spawn diamond
-        Optional<Location> diamondSpawn = Plugin.getModule(ConfigLoadingModule.class).root.getDiamondSpawn();
+        Optional<Location> diamondSpawn = getDiamondSpawnLocation();
         if (diamondSpawn.isPresent()) {
             World world = diamondSpawn.get().getWorld();
 
