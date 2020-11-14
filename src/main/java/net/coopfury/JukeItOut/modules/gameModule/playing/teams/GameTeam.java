@@ -7,6 +7,7 @@ import net.coopfury.JukeItOut.helpers.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.modules.configLoading.ConfigTeam;
 import net.coopfury.JukeItOut.modules.gameModule.playing.jukebox.JukeboxEffects;
 import net.coopfury.JukeItOut.modules.gameModule.playing.jukebox.JukeboxGui;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -34,11 +35,12 @@ public class GameTeam extends AbstractTeam<GameTeamMember> {
         guiScoreEntry.setScore(0);
 
         // Setup jukebox
-        jukeboxEffects.effectUpgradedListener = type -> {
+        jukeboxEffects.effectUpgradedListener = type -> {  // TODO: Some of these re-applications are unnecessary.
             this.applyFriendlyEffects();
             this.updateDiamondScoreGui();
         };
         jukeboxEffects.effectDowngradedListener = type -> {
+            this.applyFriendlyEffects();
             this.updateDiamondScoreGui();
         };
         jukeboxGui.registerGui();

@@ -116,7 +116,12 @@ public class JukeboxEffects {
     private int storedDiamonds;
 
     public final EffectType[] friendlyTypes = new EffectType[]{
-            new EffectType(new ItemBuilder(Material.RABBIT_FOOT).setName(ChatColor.GREEN + "Speed").toItemStack(), PotionEffectType.SPEED, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.SUGAR).setName(ChatColor.GRAY + "Speed").toItemStack(), PotionEffectType.SPEED, new EffectLevel[]{
+                    new EffectLevel(0, -1, 1),
+                    new EffectLevel(1, -1, 1),
+                    new EffectLevel(2, -1, 2)
+            }),
+            new EffectType(new ItemBuilder(Material.RABBIT_FOOT).setName(ChatColor.GREEN + "Jump Boost").toItemStack(), PotionEffectType.JUMP, new EffectLevel[]{
                     new EffectLevel(0, -1, 1),
                     new EffectLevel(1, -1, 1),
                     new EffectLevel(2, -1, 2)
@@ -142,22 +147,22 @@ public class JukeboxEffects {
 
     public final EffectType[] offensiveTypes = new EffectType[]{
             new EffectType(new ItemBuilder(Material.POISONOUS_POTATO).setName(ChatColor.DARK_GREEN + "Poison").toItemStack(), PotionEffectType.POISON, new EffectLevel[]{
-                    new EffectLevel(0, 5, 2),
-                    new EffectLevel(1, 10, 2),
-                    new EffectLevel(2, 15, 2)
+                    new EffectLevel(1, 8, 2),
+                    new EffectLevel(2, 9, 2),
+                    new EffectLevel(3, 15, 2)
             }),
             new EffectType(new ItemBuilder(Material.BROWN_MUSHROOM).setName(ChatColor.DARK_BLUE + "Slowness").toItemStack(), PotionEffectType.SLOW, new EffectLevel[]{
-                    new EffectLevel(0, 5, 1),
-                    new EffectLevel(1, 10, 1),
-                    new EffectLevel(2, 15, 2)
+                    new EffectLevel(1, 8, 1),
+                    new EffectLevel(2, 9, 1),
+                    new EffectLevel(3, 15, 2)
             }),
             new EffectType(new ItemBuilder(Material.WOOD_PICKAXE).setName(ChatColor.BLUE + "Mining Fatigue").toItemStack(), PotionEffectType.SLOW_DIGGING, new EffectLevel[]{
-                    new EffectLevel(0, 10, 2),
-                    new EffectLevel(1, 15, 3),
-                    new EffectLevel(1, 25, 3),
+                    new EffectLevel(1, 10, 2),
+                    new EffectLevel(2, 15, 3),
+                    new EffectLevel(3, 20, 3),
             }),
             new EffectType(new ItemBuilder(Material.SPIDER_EYE).setName(ChatColor.DARK_GRAY + "Blindness").toItemStack(), PotionEffectType.SLOW_DIGGING, new EffectLevel[]{
-                    new EffectLevel(0, 10, 6)
+                    new EffectLevel(0, 15, 4)
             })
     };
 
