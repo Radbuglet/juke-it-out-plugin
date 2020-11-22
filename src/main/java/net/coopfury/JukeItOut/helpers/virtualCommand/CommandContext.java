@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public class CommandContext<TSender extends CommandSender> {
     private final Map<String, Object> parsed = new HashMap<>();
+    private int lastArgLoc = 0;
     private int argLoc = 0;
 
     public final TSender sender;
@@ -52,30 +53,35 @@ public class CommandContext<TSender extends CommandSender> {
     public void sendArgError(String text, String locLineSuffix) {
         sender.sendMessage(ChatColor.RED + "Error: " + ChatColor.WHITE + text);
 
-        StringBuilder locationBuilder = new StringBuilder(ChatColor.RED + "   in " + ChatColor.GRAY + "/");
+        StringBuilder locationBuilder = new StringBuilder(ChatColor.RED + "      in " + ChatColor.GRAY + "/");
         locationBuilder.append(name);
-
-        // TODO: In the future, this should highlight all recently processed parts of the commands
         for (int index = 0; index < args.length; index++) {
+            // End error highlight
+            if (index == argLoc) {
+                locationBuilder.append(ChatColor.RED);
+            }
+
+            // Add spacing
             locationBuilder.append(" ");
-            if (index == argLoc) {
-                locationBuilder.append(ChatColor.RED.toString()).append(ChatColor.UNDERLINE);
+
+            // Start error highlight
+            if (index == lastArgLoc) {
+                locationBuilder.append(ChatColor.RED).append(ChatColor.UNDERLINE);
             }
-            locationBuilder.append(args[0]);
-            if (index == argLoc) {
-                locationBuilder.append(ChatColor.RED.toString());
-            }
+
+            // Add argument
+            locationBuilder.append(args[index]);
         }
 
         if (locLineSuffix != null) {
-            locationBuilder.append(ChatColor.RED.toString()).append(ChatColor.UNDERLINE).append(locLineSuffix);
+            locationBuilder.append(" ").append(ChatColor.RED).append(ChatColor.UNDERLINE).append(locLineSuffix);
         }
 
         sender.sendMessage(locationBuilder.toString());
     }
 
-    public static<TSender extends CommandSender> boolean run(TSender user, String commandName, String[] args, CommandPart<TSender> startingPart) {
-        return new CommandContext<>(user, commandName, args).run(startingPart);
+    public static<TSender extends CommandSender> boolean run(TSender sender, String commandName, String[] args, CommandPart<TSender> startingPart) {
+        return new CommandContext<>(sender, commandName, args).run(startingPart);
     }
 
     public boolean run(CommandPart<TSender> part) {
@@ -87,6 +93,7 @@ public class CommandContext<TSender extends CommandSender> {
 
             //noinspection unchecked
             part = (CommandPart<TSender>) result.value;
+            lastArgLoc = argLoc;
         }
     }
 }

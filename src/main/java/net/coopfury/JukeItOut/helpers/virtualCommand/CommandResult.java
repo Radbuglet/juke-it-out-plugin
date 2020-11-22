@@ -11,11 +11,11 @@ public class CommandResult<TSender extends CommandSender> {
         this.value = value;
     }
 
-    public static<TSender extends CommandSender> CommandResult<TSender> routeTo(CommandPart<TSender> part) {
-        return new CommandResult<>(false, part);
+    public static<TSender extends CommandSender> CommandResult<TSender> finish(boolean success) {
+        return new CommandResult<>(true, success);
     }
 
-    public static<TSender extends CommandSender> CommandResult<TSender> finish(boolean success) {
-        return new CommandResult<>(false, success);
+    public static<TSender extends CommandSender> CommandResult<TSender> routeTo(CommandPart<TSender> part) {
+        return new CommandResult<>(false, part);
     }
 }
