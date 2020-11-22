@@ -1,4 +1,4 @@
-package net.coopfury.JukeItOut.helpers.virtualCommand;
+package net.coopfury.JukeItOut.helpers.command;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

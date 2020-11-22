@@ -1,6 +1,6 @@
-package net.coopfury.JukeItOut.helpers.virtualCommand.components;
+package net.coopfury.JukeItOut.helpers.command.components;
 
-import net.coopfury.JukeItOut.helpers.virtualCommand.CommandPart;
+import net.coopfury.JukeItOut.helpers.command.CommandPart;
 import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;

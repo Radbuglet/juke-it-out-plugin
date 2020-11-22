@@ -1,13 +1,11 @@
-package net.coopfury.JukeItOut.helpers.virtualCommand.components;
+package net.coopfury.JukeItOut.helpers.command.components;
 
-import net.coopfury.JukeItOut.helpers.virtualCommand.CommandContext;
-import net.coopfury.JukeItOut.helpers.virtualCommand.CommandPart;
-import net.coopfury.JukeItOut.helpers.virtualCommand.CommandResult;
+import net.coopfury.JukeItOut.helpers.command.CommandContext;
+import net.coopfury.JukeItOut.helpers.command.CommandPart;
+import net.coopfury.JukeItOut.helpers.command.CommandResult;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public abstract class CommandPartEnum<TSender extends CommandSender> implements CommandPart<TSender> {
