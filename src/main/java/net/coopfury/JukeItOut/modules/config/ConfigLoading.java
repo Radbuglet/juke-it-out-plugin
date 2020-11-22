@@ -1,17 +1,17 @@
 package net.coopfury.JukeItOut.modules.config;
 
 import net.coopfury.JukeItOut.Plugin;
-import net.coopfury.JukeItOut.helpers.node.GameNode;
+import net.coopfury.JukeItOut.helpers.java.signal.BaseSignal;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.logging.Logger;
 
-public class ConfigLoading extends GameNode {
+public class ConfigLoading {
     private ConfigRoot root;
 
     public ConfigLoading() {
-        bindEnterHandler(this::reloadConfig);
-        bindExitHandler(this::saveConfig);
+        Plugin.instance.onEnable.connect(e -> reloadConfig(), BaseSignal.Priority.Medium);
+        Plugin.instance.onDisable.connect(e -> saveConfig(), BaseSignal.Priority.Medium);
     }
 
     private Logger getLogger() {
