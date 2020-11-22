@@ -1,25 +1,12 @@
 package net.coopfury.JukeItOut.modules.adminCommands;
 
-import net.coopfury.JukeItOut.Plugin;
-import net.coopfury.JukeItOut.helpers.virtualCommand.PlayerCommandVirtualForward;
-import net.coopfury.JukeItOut.helpers.virtualCommand.VirtualCommandHandler;
-import net.coopfury.JukeItOut.helpers.virtualCommand.components.CommandLocationEditor;
-import net.coopfury.JukeItOut.helpers.virtualCommand.components.SubCommandRouter;
-import net.coopfury.JukeItOut.modules.configLoading.ConfigLoadingModule;
+import net.coopfury.JukeItOut.helpers.spigot.AbstractPlayerCommand;
+import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 
-public class CommandConfMan extends PlayerCommandVirtualForward {
-    private final SubCommandRouter<Player> router = new SubCommandRouter<>();
-
-    public CommandConfMan() {
-        ConfigLoadingModule config = Plugin.getModule(ConfigLoadingModule.class);
-        router.registerSub("team", new SubCommandRouter<>());
-        router.registerSub("loc", new SubCommandRouter<Player>()
-            .registerSub("diamond_spawn", new CommandLocationEditor(
-                    config.root::setDiamondSpawn, config.root::getDiamondSpawn)));
-    }
+public class CommandConfMan extends AbstractPlayerCommand {
     @Override
-    protected VirtualCommandHandler<Player> getHandler() {
-        return router;
+    protected boolean onCommandPlayer(Player commandSender, Command command, String s, String[] args) {
+        return false;
     }
 }

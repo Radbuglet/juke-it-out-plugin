@@ -11,6 +11,6 @@ public final class RandomUtils {
     }
 
     public static<T> T randomElement(List<T> list) {
-        return list.get(randInt(0, list.size() - 1));
+        return list.get(random.nextInt(list.size()));
     }
 }
