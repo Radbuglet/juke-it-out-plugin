@@ -6,10 +6,10 @@ public class RootGameNode extends GameNode {
     }
 
     public void mount() {
-        onEnter();
+        nodeEnter();
     }
 
     public void unmount() {
-        onExit();
+        nodeExit();
     }
 }

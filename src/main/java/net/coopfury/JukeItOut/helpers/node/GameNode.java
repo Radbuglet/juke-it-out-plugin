@@ -11,6 +11,11 @@ public class GameNode {
     private final Set<Procedure> enterHandlers = new HashSet<>();
     private final Set<Procedure> exitHandlers = new HashSet<>();
 
+    // Virtual methods
+    protected void onEnterTree() { }
+
+    protected void onExitTree() { }
+
     // Tree management
     public void addChild(GameNode node) {
         assert !node.inTree;
@@ -18,7 +23,7 @@ public class GameNode {
 
         children.add(node);
         if (inTree) {
-            node.onEnter();
+            node.nodeEnter();
         }
     }
 
@@ -28,7 +33,7 @@ public class GameNode {
 
         children.remove(node);
         if (inTree) {
-            node.onExit();
+            node.nodeExit();
         }
     }
 
@@ -75,29 +80,31 @@ public class GameNode {
     }
 
     // Internal tree event handling
-    void onEnter() {
+    void nodeEnter() {
         assert !inTree;
         inTree = true;
 
+        onEnterTree();
         for (Procedure handler : enterHandlers) {
             handler.run();
         }
 
         for (GameNode child : children) {
-            child.onExit();
+            child.nodeEnter();
         }
     }
 
-    void onExit() {
+    void nodeExit() {
         assert inTree;
         inTree = false;
 
+        onExitTree();
         for (Procedure handler : exitHandlers) {
             handler.run();
         }
 
         for (GameNode child : children) {
-            child.onExit();
+            child.nodeExit();
         }
     }
 }

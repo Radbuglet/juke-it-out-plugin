@@ -1,5 +1,5 @@
 name: JukeItOut
-description: ""
+description: "The plugin powering CoopFury: Juke-It-Out"
 author: radbuglet
 
 main: net.coopfury.JukeItOut.Plugin
