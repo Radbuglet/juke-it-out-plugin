@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut;
 
-import net.coopfury.JukeItOut.helpers.spigot.UiUtils;
+import net.coopfury.JukeItOut.utils.spigot.UiUtils;
 
 public final class Constants {
     public static final String permission_map_making = "juke_it_out.privilege.map_maker";

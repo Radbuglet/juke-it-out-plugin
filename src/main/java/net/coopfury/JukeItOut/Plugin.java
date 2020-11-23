@@ -1,11 +1,11 @@
 package net.coopfury.JukeItOut;
 
-import net.coopfury.JukeItOut.helpers.gui.InventoryActionDelegator;
-import net.coopfury.JukeItOut.helpers.java.signal.EventSignal;
-import net.coopfury.JukeItOut.modules.GlobalProtect;
-import net.coopfury.JukeItOut.modules.commands.CommandRegistrar;
-import net.coopfury.JukeItOut.modules.config.ConfigLoading;
-import net.coopfury.JukeItOut.modules.game.GameManager;
+import net.coopfury.JukeItOut.utils.gui.InventoryActionDelegator;
+import net.coopfury.JukeItOut.utils.java.signal.EventSignal;
+import net.coopfury.JukeItOut.listeners.GlobalProtect;
+import net.coopfury.JukeItOut.commands.CommandRegistrar;
+import net.coopfury.JukeItOut.state.config.ConfigLoading;
+import net.coopfury.JukeItOut.state.game.GameManager;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -21,12 +21,10 @@ public class Plugin extends JavaPlugin {
 
     // APIs
     public Chat vaultChat;
-
-    // Modules
     public InventoryActionDelegator inventoryGui;
-    public GlobalProtect globalProtect;
+
+    // State
     public ConfigLoading config;
-    public CommandRegistrar commands;
     public GameManager gameManager;
 
     // Module loading
@@ -39,15 +37,18 @@ public class Plugin extends JavaPlugin {
         vaultChat = Optional.ofNullable(getServer().getServicesManager().getRegistration(Chat.class))
                 .map(RegisteredServiceProvider::getProvider).orElseThrow(() -> new IllegalStateException("Failed to get Vault chat service!"));
 
-        // Build modules
         inventoryGui = new InventoryActionDelegator();
-        globalProtect = new GlobalProtect();
+        inventoryGui.bind(this);
+
+        // Bind listeners
+        registerListener(new GlobalProtect());
+        CommandRegistrar.bind();
+
+        // Build state
         config = new ConfigLoading();
-        commands = new CommandRegistrar();
         gameManager = new GameManager();
 
         // Fire them up!
-        inventoryGui.bind(this);
         onEnable.fire(this);
         getLogger().info("JukeItOut enabled!");
     }
@@ -60,11 +61,7 @@ public class Plugin extends JavaPlugin {
         instance = null;
     }
 
-    public void registerListener(Listener listener) {
-
-    }
-
-    public void unregisterListener(Listener listener) {
-
+    private void registerListener(Listener listener) {
+        getServer().getPluginManager().registerEvents(listener, this);
     }
 }
