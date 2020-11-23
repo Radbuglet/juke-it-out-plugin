@@ -1,7 +1,7 @@
 package net.coopfury.JukeItOut;
 
 import net.coopfury.JukeItOut.helpers.java.signal.EventSignal;
-import net.coopfury.JukeItOut.modules.GlobalFixes;
+import net.coopfury.JukeItOut.modules.GlobalProtect;
 import net.coopfury.JukeItOut.modules.commands.CommandRegistrar;
 import net.coopfury.JukeItOut.modules.config.ConfigLoading;
 import net.coopfury.JukeItOut.modules.game.GameManager;
@@ -15,7 +15,7 @@ public class Plugin extends JavaPlugin {
     public final EventSignal<Plugin> onDisable = new EventSignal<>();
 
     // Modules
-    public GlobalFixes globalFixes;
+    public GlobalProtect globalProtect;
     public ConfigLoading config;
     public CommandRegistrar commands;
     public GameManager gameManager;
@@ -27,7 +27,7 @@ public class Plugin extends JavaPlugin {
         instance = this;
 
         // Build modules
-        globalFixes = new GlobalFixes();
+        globalProtect = new GlobalProtect();
         config = new ConfigLoading();
         commands = new CommandRegistrar();
         gameManager = new GameManager();

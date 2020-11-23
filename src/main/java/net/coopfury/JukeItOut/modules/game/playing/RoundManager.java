@@ -3,8 +3,10 @@ package net.coopfury.JukeItOut.modules.game.playing;
 import net.coopfury.JukeItOut.helpers.java.TimeUnits;
 import net.coopfury.JukeItOut.helpers.java.TimestampUtils;
 import net.coopfury.JukeItOut.helpers.java.signal.ProcedureSignal;
+import net.coopfury.JukeItOut.modules.game.playing.teams.GameMember;
+import org.bukkit.entity.Player;
 
-class RoundManager {
+public class RoundManager {
     // Config
     private final long TIME_PRE_SPAWN = TimeUnits.Secs.encode(20);
     private final long TIME_POST_SPAWN = TimeUnits.Secs.encode(25);
@@ -15,11 +17,16 @@ class RoundManager {
     private final ProcedureSignal onDiamondSpawned = new ProcedureSignal();
     private final ProcedureSignal onRoundReset = new ProcedureSignal();
 
-    // Round state description
+    // Properties
+    private final GameStatePlaying root;
     private int roundNumber;
     private long nextEventAt;
     private boolean hasDiamondSpawned;
     private int tradesLeft = MAX_TRADES;
+
+    public RoundManager(GameStatePlaying root) {
+        this.root = root;
+    }
 
     // Time querying
     public int getRoundNumber() {
@@ -36,11 +43,24 @@ class RoundManager {
 
     // Event handling
     public void nextRound() {
+        // Update state
         roundNumber++;
         nextEventAt = TimestampUtils.getTimeIn(TIME_PRE_SPAWN);
         hasDiamondSpawned = false;
         tradesLeft = MAX_TRADES;
         onRoundReset.fire();
+
+        // Update visuals (boss-bar)
+        long msLeft = getTimeMsLeft();
+        int secsLeft = (int) TimeUnits.Secs.decode(msLeft) + 1;
+        float percentLeft = (msLeft % TimeUnits.Secs.unitMultiplier) / (float) TimeUnits.Secs.unitMultiplier;
+
+        for (GameMember member : root.teamManager.getMembers()) {
+            if (!member.isAlive) continue;
+            Player player = member.getPlayer();
+            player.setLevel(secsLeft);
+            player.setExp(percentLeft);
+        }
     }
 
     public void diamondTraded() {
@@ -53,6 +73,7 @@ class RoundManager {
     }
 
     public void tick() {
+        // Update state
         if (hasDiamondSpawned) {
             if (TimestampUtils.hasOccurred(nextEventAt)) {
                 nextRound();
@@ -64,5 +85,8 @@ class RoundManager {
                 onDiamondSpawned.fire();
             }
         }
+
+        // Update visuals (experience)
+        // TODO
     }
 }

@@ -26,7 +26,7 @@ public class GameManager {
     }
 
     private void onTick() {
-        if (activeState != null) activeState.tick();
+        if (activeState != null) activeState.onTick();
     }
 
     private void onPluginDisable(Plugin plugin) {
