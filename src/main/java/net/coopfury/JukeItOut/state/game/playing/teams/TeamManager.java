@@ -81,4 +81,10 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         builder.append(UiUtils.formatVaultName(player));
         return builder.toString();
     }
+
+    public void cleanup() {
+        for (GameTeam team : getTeams()) {
+            team.cleanup();
+        }
+    }
 }

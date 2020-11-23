@@ -89,4 +89,8 @@ public class RoundManager {
             player.setExp(percentLeft);
         }
     }
+
+    public void cleanup() {
+        // TODO: Remove boss-bar
+    }
 }

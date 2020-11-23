@@ -19,6 +19,8 @@ public class GameStatePlaying implements GameState {
     @Override
     public void onDeactivate(boolean pluginDisable) {
         worldReset.resetWorld(true);
+        teamManager.cleanup();
+        roundManager.cleanup();
     }
 
     @Override

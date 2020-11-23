@@ -1,6 +1,7 @@
 package net.coopfury.JukeItOut.state.game.playing;
 
 import net.coopfury.JukeItOut.Plugin;
+import net.coopfury.JukeItOut.listeners.GlobalProtect;
 import net.coopfury.JukeItOut.utils.spigot.BlockPointer;
 import net.coopfury.JukeItOut.state.game.playing.teams.GameTeam;
 import org.bukkit.ChatColor;
@@ -74,7 +75,7 @@ public class WorldReset {
     public boolean onBreakBlock(BlockBreakEvent event) {
         BlockPointer blockPointer = new BlockPointer(event.getBlock());
 
-        if (!Plugin.instance.globalProtect.shouldAffect(event.getPlayer())
+        if (!GlobalProtect.shouldAffect(event.getPlayer())
                 || !root.teamManager.getMember(event.getPlayer().getUniqueId()).isPresent()) {
             dirtyBlocks.remove(blockPointer);
             return true;
