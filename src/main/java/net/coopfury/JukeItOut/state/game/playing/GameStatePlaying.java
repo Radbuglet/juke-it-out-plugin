@@ -2,11 +2,14 @@ package net.coopfury.JukeItOut.state.game.playing;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.state.game.GameState;
+import net.coopfury.JukeItOut.state.game.playing.managers.DiamondManager;
+import net.coopfury.JukeItOut.state.game.playing.managers.RoundManager;
+import net.coopfury.JukeItOut.state.game.playing.managers.WorldReset;
 import net.coopfury.JukeItOut.state.game.playing.teams.TeamManager;
 
 public class GameStatePlaying implements GameState {
+    // TODO: Link up manager signals, forward events
     public final TeamManager teamManager = new TeamManager();
-
     public final RoundManager roundManager = new RoundManager(this);
     public final DiamondManager diamondManager = new DiamondManager(this);
     public final WorldReset worldReset = new WorldReset(this);
@@ -25,7 +28,11 @@ public class GameStatePlaying implements GameState {
 
     @Override
     public void onTick() {
+        teamManager.tick();
         roundManager.tick();
-        diamondManager.tick();
+
+        if (roundManager.hasDiamondSpawned()) {
+            diamondManager.tick();
+        }
     }
 }

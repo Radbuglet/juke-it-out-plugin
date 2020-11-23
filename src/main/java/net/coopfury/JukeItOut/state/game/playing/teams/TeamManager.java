@@ -82,6 +82,12 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         return builder.toString();
     }
 
+    public void tick() {
+        for (GameTeam team : getTeams()) {
+            team.tick(this);
+        }
+    }
+
     public void cleanup() {
         for (GameTeam team : getTeams()) {
             team.cleanup();

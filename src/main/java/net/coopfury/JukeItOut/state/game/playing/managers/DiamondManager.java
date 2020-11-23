@@ -1,11 +1,13 @@
-package net.coopfury.JukeItOut.state.game.playing;
+package net.coopfury.JukeItOut.state.game.playing.managers;
 
 import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
-import net.coopfury.JukeItOut.utils.spigot.ItemBuilder;
-import net.coopfury.JukeItOut.utils.spigot.UiUtils;
+import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.state.game.playing.teams.GameMember;
 import net.coopfury.JukeItOut.state.game.playing.teams.GameTeam;
+import net.coopfury.JukeItOut.utils.java.signal.EventSignal;
+import net.coopfury.JukeItOut.utils.spigot.ItemBuilder;
+import net.coopfury.JukeItOut.utils.spigot.UiUtils;
 import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Firework;
@@ -20,14 +22,19 @@ import org.bukkit.util.Vector;
 import java.util.Optional;
 
 public class DiamondManager {
-    private final GameStatePlaying root;
-    private static final String stolenDiamondName = ChatColor.BLUE + "Stolen Diamond";
-    private static final FireworkEffect spawnFireworkEffect = FireworkEffect.builder()
+    // Config
+    private static final String STOLEN_DIAMOND_NAME = ChatColor.BLUE + "Stolen Diamond";
+    private static final FireworkEffect SPAWN_FIREWORK_EFFECT = FireworkEffect.builder()
             .trail(false).flicker(false)
             .with(FireworkEffect.Type.BALL_LARGE)
             .withColor(Color.TEAL)
             .build();
 
+    // Signals
+    public final EventSignal<Optional<GameMember>> diamondHolderChanged = new EventSignal<>();
+
+    // Properties
+    private final GameStatePlaying root;
     private boolean chaseStarted;
     private GameMember diamondHolder;
 
@@ -38,7 +45,7 @@ public class DiamondManager {
     // Diamond detection methods
     public boolean isSpawnedDiamond(ItemStack stack) {
         return stack != null && stack.getType() == Material.DIAMOND
-                && stolenDiamondName.equals(stack.getItemMeta().getDisplayName());
+                && STOLEN_DIAMOND_NAME.equals(stack.getItemMeta().getDisplayName());
     }
 
     private boolean hasSpawnedDiamond(Inventory inventory) {
@@ -67,7 +74,7 @@ public class DiamondManager {
             // Spawn firework effect
             Firework firework = world.spawn(diamondSpawn.get(), Firework.class);
             FireworkMeta fwMeta = firework.getFireworkMeta();
-            fwMeta.addEffect(spawnFireworkEffect);
+            fwMeta.addEffect(SPAWN_FIREWORK_EFFECT);
             fwMeta.setPower(0);
             firework.setFireworkMeta(fwMeta);
             new BukkitRunnable() {  // Runnable used here because it seems that fireworks can't get detonated until CraftBukkit has processed them for at least one tick.
@@ -79,7 +86,7 @@ public class DiamondManager {
 
             // Spawn item
             Item spawnedDiamond = world.dropItem(diamondSpawn.get(), new ItemBuilder(Material.DIAMOND)
-                    .setName(stolenDiamondName)
+                    .setName(STOLEN_DIAMOND_NAME)
                     .toItemStack());
             spawnedDiamond.setVelocity(new Vector(0, .5, 0));
         } else {
@@ -117,12 +124,31 @@ public class DiamondManager {
     }
 
     // Diamond holder system
-    public void tick() {
-        pollDiamondHolder();
+    public GameMember getDiamondHolder() {
+        return diamondHolder;
+    }
+
+    public void setDiamondHolder(GameMember member) {
+        if (member == diamondHolder) return;
+        diamondHolder = member;
+        diamondHolderChanged.fire(Optional.ofNullable(member));
 
         if (diamondHolder != null) {
-            Player player = diamondHolder.getPlayer();
-            player.playEffect(player.getLocation().add(new Vector(0, 0.25, 0)), Effect.PORTAL, null);
+            assert member != null;
+            Player player = member.getPlayer();
+
+            // Update everyone else
+            for (GameMember otherMember : root.teamManager.getMembers()) {
+                // Send message
+                Player otherPlayer = otherMember.getPlayer();
+                UiUtils.playSound(otherPlayer, Sound.GHAST_SCREAM2);
+                otherPlayer.sendMessage(root.teamManager.formatPlayerName(player) + ChatColor.AQUA + " picked up the diamond!");
+
+                // Give items
+                if (!chaseStarted && otherMember.isAlive && otherMember != member)
+                    otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+            }
+            chaseStarted = true;
         }
     }
 
@@ -142,29 +168,12 @@ public class DiamondManager {
         setDiamondHolder(null);
     }
 
-    public void setDiamondHolder(GameMember member) {
-        if (member == diamondHolder) return;
-        diamondHolder = member;
+    public void tick() {
+        pollDiamondHolder();
 
         if (diamondHolder != null) {
-            Player player = member.getPlayer();
-
-            // Update everyone else
-            for (GameMember otherMember : root.teamManager.getMembers()) {
-                // Send message
-                Player otherPlayer = otherMember.getPlayer();
-                UiUtils.playSound(otherPlayer, Sound.GHAST_SCREAM2);
-                otherPlayer.sendMessage(root.teamManager.formatPlayerName(player) + ChatColor.AQUA + " picked up the diamond!");
-
-                // Give items
-                if (!chaseStarted && otherMember.isAlive && otherMember != member)
-                    otherMember.getPlayer().getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-            }
-            chaseStarted = true;
+            Player player = diamondHolder.getPlayer();
+            player.playEffect(player.getLocation().add(new Vector(0, 0.25, 0)), Effect.PORTAL, null);
         }
-    }
-
-    public GameMember getDiamondHolder() {
-        return diamondHolder;
     }
 }

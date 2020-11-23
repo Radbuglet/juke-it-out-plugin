@@ -57,7 +57,7 @@ public class GameTeam extends AbstractTeam<GameMember> {
 
     // Jukebox effects
     private void onEffectLevelChanged(JukeboxEffects.EffectType type) {
-        applyFriendlyEffects();  // TODO: Some of these re-applications are unnecessary.
+        applyFriendlyEffects();
         updateDiamondScoreGui();
     }
 
@@ -111,11 +111,16 @@ public class GameTeam extends AbstractTeam<GameMember> {
         return accumulator;
     }
 
-    public void updateDiamondScoreGui() {
+    private void updateDiamondScoreGui() {
         guiScoreEntry.setScore(getTeamDiamondCount());
     }
 
-    // Cleanup
+    // Event handlers
+    public void tick(TeamManager teamManager) {
+        updateDiamondScoreGui();
+        applyOffensiveEffects(teamManager);
+    }
+
     public void cleanup() {
         jukeboxGui.unregisterGui();
     }

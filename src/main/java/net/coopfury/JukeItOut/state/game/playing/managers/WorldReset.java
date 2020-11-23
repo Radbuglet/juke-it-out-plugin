@@ -1,9 +1,10 @@
-package net.coopfury.JukeItOut.state.game.playing;
+package net.coopfury.JukeItOut.state.game.playing.managers;
 
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.listeners.GlobalProtect;
-import net.coopfury.JukeItOut.utils.spigot.BlockPointer;
+import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.state.game.playing.teams.GameTeam;
+import net.coopfury.JukeItOut.utils.spigot.BlockPointer;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;

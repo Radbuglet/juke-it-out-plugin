@@ -1,5 +1,6 @@
-package net.coopfury.JukeItOut.state.game.playing;
+package net.coopfury.JukeItOut.state.game.playing.managers;
 
+import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.utils.java.TimeUnits;
 import net.coopfury.JukeItOut.utils.java.TimestampUtils;
 import net.coopfury.JukeItOut.utils.java.signal.ProcedureSignal;
@@ -35,6 +36,10 @@ public class RoundManager {
 
     public boolean isDefenseRound() {
         return roundNumber % 5 == 0;
+    }
+
+    public boolean hasDiamondSpawned() {
+        return hasDiamondSpawned;
     }
 
     public long getTimeMsLeft() {
