@@ -24,7 +24,7 @@ public class WorldReset implements Listener {
     private final GameStatePlaying root;
     private final Set<BlockPointer> dirtyBlocks = new HashSet<>();
 
-    public WorldReset(GameStatePlaying root) {
+    public WorldReset(GameStatePlaying root) {  // TODO: Register
         this.root = root;
     }
 

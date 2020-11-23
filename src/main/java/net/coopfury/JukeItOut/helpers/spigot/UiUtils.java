@@ -1,5 +1,6 @@
 package net.coopfury.JukeItOut.helpers.spigot;
 
+import net.coopfury.JukeItOut.Plugin;
 import net.minecraft.server.v1_8_R3.ChatMessage;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
@@ -59,5 +60,13 @@ public final class UiUtils {
     // Text formatting
     public static String translateConfigText(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
+    }
+
+    public static String formatVaultName(Player player, String displayName) {
+        return UiUtils.translateConfigText(Plugin.instance.vaultChat.getPlayerPrefix(player)) + displayName;
+    }
+
+    public static String formatVaultName(Player player) {
+        return formatVaultName(player, player.getDisplayName());
     }
 }

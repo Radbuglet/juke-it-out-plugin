@@ -14,8 +14,8 @@ public class RoundManager {
     private final long TIME_TRADE_ADD = TimeUnits.Secs.encode(15);
 
     // Signals
-    private final ProcedureSignal onDiamondSpawned = new ProcedureSignal();
-    private final ProcedureSignal onRoundReset = new ProcedureSignal();
+    public final ProcedureSignal onDiamondSpawned = new ProcedureSignal();
+    public final ProcedureSignal onRoundReset = new ProcedureSignal();
 
     // Properties
     private final GameStatePlaying root;
@@ -51,16 +51,7 @@ public class RoundManager {
         onRoundReset.fire();
 
         // Update visuals (boss-bar)
-        long msLeft = getTimeMsLeft();
-        int secsLeft = (int) TimeUnits.Secs.decode(msLeft) + 1;
-        float percentLeft = (msLeft % TimeUnits.Secs.unitMultiplier) / (float) TimeUnits.Secs.unitMultiplier;
-
-        for (GameMember member : root.teamManager.getMembers()) {
-            if (!member.isAlive) continue;
-            Player player = member.getPlayer();
-            player.setLevel(secsLeft);
-            player.setExp(percentLeft);
-        }
+        // TODO
     }
 
     public void diamondTraded() {
@@ -87,6 +78,15 @@ public class RoundManager {
         }
 
         // Update visuals (experience)
-        // TODO
+        long msLeft = getTimeMsLeft();
+        int secsLeft = (int) TimeUnits.Secs.decode(msLeft) + 1;
+        float percentLeft = (msLeft % TimeUnits.Secs.unitMultiplier) / (float) TimeUnits.Secs.unitMultiplier;
+
+        for (GameMember member : root.teamManager.getMembers()) {
+            if (!member.isAlive) continue;
+            Player player = member.getPlayer();
+            player.setLevel(secsLeft);
+            player.setExp(percentLeft);
+        }
     }
 }
