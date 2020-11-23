@@ -4,6 +4,8 @@ import net.coopfury.JukeItOut.helpers.java.signal.EventSignal;
 import net.coopfury.JukeItOut.modules.GlobalFixes;
 import net.coopfury.JukeItOut.modules.commands.CommandRegistrar;
 import net.coopfury.JukeItOut.modules.config.ConfigLoading;
+import net.coopfury.JukeItOut.modules.game.GameManager;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Plugin extends JavaPlugin {
@@ -16,6 +18,7 @@ public class Plugin extends JavaPlugin {
     public GlobalFixes globalFixes;
     public ConfigLoading config;
     public CommandRegistrar commands;
+    public GameManager gameManager;
 
     // Module loading
     @Override
@@ -27,6 +30,7 @@ public class Plugin extends JavaPlugin {
         globalFixes = new GlobalFixes();
         config = new ConfigLoading();
         commands = new CommandRegistrar();
+        gameManager = new GameManager();
 
         // Fire them up!
         onEnable.fire(this);
@@ -39,5 +43,13 @@ public class Plugin extends JavaPlugin {
         onDisable.fire(this);
         getLogger().info("JukeItOut disabled!");
         instance = null;
+    }
+
+    public void registerListener(Listener listener) {
+
+    }
+
+    public void unregisterListener(Listener listener) {
+
     }
 }

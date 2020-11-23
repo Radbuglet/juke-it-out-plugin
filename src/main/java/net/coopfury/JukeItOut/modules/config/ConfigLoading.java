@@ -1,7 +1,7 @@
 package net.coopfury.JukeItOut.modules.config;
 
 import net.coopfury.JukeItOut.Plugin;
-import net.coopfury.JukeItOut.helpers.java.signal.BaseSignal;
+import net.coopfury.JukeItOut.helpers.java.signal.SignalPriority;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.logging.Logger;
@@ -10,8 +10,8 @@ public class ConfigLoading {
     private ConfigRoot root;
 
     public ConfigLoading() {
-        Plugin.instance.onEnable.connect(e -> reloadConfig(), BaseSignal.Priority.Medium);
-        Plugin.instance.onDisable.connect(e -> saveConfig(), BaseSignal.Priority.Medium);
+        Plugin.instance.onEnable.connect(e -> reloadConfig(), SignalPriority.Medium);
+        Plugin.instance.onDisable.connect(e -> saveConfig(), SignalPriority.Medium);
     }
 
     private Logger getLogger() {

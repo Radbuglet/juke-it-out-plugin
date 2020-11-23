@@ -1,8 +1,7 @@
 package net.coopfury.JukeItOut.modules;
 
 import net.coopfury.JukeItOut.Plugin;
-import net.coopfury.JukeItOut.helpers.node.GameNode;
-import net.coopfury.JukeItOut.helpers.node.NodeUtils;
+import net.coopfury.JukeItOut.helpers.java.signal.SignalPriority;
 import net.coopfury.JukeItOut.helpers.spigot.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,11 +19,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class GlobalFixes extends GameNode implements Listener {
+public class GlobalFixes implements Listener {
     private final Set<UUID> devModeUsers = new HashSet<>();
 
     public GlobalFixes() {
-        NodeUtils.bindListener(this, Plugin.instance);
+        Plugin.instance.onEnable.connect(plugin -> plugin.registerListener(this), SignalPriority.Low);
     }
 
     public boolean hasDevMode(UUID uuid) {

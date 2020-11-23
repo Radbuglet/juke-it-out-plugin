@@ -13,6 +13,10 @@ public final class TimestampUtils {
         return getTimeNow() + uint.encode(value);
     }
 
+    public static long getTimeIn(long ms) {
+        return getTimeNow() + ms;
+    }
+
     public static long getTimeUntil(long timestamp, TimeUnits uint) {
         return uint.decode(timestamp - getTimeNow()) + 1;
     }
