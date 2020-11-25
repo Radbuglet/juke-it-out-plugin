@@ -1,5 +1,6 @@
 package net.coopfury.JukeItOut;
 
+import net.coopfury.JukeItOut.listeners.GameEvents;
 import net.coopfury.JukeItOut.utils.gui.InventoryActionDelegator;
 import net.coopfury.JukeItOut.utils.java.signal.EventSignal;
 import net.coopfury.JukeItOut.listeners.GlobalProtect;
@@ -42,6 +43,7 @@ public class Plugin extends JavaPlugin {
 
         // Bind listeners
         registerListener(new GlobalProtect());
+        registerListener(new GameEvents());
         CommandRegistrar.bind();
 
         // Build state

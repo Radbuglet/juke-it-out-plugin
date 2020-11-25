@@ -1,16 +1,33 @@
 package net.coopfury.JukeItOut.state.game.playing.teams;
 
+import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.utils.game.BaseTeamManager;
 import net.coopfury.JukeItOut.utils.game.MemberPair;
 import net.coopfury.JukeItOut.utils.java.RandomUtils;
+import net.coopfury.JukeItOut.utils.spigot.ScoreboardUtils;
 import net.coopfury.JukeItOut.utils.spigot.UiUtils;
-import org.bukkit.ChatColor;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.*;
 
 public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
+    private final GameStatePlaying root;
     private final Map<UUID, GameTeam> offlinePlayerTeams = new HashMap<>();
+    private final Objective guiObjective;
+
+    public TeamManager(GameStatePlaying root) {
+        this.root = root;
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        guiObjective = ScoreboardUtils.obtainObjective(scoreboard, "cf_diamonds_gui", ChatColor.GOLD + "Team Diamonds", "dummy");
+        guiObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+    }
 
     public Optional<MemberPair<GameTeam, GameMember>> addPlayerToGame(UUID playerId) {
         // Select a team
@@ -82,6 +99,65 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         return builder.toString();
     }
 
+    public void handleBlockInteract(PlayerInteractEvent event, MemberPair<GameTeam, GameMember> memberPair) {
+        Player player = event.getPlayer();
+
+        if (!memberPair.member.isAlive) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Block clickedBlock = event.getClickedBlock();
+        if (clickedBlock == null || event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        // Find owner
+        GameTeam owningTeam = null;
+        for (GameTeam team: getTeams()) {
+            Optional<Location> teamLocation;
+            switch (clickedBlock.getType()) {
+                case CHEST:
+                    teamLocation = team.configTeam.getChestLocation();
+                    break;
+                case JUKEBOX:
+                    teamLocation = team.configTeam.getJukeboxLocation();
+                    break;
+                default:
+                    return;  // Never mind, the clicked block isn't a chest or a jukebox. Sorry for wasting your time, iterator.
+            }
+
+            if (teamLocation.isPresent() && teamLocation.get().getBlock().equals(clickedBlock)) {
+                owningTeam = team;
+                break;
+            }
+        }
+
+        if (owningTeam == null) {
+            player.sendMessage(ChatColor.RED + "You can't open the diamond reserves of empty teams.");
+            player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
+            event.setCancelled(true);
+            return;
+        }
+
+        // Check defense round
+        if (!root.roundManager.isDefenseRound() && owningTeam != memberPair.team) {
+            player.sendMessage(ChatColor.RED + "You can only open your team's diamond reserves on non-defense rounds.");
+            player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
+            event.setCancelled(true);
+            return;
+        }
+
+        // Handle normal logic (only does anything for jukebox)
+        if (clickedBlock.getType() == Material.JUKEBOX) {
+            event.setCancelled(true);
+
+            if (owningTeam == memberPair.team) {
+                owningTeam.openJukebox(player);  // openJukebox() plays the sound for us.
+            } else {
+                // TODO: Stealing logic
+            }
+        }
+    }
+
     public void tick() {
         for (GameTeam team : getTeams()) {
             team.tick(this);
@@ -89,6 +165,7 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
     }
 
     public void cleanup() {
+        guiObjective.unregister();
         for (GameTeam team : getTeams()) {
             team.cleanup();
         }

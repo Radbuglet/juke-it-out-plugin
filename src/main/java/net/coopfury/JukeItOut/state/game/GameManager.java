@@ -16,17 +16,14 @@ public class GameManager {
         new BukkitRunnable() {
             @Override
             public void run() {
-                onTick();
+                if (activeState != null)
+                    activeState.onTick();
             }
         }.runTaskTimer(Plugin.instance, 0, 0);
         Plugin.instance.onDisable.connect(this::onPluginDisable, SignalPriority.High);
 
         // Setup initial state
         Plugin.instance.onEnable.connect(plugin -> setActiveState(new GameStatePlaying()), SignalPriority.Low);
-    }
-
-    private void onTick() {
-        if (activeState != null) activeState.onTick();
     }
 
     private void onPluginDisable(Plugin plugin) {

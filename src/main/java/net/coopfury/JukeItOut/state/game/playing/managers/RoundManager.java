@@ -16,7 +16,7 @@ public class RoundManager {
 
     // Signals
     public final ProcedureSignal onDiamondSpawned = new ProcedureSignal();
-    public final ProcedureSignal onRoundReset = new ProcedureSignal();
+    public final ProcedureSignal onRoundEnd = new ProcedureSignal();
 
     // Properties
     private final GameStatePlaying root;
@@ -53,7 +53,7 @@ public class RoundManager {
         nextEventAt = TimestampUtils.getTimeIn(TIME_PRE_SPAWN);
         hasDiamondSpawned = false;
         tradesLeft = MAX_TRADES;
-        onRoundReset.fire();
+        onRoundEnd.fire();
 
         // Update visuals (boss-bar)
         // TODO

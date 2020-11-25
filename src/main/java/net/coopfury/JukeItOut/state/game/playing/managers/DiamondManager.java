@@ -31,7 +31,7 @@ public class DiamondManager {
             .build();
 
     // Signals
-    public final EventSignal<Optional<GameMember>> diamondHolderChanged = new EventSignal<>();
+    public final EventSignal<Optional<GameMember>> onDiamondHolderChange = new EventSignal<>();
 
     // Properties
     private final GameStatePlaying root;
@@ -120,7 +120,6 @@ public class DiamondManager {
                 return;  // There's only ever one stolen diamond, so we can get away with early returns and stack removal.
             }
         }
-
     }
 
     // Diamond holder system
@@ -131,7 +130,7 @@ public class DiamondManager {
     public void setDiamondHolder(GameMember member) {
         if (member == diamondHolder) return;
         diamondHolder = member;
-        diamondHolderChanged.fire(Optional.ofNullable(member));
+        onDiamondHolderChange.fire(Optional.ofNullable(member));
 
         if (diamondHolder != null) {
             assert member != null;
