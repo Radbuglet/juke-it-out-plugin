@@ -32,12 +32,17 @@ public final class PlayerUtils {
 
     public static void resetAll(Player player) {
         player.setTotalExperience(0);
+        player.setMaxHealth(20);
         player.setHealth(player.getMaxHealth());
         player.setFireTicks(0);
         player.setLastDamageCause(null);
         player.setVelocity(new Vector(0, 0, 0));
         resetEffects(player);
         resetInventory(player);
+    }
+
+    public static void heal(Player player, double amount) {
+        player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + amount));
     }
 
     /**

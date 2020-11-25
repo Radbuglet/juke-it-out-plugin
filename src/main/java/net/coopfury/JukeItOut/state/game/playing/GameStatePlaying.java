@@ -11,7 +11,7 @@ import net.coopfury.JukeItOut.utils.java.signal.SignalPriority;
 
 public class GameStatePlaying implements GameState {
     // TODO: Forward events
-    public final TeamManager teamManager = new TeamManager();
+    public final TeamManager teamManager = new TeamManager(this);
     public final RoundManager roundManager = new RoundManager(this);
     public final DiamondManager diamondManager = new DiamondManager(this);
     public final WorldReset worldReset = new WorldReset(this);
@@ -24,7 +24,10 @@ public class GameStatePlaying implements GameState {
         roundManager.onRoundEnd.connect(diamondManager::resetRoundState, SignalPriority.Medium);
         roundManager.onRoundEnd.connect(() -> worldReset.resetWorld(false), SignalPriority.Medium);
         roundManager.onRoundEnd.connect(combatManager::startRound, SignalPriority.Low);
-        diamondManager.onDiamondHolderChange.connect(holder -> roundManager.diamondTraded(), SignalPriority.Medium);
+        diamondManager.onDiamondHolderChange.connect(holder -> {
+            if (holder.isPresent())
+                roundManager.diamondTraded();
+        }, SignalPriority.Medium);
     }
 
     @Override

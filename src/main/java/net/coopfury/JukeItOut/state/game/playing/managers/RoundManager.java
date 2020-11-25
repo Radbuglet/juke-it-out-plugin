@@ -10,12 +10,12 @@ import org.bukkit.entity.Player;
 public class RoundManager {
     // Config
     private final long TIME_PRE_SPAWN = TimeUnits.Secs.encode(20);
-    private final long TIME_POST_SPAWN = TimeUnits.Secs.encode(25);
+    private final long TIME_POST_SPAWN = TimeUnits.Secs.encode(15);
     private final int MAX_TRADES = 3;
-    private final long TIME_TRADE_ADD = TimeUnits.Secs.encode(15);
+    private final long TIME_TRADE_ADD = TimeUnits.Secs.encode(10);
 
     // Signals
-    public final ProcedureSignal onDiamondSpawned = new ProcedureSignal();
+    public final ProcedureSignal onDiamondSpawned = new ProcedureSignal();  // TODO: Why does this trigger so early?
     public final ProcedureSignal onRoundEnd = new ProcedureSignal();
 
     // Properties
@@ -43,7 +43,7 @@ public class RoundManager {
     }
 
     public long getTimeMsLeft() {
-        return TimestampUtils.getTimeUntil(nextEventAt, TimeUnits.Ms) + (hasDiamondSpawned ? 0 : TIME_PRE_SPAWN);
+        return TimestampUtils.getTimeUntil(nextEventAt, TimeUnits.Ms) + (hasDiamondSpawned ? 0 : TIME_POST_SPAWN);
     }
 
     // Event handling

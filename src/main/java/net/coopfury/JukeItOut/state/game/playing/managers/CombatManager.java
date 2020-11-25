@@ -4,19 +4,20 @@ import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.state.game.playing.teams.GameMember;
 import net.coopfury.JukeItOut.state.game.playing.teams.GameTeam;
-import net.coopfury.JukeItOut.utils.game.MemberPair;
 import net.coopfury.JukeItOut.utils.spigot.ItemBuilder;
 import net.coopfury.JukeItOut.utils.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.utils.spigot.UiUtils;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-// TODO: Track damages and heal killers
+import java.util.Optional;
+
 public class CombatManager {
     private final GameStatePlaying root;
 
@@ -76,15 +77,26 @@ public class CombatManager {
             root.diamondManager.setDiamondHolder(null);
     }
 
-    public void onMemberAttacked(EntityDamageByEntityEvent event, MemberPair<GameTeam, GameMember> attacked, MemberPair<GameTeam, GameMember> attacker) {
-        if (attacker.team == attacked.team) {
+    public void onEntityAttacked(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player && event.getDamager() instanceof Player))
+            return;
+
+        Optional<GameTeam> damagerTeam = root.teamManager.getMemberTeam(event.getDamager().getUniqueId());
+        if (!damagerTeam.isPresent()) return;
+
+
+        if (root.teamManager.getMemberTeam(event.getEntity().getUniqueId()).orElse(null) == damagerTeam.get()) {
             event.setCancelled(true);
             event.getDamager().sendMessage(ChatColor.RED + "Do not try to damage your teammates!");
         }
     }
 
-    public void onMemberDamaged(EntityDamageEvent event, MemberPair<GameTeam, GameMember> attacked) {
+    public void onEntityDamaged(EntityDamageEvent event) {
+        // Check that the damage was done to a playing player.
+        if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
+        Optional<GameMember> damaged = root.teamManager.getMember(player.getUniqueId());
+        if (!damaged.isPresent()) return;
 
         // Prevent fall damage
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
@@ -95,16 +107,35 @@ public class CombatManager {
         // Check that the player died.
         if (player.getHealth() - event.getFinalDamage() > 0) return;
 
+        // Find killer
+        EntityDamageEvent lastDamage = event.getEntity().getLastDamageCause();
+        Player killer = null;
+        if (lastDamage instanceof EntityDamageByEntityEvent) {
+            Entity killerEnt = ((EntityDamageByEntityEvent) lastDamage).getDamager();
+            if (killerEnt instanceof Player) {
+                killer = (Player) killerEnt;
+            }
+        }
+
+        // Heal the killer
+        if (killer != null) {
+            PlayerUtils.heal(killer, 5);
+        }
+
         // Announce the sad news (happens here so the spectator flare doesn't get added to the message)
+        String message = killer == null ?
+                root.teamManager.formatPlayerName(player) + ChatColor.GRAY + " died." :
+                root.teamManager.formatPlayerName(player) + ChatColor.GRAY + " was killed by " + root.teamManager.formatPlayerName(killer) + ".";
+
         for (GameMember otherMember: root.teamManager.getMembers()) {
             Player otherPlayer = otherMember.getPlayer();
-            otherPlayer.sendMessage(root.teamManager.formatPlayerName(player) + ChatColor.GRAY + " died.");
+            otherPlayer.sendMessage(message);
             UiUtils.playSound(otherPlayer, Sound.BLAZE_DEATH);
         }
 
         // Set the player's state
         UiUtils.playTitle(player, ChatColor.BOLD.toString() + ChatColor.RED + "You died", Constants.title_timings_long);
-        memberKilled(attacked.member, player);
+        memberKilled(damaged.get(), player);
         event.setDamage(0);
     }
 }

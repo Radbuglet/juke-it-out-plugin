@@ -8,9 +8,8 @@ import net.coopfury.JukeItOut.utils.java.signal.SignalPriority;
 import net.coopfury.JukeItOut.utils.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.utils.spigot.SpigotEnumConverters;
 import net.coopfury.JukeItOut.state.config.ConfigTeam;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import net.coopfury.JukeItOut.utils.spigot.UiUtils;
+import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -35,8 +34,8 @@ public class GameTeam extends AbstractTeam<GameMember> {
         guiScoreEntry.setScore(0);
 
         // Setup jukebox
-        jukeboxEffects.onEffectUpgraded.connect(this::onEffectLevelChanged, SignalPriority.Medium);
-        jukeboxEffects.onEffectDowngraded.connect(this::onEffectLevelChanged, SignalPriority.Medium);
+        jukeboxEffects.onEffectsUpgraded.connect(this::onEffectLevelChanged, SignalPriority.Medium);
+        jukeboxEffects.onEffectsDowngraded.connect(this::onEffectLevelChanged, SignalPriority.Medium);
         jukeboxGui.registerGui();
     }
 
@@ -53,10 +52,26 @@ public class GameTeam extends AbstractTeam<GameMember> {
     // Jukebox UI
     public void openJukebox(Player player) {
         jukeboxGui.open(player);
+        UiUtils.playSound(player, Sound.CHEST_OPEN);
+    }
+
+    public void stealDiamonds(Player player) {
+        int diamondCount = jukeboxEffects.getStoredDiamonds();
+        if (diamondCount > 0) {
+            player.getInventory().addItem(new ItemStack(Material.DIAMOND, diamondCount));
+            jukeboxEffects.clearDiamonds();
+            player.sendMessage(ChatColor.BLUE + "You stole " + ChatColor.AQUA + diamondCount + " diamond" + (diamondCount == 1 ? "" : "s") + ".");
+            UiUtils.playSound(player, Sound.ITEM_PICKUP);
+        } else {
+            player.sendMessage(ChatColor.BLUE + "This jukebox is empty!");
+            UiUtils.playSound(player, Sound.ITEM_BREAK);
+        }
+        player.getWorld().playEffect(player.getLocation(), Effect.MAGIC_CRIT, null);
+
     }
 
     // Jukebox effects
-    private void onEffectLevelChanged(JukeboxEffects.EffectType type) {
+    private void onEffectLevelChanged() {
         applyFriendlyEffects();
         updateDiamondScoreGui();
     }

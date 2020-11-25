@@ -1,6 +1,6 @@
 package net.coopfury.JukeItOut.state.game.playing.jukebox;
 
-import net.coopfury.JukeItOut.utils.java.signal.EventSignal;
+import net.coopfury.JukeItOut.utils.java.signal.ProcedureSignal;
 import net.coopfury.JukeItOut.utils.spigot.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -32,12 +32,16 @@ public class JukeboxEffects {
         private int currentLevel = -1;
         private final EffectLevel[] levels;
         public final PotionEffectType effectType;
-        private final ItemStack icon;
+        public final ItemStack icon;
+        public final boolean isOffensive;
 
-        public EffectType(ItemStack icon, PotionEffectType effectType, EffectLevel[] levels) {
+        public EffectType(ItemStack icon, PotionEffectType effectType, boolean isOffensive, EffectLevel[] levels) {
             this.icon = icon;
             this.effectType = effectType;
+            this.isOffensive = isOffensive;
             this.levels = levels;
+
+            updateIcon();
         }
 
         public boolean hasBeenUpgraded() {
@@ -52,8 +56,8 @@ public class JukeboxEffects {
             return currentLevel + 1 >= levels.length ? Optional.empty() : Optional.of(levels[currentLevel + 1]);
         }
 
-        public ItemStack renderIcon(ItemStack target, boolean isOffensive) {
-            ItemMeta meta = target.getItemMeta();
+        private void updateIcon() {
+            ItemMeta meta = icon.getItemMeta();
             meta.setDisplayName(icon.getItemMeta().getDisplayName());
 
             // Generate lore
@@ -101,44 +105,43 @@ public class JukeboxEffects {
             } else {
                 meta.removeEnchant(Enchantment.DURABILITY);
             }
-            target.setItemMeta(meta);
-            return target;
+            icon.setItemMeta(meta);
         }
 
-        public ItemStack renderIcon(boolean isOffensive) {
-            return renderIcon(icon.clone(), isOffensive);
+        public ItemStack getIcon() {
+            return icon;
         }
     }
 
     // Properties
-    public final EventSignal<EffectType> onEffectUpgraded = new EventSignal<>();
-    public final EventSignal<EffectType> onEffectDowngraded = new EventSignal<>();
+    public final ProcedureSignal onEffectsUpgraded = new ProcedureSignal();
+    public final ProcedureSignal onEffectsDowngraded = new ProcedureSignal();
     private int storedDiamonds;
 
     public final EffectType[] friendlyTypes = new EffectType[]{
-            new EffectType(new ItemBuilder(Material.SUGAR).setName(ChatColor.GRAY + "Speed").toItemStack(), PotionEffectType.SPEED, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.SUGAR).setName(ChatColor.GRAY + "Speed").toItemStack(), PotionEffectType.SPEED, false, new EffectLevel[]{
                     new EffectLevel(0, -1, 1),
                     new EffectLevel(1, -1, 1),
                     new EffectLevel(2, -1, 2)
             }),
-            new EffectType(new ItemBuilder(Material.RABBIT_FOOT).setName(ChatColor.GREEN + "Jump Boost").toItemStack(), PotionEffectType.JUMP, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.RABBIT_FOOT).setName(ChatColor.GREEN + "Jump Boost").toItemStack(), PotionEffectType.JUMP, false, new EffectLevel[]{
                     new EffectLevel(0, -1, 1),
                     new EffectLevel(1, -1, 1),
                     new EffectLevel(2, -1, 2)
             }),
-            new EffectType(new ItemBuilder(Material.SPECKLED_MELON).setName(ChatColor.RED + "Regeneration").toItemStack(), PotionEffectType.REGENERATION, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.SPECKLED_MELON).setName(ChatColor.RED + "Regeneration").toItemStack(), PotionEffectType.REGENERATION, false, new EffectLevel[]{
                     new EffectLevel(0, -1, 2),
                     new EffectLevel(1, -1, 4)
             }),
-            new EffectType(new ItemBuilder(Material.GOLDEN_APPLE).setName(ChatColor.YELLOW + "Absorption").toItemStack(), PotionEffectType.ABSORPTION, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.GOLDEN_APPLE).setName(ChatColor.YELLOW + "Absorption").toItemStack(), PotionEffectType.ABSORPTION, false, new EffectLevel[]{
                     new EffectLevel(0, -1, 2),
                     new EffectLevel(1, -1, 3),
                     new EffectLevel(2, -1, 3)
             }),
-            new EffectType(new ItemBuilder(Material.NETHER_STAR).setName(ChatColor.DARK_RED + "Strength").toItemStack(), PotionEffectType.INCREASE_DAMAGE, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.NETHER_STAR).setName(ChatColor.DARK_RED + "Strength").toItemStack(), PotionEffectType.INCREASE_DAMAGE, false, new EffectLevel[]{
                     new EffectLevel(0, -1, 8)
             }),
-            new EffectType(new ItemBuilder(Material.GOLD_PICKAXE).setName(ChatColor.GOLD + "Haste").toItemStack(), PotionEffectType.FAST_DIGGING, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.GOLD_PICKAXE).setName(ChatColor.GOLD + "Haste").toItemStack(), PotionEffectType.FAST_DIGGING, false, new EffectLevel[]{
                     new EffectLevel(0, -1, 1),
                     new EffectLevel(1, -1, 1),
                     new EffectLevel(2, -1, 2)
@@ -146,22 +149,22 @@ public class JukeboxEffects {
     };
 
     public final EffectType[] offensiveTypes = new EffectType[]{
-            new EffectType(new ItemBuilder(Material.POISONOUS_POTATO).setName(ChatColor.DARK_GREEN + "Poison").toItemStack(), PotionEffectType.POISON, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.POISONOUS_POTATO).setName(ChatColor.DARK_GREEN + "Poison").toItemStack(), PotionEffectType.POISON, true, new EffectLevel[]{
                     new EffectLevel(1, 8, 2),
                     new EffectLevel(2, 9, 2),
                     new EffectLevel(3, 15, 2)
             }),
-            new EffectType(new ItemBuilder(Material.BROWN_MUSHROOM).setName(ChatColor.DARK_BLUE + "Slowness").toItemStack(), PotionEffectType.SLOW, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.BROWN_MUSHROOM).setName(ChatColor.DARK_BLUE + "Slowness").toItemStack(), PotionEffectType.SLOW, true, new EffectLevel[]{
                     new EffectLevel(1, 8, 1),
                     new EffectLevel(2, 9, 1),
                     new EffectLevel(3, 15, 2)
             }),
-            new EffectType(new ItemBuilder(Material.WOOD_PICKAXE).setName(ChatColor.BLUE + "Mining Fatigue").toItemStack(), PotionEffectType.SLOW_DIGGING, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.WOOD_PICKAXE).setName(ChatColor.BLUE + "Mining Fatigue").toItemStack(), PotionEffectType.SLOW_DIGGING, true, new EffectLevel[]{
                     new EffectLevel(1, 10, 2),
                     new EffectLevel(2, 15, 3),
                     new EffectLevel(3, 20, 3),
             }),
-            new EffectType(new ItemBuilder(Material.SPIDER_EYE).setName(ChatColor.DARK_GRAY + "Blindness").toItemStack(), PotionEffectType.SLOW_DIGGING, new EffectLevel[]{
+            new EffectType(new ItemBuilder(Material.SPIDER_EYE).setName(ChatColor.DARK_GRAY + "Blindness").toItemStack(), PotionEffectType.SLOW_DIGGING, true, new EffectLevel[]{
                     new EffectLevel(0, 15, 4)
             })
     };
@@ -169,16 +172,32 @@ public class JukeboxEffects {
     public void upgradeEffect(EffectType type) {
         storedDiamonds += type.getNextLevel().orElseThrow(NullPointerException::new).cost;
         type.currentLevel++;
-        onEffectUpgraded.fire(type);
+        type.updateIcon();
+        onEffectsUpgraded.fire();
     }
 
     public void downgradeEffect(EffectType type) {
         storedDiamonds -= type.getCurrentLevel().orElseThrow(NullPointerException::new).cost;
         type.currentLevel--;
-        onEffectDowngraded.fire(type);
+        type.updateIcon();  // TODO: Update icon correctly
+        onEffectsDowngraded.fire();
     }
 
     public int getStoredDiamonds() {
         return storedDiamonds;
+    }
+
+    public void clearDiamonds() {
+        if (storedDiamonds == 0) return;
+        for (EffectType type : friendlyTypes) {
+            type.currentLevel = -1;
+            type.updateIcon();
+        }
+        for (EffectType type : offensiveTypes) {
+            type.currentLevel = -1;
+            type.updateIcon();
+        }
+        storedDiamonds = 0;
+        onEffectsDowngraded.fire();
     }
 }

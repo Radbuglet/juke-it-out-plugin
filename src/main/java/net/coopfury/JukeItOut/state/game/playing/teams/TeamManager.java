@@ -1,5 +1,7 @@
 package net.coopfury.JukeItOut.state.game.playing.teams;
 
+import net.coopfury.JukeItOut.Plugin;
+import net.coopfury.JukeItOut.state.config.ConfigTeam;
 import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.utils.game.BaseTeamManager;
 import net.coopfury.JukeItOut.utils.game.MemberPair;
@@ -24,9 +26,17 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
 
     public TeamManager(GameStatePlaying root) {
         this.root = root;
+
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         guiObjective = ScoreboardUtils.obtainObjective(scoreboard, "cf_diamonds_gui", ChatColor.GOLD + "Team Diamonds", "dummy");
         guiObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        for (Optional<ConfigTeam> configTeam : Plugin.instance.config.getRoot().getTeams().values()) {
+            configTeam.ifPresent(conf -> {
+                GameTeam team = new GameTeam(conf, guiObjective);
+                addTeam(team);
+            });
+        }
     }
 
     public Optional<MemberPair<GameTeam, GameMember>> addPlayerToGame(UUID playerId) {
@@ -99,10 +109,14 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         return builder.toString();
     }
 
-    public void handleBlockInteract(PlayerInteractEvent event, MemberPair<GameTeam, GameMember> memberPair) {
+    public void onBlockInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (!memberPair.member.isAlive) {
+        Optional<MemberPair<GameTeam, GameMember>> memberPair =
+                getMemberPair(player.getUniqueId());
+
+        if (!memberPair.isPresent()) return;
+        if (!memberPair.get().member.isAlive) {
             event.setCancelled(true);
             return;
         }
@@ -139,7 +153,7 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         }
 
         // Check defense round
-        if (!root.roundManager.isDefenseRound() && owningTeam != memberPair.team) {
+        if (!root.roundManager.isDefenseRound() && owningTeam != memberPair.get().team) {
             player.sendMessage(ChatColor.RED + "You can only open your team's diamond reserves on non-defense rounds.");
             player.playSound(event.getClickedBlock().getLocation(), Sound.DOOR_OPEN, 1, 1);
             event.setCancelled(true);
@@ -150,10 +164,10 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         if (clickedBlock.getType() == Material.JUKEBOX) {
             event.setCancelled(true);
 
-            if (owningTeam == memberPair.team) {
-                owningTeam.openJukebox(player);  // openJukebox() plays the sound for us.
+            if (owningTeam == memberPair.get().team) {
+                owningTeam.openJukebox(player);
             } else {
-                // TODO: Stealing logic
+                owningTeam.stealDiamonds(player);
             }
         }
     }

@@ -52,15 +52,15 @@ public class JukeboxGui {
             gui.setItem(gui.computeSlot(row, 3), discStack.clone());
         }
 
-        populateEffectRow(effects.friendlyTypes, 1, true);
-        populateEffectRow(effects.offensiveTypes, 2, false);
+        populateEffectRow(effects.friendlyTypes, 1);
+        populateEffectRow(effects.offensiveTypes, 2);
     }
 
-    private void populateEffectRow(JukeboxEffects.EffectType[] types, int column, boolean isFriendly) {
+    private void populateEffectRow(JukeboxEffects.EffectType[] types, int column) {
         int slotOffset = column * 9;
         int row = 1;
         for (JukeboxEffects.EffectType type: types) {
-            gui.setItem(slotOffset + row, type.renderIcon(!isFriendly), event -> {
+            gui.setItem(slotOffset + row, type.getIcon(), event -> {
                 event.setCancelled(true);
                 HumanEntity player = event.getWhoClicked();
 
@@ -96,10 +96,6 @@ public class JukeboxGui {
                 } else {
                     return;
                 }
-
-                // Rerender icon
-                ItemStack stack = event.getCurrentItem();
-                type.renderIcon(stack, !isFriendly);
                 UiUtils.playSound((Player) player, Sound.NOTE_PLING);  // Player is the only subclass of HumanEntity.
             });
             row++;
@@ -107,7 +103,6 @@ public class JukeboxGui {
     }
 
     public void open(Player player) {
-        UiUtils.playSound(player, Sound.CHEST_OPEN);
         gui.open(player);
     }
 

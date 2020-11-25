@@ -4,6 +4,8 @@ import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.utils.java.CastUtils;
 import net.coopfury.JukeItOut.utils.java.signal.SignalPriority;
 import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Optional;
@@ -23,7 +25,13 @@ public class GameManager {
         Plugin.instance.onDisable.connect(this::onPluginDisable, SignalPriority.High);
 
         // Setup initial state
-        Plugin.instance.onEnable.connect(plugin -> setActiveState(new GameStatePlaying()), SignalPriority.Low);
+        Plugin.instance.onEnable.connect(plugin -> {
+            GameStatePlaying state = new GameStatePlaying();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                state.teamManager.addPlayerToGame(player.getUniqueId());
+            }
+            setActiveState(state);
+        }, SignalPriority.Low);
     }
 
     private void onPluginDisable(Plugin plugin) {

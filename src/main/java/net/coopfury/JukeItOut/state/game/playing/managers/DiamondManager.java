@@ -172,7 +172,7 @@ public class DiamondManager {
 
         if (diamondHolder != null) {
             Player player = diamondHolder.getPlayer();
-            player.playEffect(player.getLocation().add(new Vector(0, 0.25, 0)), Effect.PORTAL, null);
+            player.getWorld().playEffect(player.getLocation().add(new Vector(0, 0.25, 0)), Effect.SPELL, null);
         }
     }
 }
