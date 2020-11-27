@@ -15,7 +15,7 @@ public class RoundManager {
     private final long TIME_TRADE_ADD = TimeUnits.Secs.encode(10);
 
     // Signals
-    public final ProcedureSignal onDiamondSpawned = new ProcedureSignal();  // TODO: Why does this trigger so early?
+    public final ProcedureSignal onDiamondSpawned = new ProcedureSignal();
     public final ProcedureSignal onRoundEnd = new ProcedureSignal();
 
     // Properties

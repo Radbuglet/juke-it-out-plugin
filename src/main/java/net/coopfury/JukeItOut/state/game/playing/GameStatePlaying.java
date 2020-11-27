@@ -20,6 +20,8 @@ public class GameStatePlaying implements GameState {
     @Override
     public void onActivate() {
         Plugin.instance.getLogger().info("Game start (Fight!)");
+
+        // Connect events
         roundManager.onDiamondSpawned.connect(diamondManager::spawnDiamond, SignalPriority.Medium);
         roundManager.onRoundEnd.connect(diamondManager::resetRoundState, SignalPriority.Medium);
         roundManager.onRoundEnd.connect(() -> worldReset.resetWorld(false), SignalPriority.Medium);
@@ -28,6 +30,9 @@ public class GameStatePlaying implements GameState {
             if (holder.isPresent())
                 roundManager.diamondTraded();
         }, SignalPriority.Medium);
+
+        // Start the game
+        roundManager.nextRound();
     }
 
     @Override
