@@ -1,11 +1,13 @@
 package net.coopfury.JukeItOut.state.game.playing.teams;
 
+import net.coopfury.JukeItOut.Constants;
 import net.coopfury.JukeItOut.Plugin;
 import net.coopfury.JukeItOut.state.config.ConfigTeam;
 import net.coopfury.JukeItOut.state.game.playing.GameStatePlaying;
 import net.coopfury.JukeItOut.utils.game.BaseTeamManager;
 import net.coopfury.JukeItOut.utils.game.MemberPair;
 import net.coopfury.JukeItOut.utils.java.RandomUtils;
+import net.coopfury.JukeItOut.utils.spigot.PlayerUtils;
 import net.coopfury.JukeItOut.utils.spigot.ScoreboardUtils;
 import net.coopfury.JukeItOut.utils.spigot.UiUtils;
 import org.bukkit.*;
@@ -13,6 +15,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -107,6 +111,40 @@ public class TeamManager extends BaseTeamManager<GameTeam, GameMember> {
         formatAppendTeamName(builder, player);
         builder.append(UiUtils.formatVaultName(player));
         return builder.toString();
+    }
+
+    public void onMidGamePlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // Add player back into game
+        Optional<MemberPair<GameTeam, GameMember>> memberPair = addPlayerToGame(player.getUniqueId());
+        if (!memberPair.isPresent()) {
+            player.sendMessage(ChatColor.RED + "Failed to add you into a team (game not configured correctly)");
+            return;
+        }
+
+        // Setup player
+        memberPair.get().member.isAlive = false;
+        PlayerUtils.resetAll(player);
+        player.setGameMode(GameMode.SPECTATOR);
+        root.diamondManager.getDiamondSpawnLocation().ifPresent(player::teleport);
+
+        // Explain what's happening
+        UiUtils.playSound(player, Sound.NOTE_PLING);
+        UiUtils.playTitle(player, ChatColor.GREEN + "Please wait", ChatColor.GRAY + "You will join the game next round.", Constants.title_timings_long);
+        player.sendMessage(ChatColor.GREEN + "You are currently a spectator until the next round starts!");
+    }
+
+    public void onMidGamePlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        Optional<GameMember> member = getMember(player.getUniqueId());
+        if (!member.isPresent()) return;
+
+        if (member.get().isAlive) {
+            root.combatManager.memberKilled(member.get(), player);
+        }
+        removePlayerFromGame(player.getUniqueId());
     }
 
     public void onBlockInteract(PlayerInteractEvent event) {
